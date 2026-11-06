@@ -1,0 +1,24 @@
+{
+  "name": "shopcar",
+  "private": true,
+  "description": "ShopCar - car showroom: Express API, React customer website and admin dashboard",
+  "scripts": {
+    "setup": "npm install && npm install --prefix server && npm install --prefix client-customer && npm install --prefix client-admin",
+    "dev": "concurrently -n api,web,admin -c red,blue,magenta \"npm run dev --prefix server\" \"npm run dev --prefix client-customer\" \"npm run dev --prefix client-admin\"",
+    "build": "npm run build --prefix client-customer && npm run build --prefix client-admin",
+    "start": "npm start --prefix server",
+    "lint": "eslint .",
+    "test": "npm test --prefix server && npm test --prefix client-customer && npm test --prefix client-admin",
+    "test:api": "npm test --prefix server",
+    "test:web": "npm test --prefix client-customer && npm test --prefix client-admin",
+    "check": "npm run lint && npm test && npm run build",
+    "seed": "npm run seed --prefix server"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "concurrently": "^9.2.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.14.0"
+  }
+}

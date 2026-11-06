@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      # the MongoDB binary used by the tests (about 70 MB), downloaded once
+      - uses: actions/cache@v4
+        with:
+          path: server/node_modules/.cache/mongodb-memory-server
+          key: mongodb-${{ runner.os }}-${{ hashFiles('server/package-lock.json') }}
+      - run: npm test
+
+  web:
+    name: Lint, website tests and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client-customer/package-lock.json
+            client-admin/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix client-customer
+      - run: npm ci --prefix client-admin
+      - run: npm run lint
+      - run: npm test --prefix client-customer
+      - run: npm test --prefix client-admin
+      - run: npm run build
