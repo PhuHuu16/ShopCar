@@ -35,7 +35,11 @@ async function writeCarImages(car, brandColor) {
 
 async function seed({ reset = false } = {}) {
   if (reset) {
-    await mongoose.connection.dropDatabase();
+    // Xóa từng collection: tài khoản Atlas chỉ có quyền đọc/ghi không được xóa cả database
+    const collections = await mongoose.connection.db.listCollections({}, { nameOnly: true }).toArray();
+    for (const { name } of collections) {
+      if (!name.startsWith('system.')) await mongoose.connection.db.dropCollection(name);
+    }
     await fs.rm(path.join(config.uploadDir, 'cars', 'seed'), { recursive: true, force: true });
   }
   await Promise.all([Admin, Customer, Brand, Car, Order, Conversation, Message].map((M) => M.init()));

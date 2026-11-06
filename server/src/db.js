@@ -78,9 +78,47 @@ async function connect(uri = config.mongoUri) {
     console.log(`Local MongoDB started at ${uri} (data in server/.data/db)`);
   }
   // Windows có thể tắt MongoDB đột ngột: chờ ghi xuống ổ đĩa để không mất dữ liệu
-  const options = local ? { writeConcern: { w: 1, j: true } } : {};
-  await mongoose.connect(uri, options);
+  const options = local ? { writeConcern: { w: 1, j: true } } : { serverSelectionTimeoutMS: 10000 };
+  // Chuỗi kết nối Atlas thường không có tên database: mặc định là "shopcar"
+  if (!hasDbName(uri)) options.dbName = config.mongoDbName;
+  try {
+    await mongoose.connect(uri, options);
+  } catch (err) {
+    throw local ? err : explainConnectError(err, uri);
+  }
   return uri;
+}
+
+function hasDbName(uri) {
+  try {
+    return new URL(uri).pathname.replace(/^\//, '') !== '';
+  } catch {
+    return false;
+  }
+}
+
+// Máy chủ MongoDB, không kèm tài khoản và mật khẩu
+function describeUri(uri) {
+  try {
+    return new URL(uri).host;
+  } catch {
+    return 'MONGODB_URI không hợp lệ';
+  }
+}
+
+function explainConnectError(err, uri) {
+  const text = String(err && err.message);
+  let hint = 'Kiểm tra lại MONGODB_URI trong server/.env.';
+  if (/bad auth|authentication failed/i.test(text)) {
+    hint = 'Sai tên người dùng hoặc mật khẩu database (Atlas > Database Access). Mật khẩu có ký tự đặc biệt cần mã hóa URL.';
+  } else if (err && err.name === 'MongooseServerSelectionError') {
+    hint = 'Không tới được máy chủ: trên Atlas vào Network Access và thêm IP của máy này (hoặc 0.0.0.0/0).';
+  } else if (/querySrv|ENOTFOUND|ECONNREFUSED/i.test(text)) {
+    hint = 'Không tìm thấy máy chủ: kiểm tra lại tên cluster trong MONGODB_URI và kết nối mạng.';
+  }
+  const error = new Error(`Không kết nối được MongoDB (${describeUri(uri)}). ${hint}`);
+  error.cause = err;
+  return error;
 }
 
 async function flush(connectionDb) {
@@ -96,4 +134,4 @@ async function disconnect() {
   }
 }
 
-module.exports = { connect, disconnect, startLocalMongo, flush };
+module.exports = { connect, disconnect, startLocalMongo, flush, describeUri };

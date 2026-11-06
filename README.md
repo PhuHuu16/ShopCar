@@ -114,6 +114,7 @@ npm run check   # lint + toàn bộ test + build, giống hệt CI
 npm test        # test API, rồi test hai web
 npm run lint    # ESLint cho API và hai web
 npm run seed    # tạo lại dữ liệu mẫu (tắt npm run dev trước)
+npm run db:check  # kiểm tra kết nối database
 npm run build   # build hai web (client-*/dist)
 npm start       # server production: API + web ở / + quản trị ở /admin, chung một cổng
 ```

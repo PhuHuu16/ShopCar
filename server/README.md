@@ -28,6 +28,7 @@ Các lệnh khác:
 
 ```bash
 npm test           # test API và chat trên một cơ sở dữ liệu tạm
+npm run db:check   # kiểm tra kết nối tới MONGODB_URI (không in mật khẩu)
 npm run seed       # xóa và tạo lại dữ liệu mẫu (tắt server dev trước)
 npm start          # chạy production (cần MONGODB_URI và JWT_SECRET)
 ```

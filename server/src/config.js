@@ -20,6 +20,7 @@ const config = {
   port: Number(process.env.PORT) || 3000,
   // Để trống khi phát triển = tự chạy MongoDB trên máy
   mongoUri: isTest ? '' : process.env.MONGODB_URI || '',
+  mongoDbName: process.env.MONGODB_DB || 'shopcar',
   jwtSecret: process.env.JWT_SECRET || (isProd ? '' : 'dev-only-secret-change-me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
   clientUrl: (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, ''),
