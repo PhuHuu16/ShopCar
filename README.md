@@ -1,5 +1,7 @@
 # ShopCar
 
+[![CI](https://github.com/PhuHuu16/ShopCar/actions/workflows/ci.yml/badge.svg)](https://github.com/PhuHuu16/ShopCar/actions/workflows/ci.yml)
+
 Ứng dụng web cho showroom ô tô: khách hàng xem và so sánh xe, tính trả góp, đặt mua qua giỏ hàng
 (có thể đặt cọc online) và chat trực tiếp với showroom; nhân viên quản lý showroom qua trang quản trị.
 Đây là dự án full-stack làm portfolio.
