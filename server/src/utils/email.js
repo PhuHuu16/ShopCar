@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 const config = require('../config');
 
-// Emails sent while running tests, so tests can read the links inside them.
 const outbox = [];
 
 let transporter = null;

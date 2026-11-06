@@ -5,7 +5,7 @@ function readTheme() {
 }
 
 export const useUi = create((set, get) => ({
-  sidebarOpen: false, // mobile menu
+  sidebarOpen: false,
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
 
   theme: readTheme(),
@@ -15,7 +15,7 @@ export const useUi = create((set, get) => ({
     try {
       localStorage.setItem('shopcar-theme', theme);
     } catch {
-      // private mode: the choice just is not remembered
+      // chế độ ẩn danh: không lưu được lựa chọn
     }
     set({ theme });
   }

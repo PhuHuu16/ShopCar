@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Logged-in customer, kept in localStorage so a refresh does not log out.
+// -- Phiên đăng nhập của khách hàng --
 export const useAuth = create(
   persist(
     (set) => ({

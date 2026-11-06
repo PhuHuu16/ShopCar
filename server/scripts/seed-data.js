@@ -1,5 +1,4 @@
-// Demo data for development and portfolio screenshots.
-// Prices are rough Vietnamese market prices (VND) for illustration only.
+// -- Dữ liệu mẫu, giá chỉ mang tính minh họa --
 
 const BRANDS = [
   { name: 'Toyota', color: '#b91c1c' },
@@ -12,7 +11,7 @@ const BRANDS = [
   { name: 'Mercedes-Benz', color: '#334155' }
 ];
 
-// [brand, name, year, price, fuel, transmission, bodyType, seats, color, condition, mileage, stock]
+// [hãng, tên, năm, giá, nhiên liệu, hộp số, kiểu dáng, số chỗ, màu, tình trạng, số km, tồn kho]
 const CARS = [
   ['Toyota', 'Toyota Vios 1.5G CVT', 2024, 545000000, 'gasoline', 'automatic', 'sedan', 5, 'Trắng', 'new', 0, 4],
   ['Toyota', 'Toyota Camry 2.5HEV Top', 2024, 1530000000, 'hybrid', 'automatic', 'sedan', 5, 'Đen', 'new', 0, 2],

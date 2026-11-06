@@ -68,7 +68,6 @@ function Section({ title, subtitle, link, children }) {
   );
 }
 
-// Best seller shown next to the headline on large screens
 function HeroCar({ car }) {
   if (!car) return <div className="hidden aspect-[16/10] rounded-3xl bg-white/5 lg:block" />;
   return (
@@ -100,7 +99,7 @@ export default function Home() {
 
   return (
     <>
-      {/* hero */}
+      {/* -- Banner -- */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(220,38,38,0.35),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(30,64,175,0.25),transparent_50%)]" />
@@ -129,7 +128,7 @@ export default function Home() {
         <QuickSearch filters={filters.data} />
       </div>
 
-      {/* brands */}
+      {/* -- Hãng xe -- */}
       {filters.data && (
         <section className="container-page mt-14">
           <div className="flex flex-wrap justify-center gap-3">
@@ -161,7 +160,7 @@ export default function Home() {
         </>
       )}
 
-      {/* perks */}
+      {/* -- Ưu điểm -- */}
       <section className="container-page mt-20">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PERKS.map(({ icon: Icon, title, text }) => (
@@ -176,7 +175,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* call to action */}
+      {/* -- Kêu gọi liên hệ -- */}
       <section className="container-page mt-20">
         <div className="relative overflow-hidden rounded-3xl bg-brand-600 px-8 py-12 text-white sm:px-12">
           <div className="absolute -right-20 -top-20 size-72 rounded-full bg-white/10" />

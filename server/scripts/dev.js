@@ -1,6 +1,4 @@
-// `npm run dev`: starts the API and restarts it whenever code changes.
-// Without MONGODB_URI it also starts ONE local MongoDB here and keeps it running
-// across restarts, so saving a file restarts the API in about a second.
+// -- npm run dev: API tự khởi động lại khi sửa code, MongoDB chạy liên tục --
 const path = require('path');
 const { spawn } = require('child_process');
 const mongoose = require('mongoose');
@@ -31,7 +29,6 @@ async function main() {
     stopping = true;
     app.kill();
     if (local) {
-      // write everything to disk, then stop MongoDB
       const conn = await mongoose.createConnection(env.MONGODB_URI).asPromise().catch(() => null);
       if (conn) {
         await flush(conn.db);

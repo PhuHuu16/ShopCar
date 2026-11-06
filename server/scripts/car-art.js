@@ -1,4 +1,4 @@
-// Draws a simple illustrated car as SVG, used as placeholder photos for demo data.
+// -- Vẽ ảnh xe minh họa (SVG) cho dữ liệu mẫu --
 
 const PAINT = {
   'Trắng': '#f1f5f9', 'Đen': '#111827', 'Đỏ': '#dc2626', 'Xám': '#6b7280', 'Bạc': '#cbd5e1',
@@ -32,7 +32,6 @@ function wheel(cx) {
     + `<circle cx="${cx}" cy="360" r="40" fill="#4b5563"/><circle cx="${cx}" cy="360" r="14" fill="#d1d5db"/>`;
 }
 
-// variant 0..2 changes the background and flips the car for a "different angle"
 function carSvg({ brand, brandColor, name, year, bodyType, color }, variant = 0) {
   const shape = SHAPES[SHAPE_FOR[bodyType] || 'sedan'];
   const paint = PAINT[color] || '#94a3b8';

@@ -10,7 +10,7 @@ const { ensureAdmin } = require('./src/services/admin');
 async function main() {
   await db.connect();
 
-  // First run in development: fill the empty database with demo data.
+  // Lần chạy đầu khi phát triển: thêm dữ liệu mẫu
   if (!config.isProd && !(await Admin.exists({}))) {
     console.log('Empty database, adding demo data...');
     await seed();

@@ -1,15 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-require('./utils/zodMessages'); // Vietnamese validation messages
+require('./utils/zodMessages');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const config = require('./config');
 const { apiNotFound, errorHandler } = require('./middleware/errors');
 
-// Built websites are served by this server in production:
-// customer site at "/", admin site at "/admin". Vite builds to "dist",
-// the old Create React App builds to "build".
+// Production: phục vụ web khách hàng ở / và trang quản trị ở /admin
 function findBuild(folder) {
   for (const name of ['dist', 'build']) {
     const dir = path.resolve(__dirname, '../..', folder, name);
@@ -20,12 +18,12 @@ function findBuild(folder) {
 
 function createApp() {
   const app = express();
-  app.set('trust proxy', 1); // correct client IPs behind Render/Heroku proxies (rate limiting)
+  app.set('trust proxy', 1); // Lấy đúng IP khách khi chạy sau proxy (Render) để giới hạn số lần thử
 
   if (!config.isTest) app.use(morgan(config.isProd ? 'combined' : 'dev'));
   app.use(express.json({ limit: '1mb' }));
 
-  // ----- API -----
+  // -- API --
   const api = express.Router();
   api.use(helmet());
   api.get('/health', (req, res) => res.json({ ok: true }));
@@ -36,10 +34,10 @@ function createApp() {
   api.use(apiNotFound);
   app.use('/api', api);
 
-  // ----- uploaded car photos -----
+  // -- Ảnh xe đã tải lên --
   app.use('/uploads', express.static(config.uploadDir, { maxAge: '30d', immutable: true, fallthrough: false }));
 
-  // ----- websites -----
+  // -- Hai web đã build --
   const adminBuild = findBuild('client-admin');
   if (adminBuild) {
     app.use('/admin', express.static(adminBuild));

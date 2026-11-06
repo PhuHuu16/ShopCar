@@ -6,7 +6,7 @@ const {
 const { Schema, model } = mongoose;
 const { ObjectId } = Schema.Types;
 
-// Never put passwords or email tokens into API responses, even by mistake.
+// Không bao giờ trả mật khẩu hay token email trong API
 const SECRET_FIELDS = ['password', 'activationTokenHash', 'resetTokenHash', 'resetTokenExpires'];
 function hideSecrets(schema) {
   schema.set('toJSON', {
@@ -32,7 +32,7 @@ const customerSchema = new Schema({
   phone: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   emailVerified: { type: Boolean, default: false },
-  status: { type: String, enum: CUSTOMER_STATUSES, default: 'active' }, // admin can block
+  status: { type: String, enum: CUSTOMER_STATUSES, default: 'active' },
   activationTokenHash: { type: String, select: false },
   resetTokenHash: { type: String, select: false },
   resetTokenExpires: { type: Date, select: false }
@@ -54,9 +54,9 @@ const carSchema = new Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true },
   brand: { type: ObjectId, ref: 'Brand', required: true, index: true },
-  price: { type: Number, required: true, min: 0 }, // VND
+  price: { type: Number, required: true, min: 0 },
   year: { type: Number, required: true },
-  mileage: { type: Number, default: 0, min: 0 }, // km
+  mileage: { type: Number, default: 0, min: 0 },
   fuel: { type: String, enum: FUELS, required: true },
   transmission: { type: String, enum: TRANSMISSIONS, required: true },
   bodyType: { type: String, enum: BODY_TYPES, required: true },
@@ -64,7 +64,7 @@ const carSchema = new Schema({
   color: { type: String, default: '' },
   condition: { type: String, enum: CONDITIONS, default: 'new' },
   description: { type: String, default: '' },
-  images: { type: [imageSchema], default: [] }, // first image = cover
+  images: { type: [imageSchema], default: [] },
   stock: { type: Number, default: 1, min: 0 },
   sold: { type: Number, default: 0, min: 0 }
 }, { timestamps: true });
@@ -73,8 +73,7 @@ carSchema.index({ createdAt: -1 });
 carSchema.index({ sold: -1 });
 hideSecrets(carSchema);
 
-// Orders keep a copy of the car and customer details at the time of purchase,
-// so later edits (or deleting a car) do not change old orders.
+// Đơn hàng lưu bản sao thông tin xe và khách lúc mua
 const orderItemSchema = new Schema({
   car: { type: ObjectId, ref: 'Car', required: true },
   name: { type: String, required: true },
@@ -83,12 +82,12 @@ const orderItemSchema = new Schema({
   quantity: { type: Number, required: true, min: 1 }
 }, { _id: false });
 
-// Online deposit for an order. Each payment attempt gets a new txnRef.
+// -- Đặt cọc online --
 const paymentSchema = new Schema({
   method: { type: String, enum: PAYMENT_METHODS, default: 'showroom' },
   status: { type: String, enum: PAYMENT_STATUSES, default: 'none' },
   deposit: { type: Number, default: 0 },
-  provider: { type: String, enum: ['vnpay', 'demo'] }, // demo = built-in test payment page
+  provider: { type: String, enum: ['vnpay', 'demo'] },
   txnRef: String,
   attempts: { type: Number, default: 0 },
   responseCode: String,
@@ -115,7 +114,7 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ 'payment.txnRef': 1 }, { unique: true, sparse: true });
 hideSecrets(orderSchema);
 
-// One conversation per customer with the showroom.
+// -- Chat: mỗi khách một cuộc trò chuyện --
 const conversationSchema = new Schema({
   customer: { type: ObjectId, ref: 'Customer', required: true, unique: true },
   lastMessage: {
@@ -133,7 +132,7 @@ const messageSchema = new Schema({
   conversation: { type: ObjectId, ref: 'Conversation', required: true },
   sender: { type: String, enum: ['customer', 'admin'], required: true },
   text: { type: String, required: true, maxlength: 2000 },
-  car: { type: ObjectId, ref: 'Car' } // optional: "I'm interested in this car"
+  car: { type: ObjectId, ref: 'Car' }
 }, { timestamps: true });
 messageSchema.index({ conversation: 1, createdAt: -1 });
 hideSecrets(messageSchema);

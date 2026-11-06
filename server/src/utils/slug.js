@@ -1,4 +1,3 @@
-// "Xe Mazda CX-5 Đời 2024" -> "xe-mazda-cx-5-doi-2024"
 function slugify(text) {
   return String(text)
     .normalize('NFD')
@@ -11,7 +10,6 @@ function slugify(text) {
     .slice(0, 80) || 'item';
 }
 
-// Adds -2, -3 ... when another document already uses the slug.
 async function uniqueSlug(Model, text, excludeId) {
   const base = slugify(text);
   let slug = base;

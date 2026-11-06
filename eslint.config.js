@@ -1,10 +1,9 @@
-// One lint setup for the API and both websites: `npm run lint` at the project root.
+// -- ESLint cho API và hai web --
 const js = require('@eslint/js');
 const globals = require('globals');
 const reactHooks = require('eslint-plugin-react-hooks');
 
-// Components used only in JSX look unused to the core rule, so names starting
-// with a capital letter (components, icons) are not reported.
+// Bỏ qua tên viết hoa: component chỉ dùng trong JSX
 const unused = ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^(_|[A-Z])', caughtErrors: 'none' }];
 
 module.exports = [

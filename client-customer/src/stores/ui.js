@@ -5,7 +5,6 @@ function readTheme() {
 }
 
 export const useUi = create((set, get) => ({
-  // chat panel; `chatCar` is a car to attach to the next message
   chatOpen: false,
   chatCar: null,
   openChat: (car = null) => set({ chatOpen: true, chatCar: car || get().chatCar }),
@@ -19,7 +18,7 @@ export const useUi = create((set, get) => ({
     try {
       localStorage.setItem('shopcar-theme', theme);
     } catch {
-      // private mode: the choice just is not remembered
+      // chế độ ẩn danh: không lưu được lựa chọn
     }
     set({ theme });
   }

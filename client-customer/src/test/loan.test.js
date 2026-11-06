@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { loanPlan } from '../components/LoanCalculator';
 
 describe('loanPlan (reducing balance)', () => {
-  const plan = loanPlan(600_000_000, 30, 60, 12); // 1% a month
+  const plan = loanPlan(600_000_000, 30, 60, 12);
 
   test('splits the price into down payment and loan', () => {
     expect(plan.down).toBe(180_000_000);
@@ -10,7 +10,7 @@ describe('loanPlan (reducing balance)', () => {
   });
 
   test('first month pays interest on the whole loan, last month on one share', () => {
-    expect(plan.first).toBeCloseTo(7_000_000 + 4_200_000); // 420M/60 + 1% of 420M
+    expect(plan.first).toBeCloseTo(7_000_000 + 4_200_000);
     expect(plan.last).toBeCloseTo(7_000_000 + 70_000);
   });
 

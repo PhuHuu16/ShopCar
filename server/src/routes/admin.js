@@ -30,7 +30,7 @@ function checkId(id) {
   return id;
 }
 
-// ---------- auth ----------
+// -- Đăng nhập --
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -48,14 +48,14 @@ router.post('/login', loginLimiter, async (req, res) => {
   res.json({ token: security.signToken(admin._id, 'admin'), admin });
 });
 
-// Every route below needs an admin token.
+// Các route bên dưới cần token quản trị
 router.use(requireAdmin);
 
 router.get('/me', (req, res) => {
   res.json(req.admin);
 });
 
-// ---------- brands ----------
+// -- Hãng xe --
 
 const brandSchema = z.object({ name: z.string().trim().min(1, 'Hãy nhập tên hãng').max(60) });
 
@@ -87,9 +87,8 @@ router.delete('/brands/:id', async (req, res) => {
   res.json({ message: 'Đã xóa hãng xe' });
 });
 
-// ---------- car photos ----------
+// -- Ảnh xe --
 
-// Upload first, then send the returned {url, thumbUrl} list with the car form.
 router.post('/uploads', uploadImages, async (req, res) => {
   if (!req.files || req.files.length === 0) throw new HttpError(400, 'Chưa chọn ảnh');
   const images = [];
@@ -104,7 +103,7 @@ router.post('/uploads', uploadImages, async (req, res) => {
   res.status(201).json(images);
 });
 
-// ---------- cars ----------
+// -- Xe --
 
 const imageUrl = z.string().regex(/^(\/uploads\/|https?:\/\/)/, 'Đường dẫn ảnh không hợp lệ');
 const carSchema = z.object({
@@ -152,7 +151,6 @@ router.put('/cars/:id', async (req, res) => {
     { ...data, slug: await uniqueSlug(Car, `${data.name} ${data.year}`, id) },
     { new: true, runValidators: true }
   ).populate('brand', 'name slug');
-  // remove photo files that are no longer used
   const kept = new Set(data.images.map((i) => i.url));
   await deleteImages(old.images.filter((i) => !kept.has(i.url)));
   res.json(car);
@@ -165,7 +163,7 @@ router.delete('/cars/:id', async (req, res) => {
   res.json({ message: 'Đã xóa xe' });
 });
 
-// ---------- orders ----------
+// -- Đơn hàng --
 
 router.get('/orders', async (req, res) => {
   const q = z.object({
@@ -182,7 +180,6 @@ router.get('/orders', async (req, res) => {
   if (q.q) {
     const re = { $regex: escapeRegex(q.q.replace(/^#/, '')), $options: 'i' };
     filter.$or = [{ 'customerInfo.name': re }, { 'customerInfo.phone': re }, { 'customerInfo.email': re }];
-    // order codes are the last 6 characters of the id, as shown on the websites
     if (/^#?[0-9a-f]{4,24}$/i.test(q.q)) {
       filter.$or.push({ $expr: { $regexMatch: { input: { $toString: '$_id' }, regex: escapeRegex(q.q.replace(/^#/, '')), options: 'i' } } });
     }
@@ -205,7 +202,7 @@ router.patch('/orders/:id/status', async (req, res) => {
   res.json(await changeStatus(req.params.id, status));
 });
 
-// ---------- customers ----------
+// -- Khách hàng --
 
 router.get('/customers', async (req, res) => {
   const q = z.object({ q: z.string().trim().max(100).optional(), ...pageQuery }).parse(req.query);
@@ -260,7 +257,7 @@ router.post('/customers/:id/resend-activation', async (req, res) => {
   res.json({ message: 'Đã gửi lại email kích hoạt' });
 });
 
-// ---------- dashboard ----------
+// -- Tổng quan --
 
 router.get('/stats', async (req, res) => {
   const since = new Date();
@@ -289,14 +286,12 @@ router.get('/stats', async (req, res) => {
           _id: null,
           count: { $sum: 1 },
           total: { $sum: '$payment.deposit' },
-          // deposits on cancelled orders have to be paid back by hand
           toRefund: { $sum: { $cond: [{ $eq: ['$status', 'CANCELED'] }, '$payment.deposit', 0] } }
         }
       }
     ])
   ]);
 
-  // fill months without sales with 0 so the chart has 12 points
   const months = [];
   const byMonth = new Map(revenueByMonth.map((m) => [m._id, m]));
   for (let i = 0; i < 12; i++) {
@@ -321,7 +316,7 @@ router.get('/stats', async (req, res) => {
   });
 });
 
-// ---------- chat ----------
+// -- Chat --
 
 router.get('/chats', async (req, res) => {
   const conversations = await Conversation.find({ lastMessage: { $exists: true } })
@@ -331,7 +326,6 @@ router.get('/chats', async (req, res) => {
   res.json(conversations);
 });
 
-// Opens (or creates) the conversation with a customer, so the showroom can write first.
 router.post('/chats/with/:customerId', async (req, res) => {
   const customer = await Customer.exists({ _id: checkId(req.params.customerId) });
   if (!customer) throw new HttpError(404, 'Không tìm thấy khách hàng');

@@ -5,7 +5,6 @@ export function formatVnd(value) {
   return vnd.format(value || 0);
 }
 
-// 1530000000 -> "1,53 tỷ", 545000000 -> "545 triệu"
 export function formatPriceShort(value) {
   if (value >= 999.5e6) return `${(value / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} tỷ`;
   if (value >= 1e6) return `${num.format(Math.round(value / 1e6))} triệu`;

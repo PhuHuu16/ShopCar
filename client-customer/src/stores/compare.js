@@ -3,13 +3,12 @@ import { persist } from 'zustand/middleware';
 
 export const MAX_COMPARE = 3;
 
-// Cars picked for side-by-side comparison (kept in the browser)
+// -- Danh sách xe so sánh --
 export const useCompare = create(
   persist(
     (set, get) => ({
-      items: [], // [{ _id, slug, name, image }]
+      items: [],
       has: (id) => get().items.some((c) => c._id === id),
-      // returns 'added' | 'removed' | 'full'
       toggle(car) {
         const { items } = get();
         if (items.some((c) => c._id === car._id)) {

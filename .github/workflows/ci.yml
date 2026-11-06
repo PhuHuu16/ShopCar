@@ -24,7 +24,7 @@ jobs:
           cache: npm
           cache-dependency-path: server/package-lock.json
       - run: npm ci
-      # the MongoDB binary used by the tests (about 70 MB), downloaded once
+      # Lưu cache MongoDB dùng cho test (khoảng 70 MB)
       - uses: actions/cache@v4
         with:
           path: server/node_modules/.cache/mongodb-memory-server

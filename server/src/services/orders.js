@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const { Car, Order } = require('../models');
 const HttpError = require('../utils/httpError');
 
-// Builds an order from car ids + quantities only. Prices and the total always
-// come from the database, never from the browser.
+// Giá và tổng tiền luôn lấy từ database, không tin dữ liệu từ trình duyệt
 async function createOrder(customer, items, note = '') {
   const merged = new Map();
   for (const item of items) {
@@ -42,8 +41,7 @@ async function createOrder(customer, items, note = '') {
   });
 }
 
-// Takes cars out of stock. Each update only succeeds if enough stock is left,
-// so two admins approving at once cannot oversell. Undoes itself on failure.
+// Trừ kho có điều kiện để không bán vượt số xe còn lại
 async function takeStock(order) {
   const done = [];
   for (const item of order.items) {
@@ -78,7 +76,7 @@ async function changeStatus(orderId, newStatus) {
   if (!TRANSITIONS[order.status].includes(newStatus)) {
     throw new HttpError(409, `Không thể chuyển đơn từ ${order.status} sang ${newStatus}`);
   }
-  // Claim the order first so a second request for the same change fails here.
+  // Giữ đơn trước để hai yêu cầu cùng lúc không đổi trạng thái hai lần
   const claimed = await Order.findOneAndUpdate(
     { _id: order._id, status: order.status },
     { status: newStatus, ...(newStatus === 'APPROVED' ? { approvedAt: new Date() } : {}) },

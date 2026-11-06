@@ -7,7 +7,6 @@ import { Layout, NotFound, RequireAuth, RouteError } from './components/Layout';
 import { Spinner } from './components/ui';
 import Home from './pages/Home';
 
-// Pages other than the home page are loaded on demand, keeping the first load small.
 const Cars = lazy(() => import('./pages/Cars'));
 const CarDetail = lazy(() => import('./pages/CarDetail'));
 const Cart = lazy(() => import('./pages/Cart'));

@@ -62,7 +62,6 @@ function Editor({ car }) {
     }
   });
 
-  // ask before leaving with unsaved changes
   const blocker = useBlocker(({ nextLocation }) => dirty && !save.isPending && !save.isSuccess && !nextLocation.state?.saved);
   useEffect(() => {
     if (blocker.state !== 'blocked') return;

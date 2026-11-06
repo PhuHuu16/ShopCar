@@ -15,7 +15,7 @@ const { PAYMENT_METHODS } = require('../constants');
 
 const router = express.Router();
 
-// Slows down password guessing and email spam from one IP address.
+// Giới hạn số lần thử từ một IP (chống dò mật khẩu, spam email)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
@@ -36,7 +36,7 @@ const signupSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email không hợp lệ')
 });
 
-// ---------- account ----------
+// -- Tài khoản: đăng ký, kích hoạt, đăng nhập --
 
 router.post('/signup', authLimiter, async (req, res) => {
   const data = signupSchema.parse(req.body);
@@ -77,7 +77,7 @@ router.post('/resend-activation', authLimiter, async (req, res) => {
     await Customer.updateOne({ _id: customer._id }, { activationTokenHash: hash });
     await email.sendActivation(customer, token);
   }
-  // Same answer either way, so this cannot be used to find out who has an account.
+  // Trả lời giống nhau để không lộ email nào đã có tài khoản
   res.json({ message: 'Nếu email thuộc một tài khoản chưa kích hoạt, chúng tôi đã gửi lại link kích hoạt.' });
 });
 
@@ -112,7 +112,7 @@ router.post('/reset-password', authLimiter, async (req, res) => {
     { _id: data.id, resetTokenHash: security.hashEmailToken(data.token), resetTokenExpires: { $gt: new Date() } },
     {
       password: await security.hashPassword(data.password),
-      emailVerified: true, // opening the email link proves they own the address
+      emailVerified: true,
       $unset: { resetTokenHash: 1, resetTokenExpires: 1, activationTokenHash: 1 }
     },
     { new: true }
@@ -121,7 +121,7 @@ router.post('/reset-password', authLimiter, async (req, res) => {
   res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập.' });
 });
 
-// ---------- profile (logged in) ----------
+// -- Thông tin cá nhân --
 
 router.get('/me', requireCustomer, (req, res) => {
   res.json(req.customer);
@@ -146,7 +146,7 @@ router.put('/me', requireCustomer, async (req, res) => {
   res.json(await Customer.findByIdAndUpdate(req.customer._id, update, { new: true }));
 });
 
-// ---------- orders ----------
+// -- Đơn hàng --
 
 router.post('/orders', requireCustomer, async (req, res) => {
   const { items, note, payment } = z.object({
@@ -176,14 +176,12 @@ router.get('/orders/:id', requireCustomer, async (req, res) => {
   res.json(await findOwnOrder(req));
 });
 
-// Pay (or retry paying) the online deposit for one of your pending orders.
 router.post('/orders/:id/pay', requireCustomer, async (req, res) => {
   const order = await findOwnOrder(req);
   const { payUrl } = await payments.startPayment(order, req.ip);
   res.json({ payUrl });
 });
 
-// Customers may cancel while the showroom has not confirmed yet.
 router.post('/orders/:id/cancel', requireCustomer, async (req, res) => {
   const order = await findOwnOrder(req);
   if (order.status !== 'PENDING') throw new HttpError(409, 'Chỉ hủy được đơn đang chờ xác nhận');
@@ -193,7 +191,7 @@ router.post('/orders/:id/cancel', requireCustomer, async (req, res) => {
   res.json(await changeStatus(order._id, 'CANCELED'));
 });
 
-// ---------- chat with the showroom ----------
+// -- Chat với showroom --
 
 router.get('/chat', requireCustomer, async (req, res) => {
   const conversation = await chat.getOrCreateConversation(req.customer._id);

@@ -1,4 +1,4 @@
-// Vietnamese names for the codes stored by the API
+// -- Tên tiếng Việt cho các mã từ API --
 export const FUEL = { gasoline: 'Xăng', diesel: 'Dầu', hybrid: 'Hybrid', electric: 'Điện' };
 export const TRANSMISSION = { automatic: 'Số tự động', manual: 'Số sàn' };
 export const BODY_TYPE = { sedan: 'Sedan', suv: 'SUV', crossover: 'Crossover', hatchback: 'Hatchback', mpv: 'MPV', pickup: 'Bán tải', coupe: 'Coupe' };
@@ -26,7 +26,6 @@ export const PRICE_RANGES = [
   { label: 'Trên 1,5 tỷ', min: 1500000000 }
 ];
 
-// Online deposit state of an order (payment.status)
 export const PAYMENT_STATUS = {
   none: { label: 'Thanh toán tại showroom', className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
   pending: { label: 'Chờ thanh toán cọc', className: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },

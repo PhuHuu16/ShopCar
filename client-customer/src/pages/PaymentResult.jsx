@@ -10,8 +10,7 @@ import { useTitle } from '../hooks/useTitle';
 import { useAuth } from '../stores/auth';
 import { useUi } from '../stores/ui';
 
-// VNPay sends the customer back here with the result in the address.
-// The API checks the signature and records the payment.
+// -- Kết quả thanh toán VNPay --
 export default function PaymentResult() {
   useTitle('Kết quả thanh toán');
   const { search } = useLocation();

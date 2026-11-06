@@ -7,8 +7,7 @@ function apiNotFound(req, res) {
   res.status(404).json({ message: 'Không tìm thấy API' });
 }
 
-// Turns any thrown error into a JSON answer. Express 5 sends errors from
-// async routes here automatically.
+// -- Xử lý lỗi chung --
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   if (err instanceof HttpError) {
@@ -29,7 +28,7 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ message: `Lỗi upload: ${err.message}` });
   }
   if (err && (err.status === 404 || err.statusCode === 404)) {
-    return res.status(404).end(); // e.g. missing file under /uploads
+    return res.status(404).end();
   }
   console.error(err);
   res.status(500).json({ message: 'Lỗi máy chủ' });

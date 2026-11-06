@@ -118,7 +118,6 @@ export function Header() {
         <Logo />
         <nav className="ml-4 hidden items-center gap-1 lg:flex">
           {NAV.map((n) => (
-            // "Xe đã qua sử dụng" shares the /cars path, so only highlight the plain list
             <NavLink key={n.label} to={n.to} end={n.end} className={n.to.includes('?') ? navClass({ isActive: false }) : navClass}>
               {n.label}
             </NavLink>

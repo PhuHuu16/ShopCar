@@ -126,7 +126,6 @@ export default function Cars() {
     placeholderData: keepPreviousData
   });
 
-  // changing any filter goes back to page 1
   function setParam(changes, keepPage = false) {
     const next = new URLSearchParams(params);
     for (const [key, value] of Object.entries(changes)) {
@@ -171,7 +170,6 @@ export default function Cars() {
       </div>
 
       <div className="flex gap-8">
-        {/* desktop sidebar */}
         <aside className="hidden w-64 shrink-0 lg:block">
           <div className="card sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto p-5">
             {activeCount > 0 && (
@@ -183,7 +181,6 @@ export default function Cars() {
           </div>
         </aside>
 
-        {/* mobile drawer */}
         {showFilters && (
           <div className="fixed inset-0 z-[60] lg:hidden">
             <div className="absolute inset-0 bg-slate-950/50" onClick={() => setShowFilters(false)} />

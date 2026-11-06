@@ -24,7 +24,6 @@ export function PaymentBadge({ payment }) {
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
-// Deposit details in the order drawer
 function PaymentInfo({ order }) {
   const p = order.payment || { method: 'showroom', status: 'none' };
   const refund = order.status === 'CANCELED' && p.status === 'paid';

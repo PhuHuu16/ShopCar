@@ -4,8 +4,7 @@ import { formatPriceShort, formatVnd } from '../lib/format';
 
 const TERMS = [12, 24, 36, 48, 60, 72, 84, 96];
 
-// Car loan on a reducing balance (how most Vietnamese banks lend):
-// the same principal every month, interest on what is still owed.
+// -- Tính trả góp theo dư nợ giảm dần --
 export function loanPlan(price, downPercent, months, yearlyRate) {
   const loan = Math.round(price * (1 - downPercent / 100));
   const principal = loan / months;

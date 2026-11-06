@@ -9,7 +9,6 @@ import { ButtonLink, EmptyState, PageHeader, Spinner } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 import { MAX_COMPARE, useCompare } from '../stores/compare';
 
-// Rows of the table. `best` picks the winning value among the cars, if any.
 const ROWS = [
   { label: 'Giá niêm yết', value: (c) => formatVnd(c.price), best: (cars) => Math.min(...cars.map((c) => c.price)), key: 'price' },
   { label: 'Năm sản xuất', value: (c) => c.year, best: (cars) => Math.max(...cars.map((c) => c.year)), key: 'year' },
@@ -36,7 +35,6 @@ export default function Compare() {
     queries: items.map((c) => ({ queryKey: ['car', c.slug], queryFn: () => api(`/cars/${c.slug}`) }))
   });
 
-  // a car may have been removed from the showroom since it was picked
   const gone = results.map((r, i) => (r.error?.status === 404 ? items[i]._id : null)).filter(Boolean).join();
   useEffect(() => {
     if (gone) gone.split(',').forEach(remove);
@@ -58,7 +56,6 @@ export default function Compare() {
   const winners = Object.fromEntries(
     ROWS.filter((row) => row.best && cars.length > 1).map((row) => [row.key, row.best(cars)])
   );
-  // don't crown a winner when every car has the same value
   const isBest = (row, car) => row.key && winners[row.key] !== undefined && car[row.key] === winners[row.key] && !cars.every((c) => c[row.key] === car[row.key]);
   const cols = `minmax(140px,180px) repeat(${MAX_COMPARE}, minmax(200px, 1fr))`;
 

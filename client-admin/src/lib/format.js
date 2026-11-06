@@ -5,7 +5,6 @@ export function formatVnd(value) {
   return vnd.format(value || 0);
 }
 
-// 1530000000 -> "1,53 tỷ", 545000000 -> "545 triệu"
 export function formatPriceShort(value) {
   if (value >= 999.5e6) return `${(value / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} tỷ`;
   if (value >= 1e6) return `${num.format(Math.round(value / 1e6))} triệu`;
@@ -35,7 +34,6 @@ export function shortId(id) {
   return `#${String(id).slice(-6).toUpperCase()}`;
 }
 
-// Compact amounts for chart axes: 1500000000 -> "1,5 tỷ", 300000000 -> "300 tr"
 export function formatAxisVnd(value) {
   if (value >= 999.5e6) return `${(value / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} tỷ`;
   if (value >= 1e6) return `${num.format(Math.round(value / 1e6))} tr`;
@@ -46,7 +44,6 @@ export function formatNumber(value) {
   return num.format(value || 0);
 }
 
-// "2026-03" -> "Tháng 3/2026", or "T3" when short
 export function formatMonth(key, short = false) {
   const [y, m] = key.split('-');
   return short ? `T${Number(m)}` : `Tháng ${Number(m)}/${y}`;

@@ -7,7 +7,6 @@ import { AdminLayout, NotFound, Root, RouteError } from './components/Layout';
 import { Spinner } from './components/ui';
 import Dashboard from './pages/Dashboard';
 
-// Pages other than the dashboard are loaded on demand.
 const Login = lazy(() => import('./pages/Login'));
 const Cars = lazy(() => import('./pages/Cars'));
 const CarForm = lazy(() => import('./pages/CarForm'));

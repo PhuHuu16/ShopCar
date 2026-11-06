@@ -26,8 +26,7 @@ function Tile({ label, value, icon: Icon, children, to }) {
   return to ? <Link to={to} className="block">{body}</Link> : body;
 }
 
-// The month is still running, so a percentage against a whole month would look
-// like a drop. Show last month's figure until this month has passed it.
+// Tháng này chưa hết nên chỉ hiện % khi đã vượt tháng trước
 function Delta({ now, before }) {
   if (!before) return <span>Tháng trước chưa có doanh thu</span>;
   if (now < before) {

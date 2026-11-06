@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// 1 … 4 5 [6] 7 8 … 20
 function pageList(page, pages) {
   const list = [];
   for (let p = 1; p <= pages; p++) {

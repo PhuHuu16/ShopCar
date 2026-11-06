@@ -74,7 +74,6 @@ export function Textarea({ label, error, hint, className, id, ...props }) {
   );
 }
 
-// options: [{ value, label }]
 export function Select({ label, error, hint, className, id, options, placeholder, ...props }) {
   return (
     <Field label={label} error={error} hint={hint} className={className} htmlFor={id}>
@@ -140,7 +139,7 @@ export function PageHeader({ title, description, actions }) {
   );
 }
 
-// Closes on Escape and locks page scrolling while open
+// -- Hộp thoại --
 function useOverlay(open, onClose) {
   useEffect(() => {
     if (!open) return undefined;
@@ -175,7 +174,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'max-w-md
   );
 }
 
-// Panel sliding in from the right, used for order details
+// -- Ngăn kéo bên phải --
 export function Drawer({ open, onClose, title, children, footer }) {
   useOverlay(open, onClose);
   if (!open) return null;
@@ -208,7 +207,7 @@ export function SearchInput({ value, onChange, placeholder, className = '' }) {
   );
 }
 
-// Table wrapper that scrolls sideways on small screens instead of the page
+// -- Bảng --
 export function Table({ children }) {
   return (
     <div className="overflow-x-auto">

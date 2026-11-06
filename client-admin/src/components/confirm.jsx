@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Button, Modal } from './ui';
 
-// const ok = await confirm({ title, message, confirmText, danger })
+// Cách dùng: const ok = await confirm({ title, message, confirmText, danger })
 const useConfirm = create(() => ({ request: null }));
 
 export function confirm(options) {

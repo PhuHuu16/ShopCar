@@ -143,7 +143,6 @@ function Messages({ messages }) {
   );
 }
 
-// Lets the showroom attach a car to the next message
 function CarPicker({ open, onClose, onPick }) {
   const [search, setSearch] = useState('');
   const cars = useQuery({
@@ -282,7 +281,6 @@ function ChatPane({ id }) {
     return () => setActiveChat(null);
   }, [id]);
 
-  // opening a conversation marks the customer's messages as read
   useEffect(() => {
     if (unread > 0) markChatRead(queryClient, id);
   }, [unread, id, queryClient]);
@@ -326,7 +324,6 @@ export default function Chats() {
   const navigate = useNavigate();
   const chats = useQuery({ queryKey: ['chats'], queryFn: () => api('/chats') });
 
-  // on wide screens open the newest conversation right away
   useEffect(() => {
     if (!id && chats.data?.length && window.matchMedia('(min-width: 768px)').matches) {
       navigate(`/chats/${chats.data[0]._id}`, { replace: true });

@@ -12,13 +12,11 @@ function notifyAdmins(req, order) {
   req.app.get('io')?.to('admins').emit('order:paid', order);
 }
 
-// What the checkout page shows about online deposits
 router.get('/config', (req, res) => {
   res.json({ depositPerCar: config.payment.depositPerCar, provider: payments.provider().name });
 });
 
-// The customer's browser comes back from VNPay to /payment/result on the website,
-// which forwards VNPay's parameters here to be checked and recorded.
+// -- Trang kết quả: web chuyển kết quả VNPay về đây để kiểm tra --
 router.get('/vnpay/return', async (req, res) => {
   const result = await payments.applyResult(req.query);
   if (result.code === 'invalid') return res.status(400).json({ status: 'invalid', message: 'Dữ liệu thanh toán không hợp lệ' });
@@ -28,14 +26,13 @@ router.get('/vnpay/return', async (req, res) => {
   const { order } = result;
   const status = result.code === 'amount' ? 'invalid' : order.payment.status;
   res.json({
-    status, // paid | failed | pending | invalid
+    status,
     message: result.code === 'amount' ? 'Số tiền thanh toán không khớp' : vnpay.responseMessage(req.query.vnp_ResponseCode),
     order: { _id: order._id, code: shortCode(order._id), total: order.total, deposit: order.payment.deposit, paidAt: order.payment.paidAt }
   });
 });
 
-// Server-to-server confirmation from VNPay (Instant Payment Notification).
-// Set this URL in the VNPay merchant portal: https://<your-site>/api/payment/vnpay/ipn
+// -- IPN: VNPay gọi trực tiếp để xác nhận thanh toán --
 router.get('/vnpay/ipn', async (req, res) => {
   try {
     const result = await payments.applyResult(req.query);
@@ -55,7 +52,7 @@ router.get('/vnpay/ipn', async (req, res) => {
   }
 });
 
-// ---------- built-in demo payment page (used when VNPay is not configured) ----------
+// -- Trang thanh toán thử nghiệm (khi chưa cấu hình VNPay) --
 
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -94,7 +91,7 @@ router.get('/demo-gateway', (req, res) => {
   if (p.name !== 'demo') return res.status(404).json({ message: 'Không tìm thấy' });
   const params = vnpay.verify(req.query, p.secret);
   const returnUrl = String(req.query.vnp_ReturnUrl || '');
-  // only send people back to our own website
+  // Chỉ chuyển về đúng web của mình
   if (!params || !returnUrl.startsWith(`${config.clientUrl}/`)) {
     return res.status(400).type('html').send(page('Lỗi thanh toán', '<div class="body"><h2>Liên kết thanh toán không hợp lệ</h2></div>'));
   }

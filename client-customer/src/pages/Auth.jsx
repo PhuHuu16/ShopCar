@@ -38,7 +38,7 @@ function Result({ ok, title, children, action }) {
   );
 }
 
-// only allow redirects inside this site
+// Chỉ cho quay lại các trang trong web
 function safeRedirect(from) {
   return from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
 }
@@ -79,6 +79,7 @@ function ResendActivation({ defaultEmail = '' }) {
   );
 }
 
+// -- Đăng nhập --
 export function Login() {
   useTitle('Đăng nhập');
   const [params] = useSearchParams();
@@ -122,6 +123,7 @@ export function Login() {
   );
 }
 
+// -- Đăng ký --
 export function Signup() {
   useTitle('Đăng ký');
   const form = useForm({ name: '', username: '', email: '', phone: '', password: '' });
@@ -170,12 +172,12 @@ export function Signup() {
   );
 }
 
-// Opened from the link in the activation email: /activate?id=...&token=...
+// -- Kích hoạt tài khoản --
 export function Activate() {
   useTitle('Kích hoạt tài khoản');
   const [params] = useSearchParams();
   const [state, setState] = useState({ status: 'loading' });
-  const started = useRef(false); // the link works once; don't send it twice in dev StrictMode
+  const started = useRef(false); // Link chỉ dùng được một lần, tránh gọi hai lần ở StrictMode
 
   useEffect(() => {
     if (started.current) return;
@@ -207,6 +209,7 @@ export function Activate() {
   );
 }
 
+// -- Quên mật khẩu --
 export function ForgotPassword() {
   useTitle('Quên mật khẩu');
   const [email, setEmail] = useState('');
@@ -233,7 +236,7 @@ export function ForgotPassword() {
   );
 }
 
-// Opened from the email link: /reset-password?id=...&token=...
+// -- Đặt lại mật khẩu --
 export function ResetPassword() {
   useTitle('Đặt lại mật khẩu');
   const [params] = useSearchParams();

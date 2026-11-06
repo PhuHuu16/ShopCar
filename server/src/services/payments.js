@@ -1,13 +1,11 @@
-// Online deposits through VNPay. Without VNPay merchant settings the same flow
-// runs against a built-in demo payment page (see routes/payment.js).
+// -- Đặt cọc online qua VNPay --
 const crypto = require('crypto');
 const config = require('../config');
 const { Order } = require('../models');
 const HttpError = require('../utils/httpError');
 const vnpay = require('../utils/vnpay');
 
-// Secret for the demo page. Derived from JWT_SECRET so nobody outside the
-// server can forge a "paid" answer, even in demo mode.
+// Khóa cho trang thử nghiệm, lấy từ JWT_SECRET để không ai giả được kết quả
 const demoSecret = crypto.createHmac('sha256', config.jwtSecret).update('shopcar-demo-payment').digest('hex');
 
 function provider() {
@@ -23,7 +21,6 @@ function depositFor(order) {
 
 const shortCode = (id) => String(id).slice(-6).toUpperCase();
 
-// Gives the order a new payment attempt and returns the address to pay at.
 async function startPayment(order, ipAddr) {
   if (order.status !== 'PENDING') throw new HttpError(409, 'Chỉ đặt cọc được cho đơn đang chờ xác nhận');
   if (order.payment?.status === 'paid') throw new HttpError(409, 'Đơn hàng này đã được đặt cọc');
@@ -62,9 +59,7 @@ async function startPayment(order, ipAddr) {
   return { order: updated, payUrl };
 }
 
-// Applies the answer VNPay sends back (to the return page and to the IPN).
-// Safe to call twice for the same payment: only the first call changes the order.
-// code: ok | invalid (bad signature) | not_found | amount | already
+// Gọi hai lần vẫn an toàn: chỉ lần đầu thay đổi đơn hàng
 async function applyResult(query) {
   const p = provider();
   const params = vnpay.verify(query, p.secret);

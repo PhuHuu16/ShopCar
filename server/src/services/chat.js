@@ -18,7 +18,6 @@ async function getOrCreateConversation(customerId) {
   );
 }
 
-// Newest first in the database, returned oldest first for display.
 async function listMessages(conversationId, { before, limit = 50 } = {}) {
   const query = { conversation: conversationId };
   if (before) query.createdAt = { $lt: new Date(before) };
@@ -29,7 +28,6 @@ async function listMessages(conversationId, { before, limit = 50 } = {}) {
   return messages.reverse();
 }
 
-// Saves a message and updates the conversation preview + unread counters.
 async function saveMessage(conversation, sender, input) {
   const { text, car } = sendSchema.parse(input);
   if (car && !(await Car.exists({ _id: car }))) throw new HttpError(404, 'Không tìm thấy xe');
@@ -49,8 +47,7 @@ async function markRead(conversationId, reader) {
   return Conversation.findByIdAndUpdate(conversationId, { [field]: 0 }, { new: true });
 }
 
-// Sends the new message to everyone who should see it right away:
-// the customer's room and all connected admins.
+// Gửi tin mới cho khách và tất cả quản trị viên đang online
 function broadcast(io, conversation, message) {
   if (!io) return;
   const payload = { conversationId: String(conversation._id), conversation, message };

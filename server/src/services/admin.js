@@ -2,10 +2,7 @@ const config = require('../config');
 const { Admin } = require('../models');
 const { checkPassword, hashPassword } = require('../utils/security');
 
-// Keeps the admin account in line with ADMIN_USERNAME / ADMIN_PASSWORD from .env.
-// Runs at every start: creates the account on a new database (for example in
-// production), and when .env changes, renames it and/or sets the new password.
-// Returns what happened: 'created' | 'updated' | 'unchanged'.
+// -- Đồng bộ tài khoản quản trị với .env mỗi lần khởi động --
 async function ensureAdmin() {
   const { username, password, fromEnv } = config.admin;
   const count = await Admin.countDocuments();
@@ -13,10 +10,9 @@ async function ensureAdmin() {
     await Admin.create({ username, password: await hashPassword(password), name: 'Quản trị viên' });
     return 'created';
   }
-  // without .env values, keep whatever login the database already has
   if (!fromEnv) return 'unchanged';
 
-  // the showroom has one admin: rename it rather than leaving the old login working
+  // Chỉ có một quản trị viên: đổi tên để tài khoản cũ không còn dùng được
   const admin = (await Admin.findOne({ username }).select('+password'))
     || (count === 1 ? await Admin.findOne().select('+password') : null);
   if (!admin) {

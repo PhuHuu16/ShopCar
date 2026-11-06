@@ -28,7 +28,6 @@ export function Logo({ light = false }) {
   );
 }
 
-// Counters shown next to the menu items
 function useBadges() {
   const token = useAuth((s) => s.token);
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api('/stats'), enabled: !!token, refetchInterval: 60_000 });
@@ -156,7 +155,7 @@ function Topbar() {
   );
 }
 
-// Checks the saved login is still valid when the site opens
+// -- Kiểm tra phiên đăng nhập khi mở trang --
 function useRefreshAdmin(token) {
   const setAdmin = useAuth((s) => s.setAdmin);
   useEffect(() => {
@@ -184,7 +183,6 @@ export function AdminLayout() {
   );
 }
 
-// Wraps every page (also the login page) with toasts and scroll handling
 export function Root() {
   const theme = useUi((s) => s.theme);
   return (

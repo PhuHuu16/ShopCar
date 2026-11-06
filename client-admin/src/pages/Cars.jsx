@@ -20,7 +20,6 @@ function StockBadge({ stock }) {
   return <span className="tabular-nums">{stock}</span>;
 }
 
-// Waits until typing pauses before searching
 function useDebounced(value, ms = 300) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {

@@ -4,17 +4,15 @@ export class ApiError extends Error {
   constructor(status, message, errors = []) {
     super(message);
     this.status = status;
-    this.errors = errors; // [{ field, message }] for form validation
+    this.errors = errors;
   }
 
-  // { username: 'Tên đăng nhập đã tồn tại', ... }
   fieldErrors() {
     return Object.fromEntries(this.errors.map((e) => [e.field, e.message]));
   }
 }
 
-// Small fetch wrapper: adds the token, turns error answers into ApiError,
-// and logs out when the server says the session is no longer valid.
+// -- Gọi API --
 export async function api(path, { method = 'GET', body, query } = {}) {
   const token = useAuth.getState().token;
   const headers = {};

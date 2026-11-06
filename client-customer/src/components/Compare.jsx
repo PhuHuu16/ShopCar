@@ -15,7 +15,7 @@ export function useToggleCompare() {
   };
 }
 
-// Small round button on car cards (inside a link, so it must not navigate)
+// -- Nút so sánh trên thẻ xe --
 export function CompareToggle({ car }) {
   const selected = useCompare((s) => s.items.some((c) => c._id === car._id));
   const toggle = useToggleCompare();
@@ -40,7 +40,7 @@ export function CompareToggle({ car }) {
   );
 }
 
-// Bar at the bottom of the screen while cars are picked for comparison
+// -- Thanh so sánh xe --
 export function CompareBar() {
   const { items, remove, clear } = useCompare();
   const { pathname } = useLocation();

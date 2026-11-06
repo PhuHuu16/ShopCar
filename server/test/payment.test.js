@@ -21,10 +21,8 @@ after(() => ctx.stop());
 const asCustomer = (req) => req.set('Authorization', `Bearer ${customerToken}`);
 const asAdmin = (req) => req.set('Authorization', `Bearer ${adminToken}`);
 
-// "http://localhost:5173/api/payment/..." -> "/api/payment/..." for supertest
 const localPath = (url) => url.replace(config.clientUrl, '');
 
-// Opens the demo payment page and returns the "pay" or "cancel" link on it
 async function gatewayLink(payUrl, choice) {
   const page = await api.get(localPath(payUrl));
   assert.equal(page.status, 200);
@@ -34,7 +32,6 @@ async function gatewayLink(payUrl, choice) {
   return match[1].replace(/&amp;/g, '&');
 }
 
-// The website forwards VNPay's answer to the API exactly like this
 function returnPath(answerUrl) {
   return `/api/payment/vnpay/return${new URL(answerUrl).search}`;
 }
@@ -61,8 +58,8 @@ describe('VNPay signing', () => {
   const query = Object.fromEntries(new URL(url).searchParams);
 
   test('builds a signed URL in VNPay format', () => {
-    assert.equal(query.vnp_Amount, '1000000000'); // x100
-    assert.equal(query.vnp_OrderInfo, 'Dat coc don hang ABC'); // ASCII only
+    assert.equal(query.vnp_Amount, '1000000000');
+    assert.equal(query.vnp_OrderInfo, 'Dat coc don hang ABC');
     assert.equal(query.vnp_IpAddr, '127.0.0.1');
     assert.match(query.vnp_CreateDate, /^\d{14}$/);
     assert.match(query.vnp_SecureHash, /^[0-9a-f]{128}$/);
@@ -96,7 +93,6 @@ describe('online deposit', () => {
     assert.equal(res.body.status, 'paid');
     assert.equal(res.body.order.deposit, order.payment.deposit);
 
-    // the same answer again (refresh, or the IPN arriving later) changes nothing
     const again = await api.get(returnPath(answer));
     assert.equal(again.body.status, 'paid');
     const ipn = await api.get(`/api/payment/vnpay/ipn${new URL(answer).search}`);

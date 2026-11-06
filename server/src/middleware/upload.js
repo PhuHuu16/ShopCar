@@ -3,7 +3,6 @@ const HttpError = require('../utils/httpError');
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 
-// Keeps files in memory; utils/images.js converts and saves them.
 const uploadImages = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024, files: 12 },

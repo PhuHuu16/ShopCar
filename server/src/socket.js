@@ -5,11 +5,7 @@ const { loadAccount } = require('./middleware/auth');
 const { Conversation } = require('./models');
 const chat = require('./services/chat');
 
-// Realtime chat between customers and the showroom.
-// Clients connect with: io({ auth: { token, role: 'customer' | 'admin' } })
-// Events from client:  'message:send' { text, car?, conversationId? (admin) }, 'conversation:read' { conversationId? }
-// Events to client:    'message:new'  { conversationId, conversation, message }
-//                      'order:new'    order (admins only, when a customer places an order)
+// -- Chat thời gian thực --
 function attachSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: config.isProd ? undefined : { origin: [config.clientUrl, /^http:\/\/localhost:\d+$/] }
@@ -31,8 +27,7 @@ function attachSocket(httpServer) {
 
   io.on('connection', (socket) => {
     const { role, accountId } = socket.data;
-    // Listeners below are added right away (not after this lookup), otherwise a
-    // message sent immediately after connecting would be lost.
+    // Gắn listener ngay, nếu không tin gửi ngay sau khi kết nối sẽ bị mất
     let ownConversation = Promise.resolve(null);
     if (role === 'admin') {
       socket.join('admins');
@@ -44,7 +39,6 @@ function attachSocket(httpServer) {
       ownConversation.catch((err) => console.error('[chat]', err));
     }
 
-    // The customer always writes in their own conversation; admins pick one.
     async function conversationFor(payload) {
       if (role === 'customer') return ownConversation;
       const id = payload && payload.conversationId;

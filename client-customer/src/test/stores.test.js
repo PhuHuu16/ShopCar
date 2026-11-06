@@ -19,7 +19,7 @@ describe('cart', () => {
   test('never holds more cars than are in stock', () => {
     const { add } = useCart.getState();
     expect(add(car('a'), 2)).toBe(2);
-    expect(add(car('a'), 5)).toBe(1); // only 3 in stock
+    expect(add(car('a'), 5)).toBe(1);
     expect(add(car('a'))).toBe(0);
     expect(useCart.getState().items[0].quantity).toBe(3);
   });
@@ -28,7 +28,7 @@ describe('cart', () => {
     const { add, setQuantity } = useCart.getState();
     add(car('a'));
     add(car('b', { price: 1_000_000_000 }), 2);
-    setQuantity('b', 99); // clamped to stock
+    setQuantity('b', 99);
     const state = useCart.getState();
     expect(state.items[0].car).toEqual({
       _id: 'a', slug: 'car-a', name: 'Car a', price: 500_000_000, stock: 3, image: '/t/a.webp', brand: 'Mazda'

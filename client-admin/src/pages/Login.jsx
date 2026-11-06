@@ -8,11 +8,12 @@ import { Logo } from '../components/Layout';
 import { Button, Input } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 
-// only go back to pages of this site
+// Chỉ cho quay lại các trang trong web
 function safeRedirect(from) {
   return from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
 }
 
+// -- Đăng nhập quản trị --
 export default function Login() {
   useTitle('Đăng nhập');
   const [params] = useSearchParams();

@@ -4,13 +4,12 @@ export class ApiError extends Error {
   constructor(status, message, errors = []) {
     super(message);
     this.status = status;
-    this.errors = errors || []; // [{ field, message }] for form validation
+    this.errors = errors || [];
   }
 
-  // { name: 'Tên xe tối thiểu 2 ký tự', ... }
   fieldErrors() {
     const result = {};
-    for (const e of this.errors) result[e.field] ??= e.message; // first problem per field
+    for (const e of this.errors) result[e.field] ??= e.message;
     return result;
   }
 }
@@ -27,8 +26,7 @@ function buildUrl(path, query) {
   return url;
 }
 
-// Small fetch wrapper for the admin API: adds the token, sends JSON (or a
-// FormData upload), turns error answers into ApiError, and logs out on 401.
+// -- Gọi API quản trị --
 export async function api(path, { method = 'GET', body, query, form } = {}) {
   const token = useAuth.getState().token;
   const headers = {};
@@ -53,5 +51,4 @@ export async function api(path, { method = 'GET', body, query, form } = {}) {
   return data;
 }
 
-// Customer website address, for "view on site" links
 export const SHOP_URL = import.meta.env.DEV ? 'http://localhost:5173' : '';

@@ -1,14 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const MAX_PER_CAR = 10; // same limit as the API
+const MAX_PER_CAR = 10;
 
 function maxFor(car) {
   return Math.max(0, Math.min(car.stock ?? MAX_PER_CAR, MAX_PER_CAR));
 }
 
-// Keeps a small copy of each car for display. The server re-checks prices
-// and stock when the order is placed.
+// -- Giỏ hàng (server kiểm tra lại giá và tồn kho khi đặt) --
 function snapshot(car) {
   return {
     _id: car._id,
@@ -25,7 +24,6 @@ export const useCart = create(
   persist(
     (set, get) => ({
       items: [],
-      // returns the quantity that was actually added
       add(car, quantity = 1) {
         const items = [...get().items];
         const index = items.findIndex((i) => i.car._id === car._id);

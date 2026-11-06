@@ -57,7 +57,6 @@ test('customer message reaches the admin live, and the admin reply reaches the c
   const answer = await customerGets;
   assert.equal(answer.message.sender, 'admin');
 
-  // history over REST
   const history = await ctx.api.get('/api/customer/chat').set('Authorization', `Bearer ${customerToken}`);
   assert.equal(history.status, 200);
   assert.deepEqual(history.body.messages.map((m) => m.sender), ['customer', 'admin']);
@@ -112,7 +111,7 @@ test('the showroom can start a conversation with a customer', async () => {
   assert.equal(first.status, 200);
   assert.equal(first.body.customer.username, 'demo');
   const again = await ctx.api.post(`/api/admin/chats/with/${customer._id}`).set(auth);
-  assert.equal(again.body._id, first.body._id); // same conversation, not a second one
+  assert.equal(again.body._id, first.body._id);
   const sent = await ctx.api.post(`/api/admin/chats/${first.body._id}/messages`).set(auth).send({ text: 'Chào anh, xe đã về ạ' });
   assert.equal(sent.status, 201);
 });

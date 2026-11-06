@@ -100,7 +100,7 @@ function ChatPanel({ token, chat }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
-              // isComposing: Vietnamese input methods use Enter while composing a word
+              // Bỏ qua Enter khi bộ gõ tiếng Việt đang ghép chữ
               if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) submit(e);
             }}
             rows={1}
@@ -129,7 +129,6 @@ export function ChatWidget() {
   const chat = useChat(token, chatOpen);
   const navigate = useNavigate();
 
-  // visitors must log in first; the chat opens again after login
   useEffect(() => {
     if (chatOpen && !token) {
       closeChat();

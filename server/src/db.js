@@ -12,14 +12,13 @@ const OWNER_FILE = path.join(DB_PATH, 'shopcar-owner.json');
 
 function isAlive(pid) {
   try {
-    process.kill(pid, 0); // throws if that process is gone
+    process.kill(pid, 0);
     return true;
   } catch {
     return false;
   }
 }
 
-// mongod writes its process id into mongod.lock while it uses the data folder.
 function lockOwner() {
   try {
     const pid = Number(fs.readFileSync(path.join(DB_PATH, 'mongod.lock'), 'utf8').trim());
@@ -29,8 +28,7 @@ function lockOwner() {
   }
 }
 
-// If the app that started the running MongoDB was killed without a clean stop,
-// that MongoDB is left behind holding the folder. Stop it so we can start again.
+// Dừng MongoDB bị bỏ lại khi app trước bị tắt đột ngột
 function stopOrphan(mongodPid) {
   try {
     const { mongod, app } = JSON.parse(fs.readFileSync(OWNER_FILE, 'utf8'));
@@ -39,11 +37,11 @@ function stopOrphan(mongodPid) {
       console.log('Stopped a local MongoDB left running by a previous session.');
     }
   } catch {
-    // no owner file: not started by us, leave it alone
+    // tiến trình đã dừng sẵn
   }
 }
 
-// Starts a local MongoDB for development, with data kept in server/.data/db.
+// -- MongoDB chạy trên máy khi phát triển --
 async function startLocalMongo() {
   fs.mkdirSync(DB_PATH, { recursive: true });
   const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -66,13 +64,12 @@ async function startLocalMongo() {
         if (attempt > 3) throw err;
       }
     }
-    await sleep(1000); // the previous MongoDB may still be releasing the folder
+    await sleep(1000);
   }
 }
 
-// Connects to MONGODB_URI. In development without one, starts a local MongoDB.
+// -- Kết nối database --
 async function connect(uri = config.mongoUri) {
-  // SHOPCAR_LOCAL_MONGO is set by scripts/dev.js, which runs the local MongoDB itself
   const local = !uri || !!process.env.SHOPCAR_LOCAL_MONGO;
   if (!uri) {
     if (config.isProd) throw new Error('MONGODB_URI is required in production');
@@ -80,8 +77,7 @@ async function connect(uri = config.mongoUri) {
     uri = localServer.getUri('shopcar');
     console.log(`Local MongoDB started at ${uri} (data in server/.data/db)`);
   }
-  // On Windows the local MongoDB can be killed outright, so make every write
-  // wait for the journal; otherwise the last writes could be lost.
+  // Windows có thể tắt MongoDB đột ngột: chờ ghi xuống ổ đĩa để không mất dữ liệu
   const options = local ? { writeConcern: { w: 1, j: true } } : {};
   await mongoose.connect(uri, options);
   return uri;
@@ -95,7 +91,7 @@ async function disconnect() {
   if (localServer && mongoose.connection.readyState === 1) await flush(mongoose.connection.db);
   await mongoose.disconnect();
   if (localServer) {
-    await localServer.stop({ doCleanup: false }); // keep the dev data
+    await localServer.stop({ doCleanup: false });
     localServer = null;
   }
 }

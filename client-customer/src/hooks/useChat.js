@@ -12,10 +12,10 @@ function addMessage(data, message, conversation) {
   };
 }
 
-// Live chat with the showroom: history over REST, new messages over Socket.IO.
+// -- Chat với showroom: lịch sử qua REST, tin mới qua Socket.IO --
 export function useChat(token, isOpen) {
   const queryClient = useQueryClient();
-  const key = ['chat', token]; // per account, so a new login never sees the old chat
+  const key = ['chat', token];
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
@@ -34,7 +34,6 @@ export function useChat(token, isOpen) {
     socket.on('message:new', ({ message, conversation }) => {
       queryClient.setQueryData(key, (data) => addMessage(data, message, conversation));
     });
-    // after a reconnect, fetch anything missed while offline
     socket.io.on('reconnect', () => queryClient.invalidateQueries({ queryKey: key }));
     return () => {
       socket.close();
@@ -45,7 +44,6 @@ export function useChat(token, isOpen) {
 
   const unread = query.data?.conversation?.unreadByCustomer || 0;
 
-  // opening the panel marks the showroom's replies as read
   useEffect(() => {
     if (!isOpen || !unread || !socketRef.current) return;
     socketRef.current.emit('conversation:read', {});

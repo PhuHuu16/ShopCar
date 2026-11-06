@@ -3,7 +3,6 @@ import { formatKm, formatPriceShort, formatVnd, shortId } from '../lib/format';
 import * as labels from '../lib/labels';
 import constants from '../../../server/src/constants';
 
-// Intl puts a non-breaking space before the currency sign
 const plain = (s) => s.replace(/\s/g, ' ');
 
 describe('format', () => {
@@ -16,7 +15,7 @@ describe('format', () => {
     expect(formatPriceShort(545_000_000)).toBe('545 triệu');
     expect(formatPriceShort(1_530_000_000)).toBe('1,53 tỷ');
     expect(formatPriceShort(2_000_000_000)).toBe('2 tỷ');
-    expect(formatPriceShort(999_600_000)).toBe('1 tỷ'); // not "1.000 triệu"
+    expect(formatPriceShort(999_600_000)).toBe('1 tỷ');
   });
 
   test('km and order codes', () => {
@@ -25,7 +24,6 @@ describe('format', () => {
   });
 });
 
-// The website must have a Vietnamese name for every code the API can send
 describe('labels match the API', () => {
   test.each([
     ['FUEL', 'FUELS'],

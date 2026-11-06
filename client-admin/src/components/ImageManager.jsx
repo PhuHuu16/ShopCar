@@ -5,10 +5,9 @@ import { api } from '../lib/api';
 
 const MAX_IMAGES = 20;
 const MAX_SIZE = 10 * 1024 * 1024;
-const PER_REQUEST = 12; // the API takes at most 12 files per upload
+const PER_REQUEST = 12;
 
-// Car photos: drop or pick files (uploaded right away and converted to WebP by
-// the server), drag thumbnails to reorder, the first photo is the cover.
+// -- Ảnh xe: kéo thả để tải lên, kéo để sắp xếp, ảnh đầu tiên là ảnh bìa --
 export function ImageManager({ images, onChange, error }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(0);
@@ -64,7 +63,7 @@ export function ImageManager({ images, onChange, error }) {
     <div>
       <div
         onDragOver={(e) => {
-          if (dragIndex !== null) return; // reordering, not dropping files
+          if (dragIndex !== null) return;
           e.preventDefault();
           setDragOver(true);
         }}

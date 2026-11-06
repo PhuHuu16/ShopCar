@@ -3,7 +3,6 @@ import { BarChart3, Table2 } from 'lucide-react';
 import { formatAxisVnd, formatMonth, formatNumber, formatVnd } from '../lib/format';
 import { ORDER_STATUS } from '../lib/labels';
 
-// Rounds the axis top up to a clean number: 1 / 2 / 2.5 / 5 x 10^n per step
 function niceScale(max, steps = 4) {
   if (max <= 0) return { top: steps, step: 1 };
   const raw = max / steps;
@@ -12,8 +11,7 @@ function niceScale(max, steps = 4) {
   return { top: step * steps, step };
 }
 
-// Monthly revenue as columns. One series, so no legend: the card title names it.
-// Hover or focus a month for its exact numbers; the table view lists every value.
+// -- Biểu đồ doanh thu theo tháng --
 export function RevenueChart({ data }) {
   const [view, setView] = useState('chart');
   const [active, setActive] = useState(null);
@@ -67,7 +65,6 @@ export function RevenueChart({ data }) {
         </div>
       ) : (
         <div className="flex gap-3">
-          {/* y axis */}
           <div className="relative h-64 w-12 shrink-0 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
             {ticks.map((t) => (
               <span key={t} className="absolute right-0 -translate-y-1/2" style={{ bottom: `${(t / top) * 100}%` }}>
@@ -100,7 +97,6 @@ export function RevenueChart({ data }) {
                       onFocus={() => setActive(i)}
                       onBlur={() => setActive(null)}
                     >
-                      {/* hover band: the whole month slot is the hit target */}
                       <div className={`absolute inset-x-0.5 inset-y-0 rounded-md transition ${isActive ? 'bg-slate-100 dark:bg-slate-800/70' : ''}`} />
                       <div
                         className="relative w-full max-w-6 rounded-t-[4px] bg-brand-600 transition-[height] duration-500 dark:bg-brand-500"
@@ -128,7 +124,6 @@ export function RevenueChart({ data }) {
                 })}
               </div>
             </div>
-            {/* x axis */}
             <div className="mt-2 flex text-[11px] text-slate-500 dark:text-slate-400">
               {data.map((d, i) => (
                 <span key={d.month} className={`flex-1 text-center ${i % 2 ? 'hidden sm:block' : ''}`}>
@@ -143,7 +138,7 @@ export function RevenueChart({ data }) {
   );
 }
 
-// One bar split by order status, with a legend that carries labels and counts
+// -- Thanh trạng thái đơn hàng --
 export function StatusBar({ counts }) {
   const entries = Object.entries(ORDER_STATUS).map(([key, s]) => ({ key, ...s, count: counts[key] || 0 }));
   const total = entries.reduce((sum, e) => sum + e.count, 0);

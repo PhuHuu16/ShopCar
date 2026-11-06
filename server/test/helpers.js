@@ -1,4 +1,4 @@
-// Starts a throwaway MongoDB + the app for tests. Must be required first.
+// Phải require file này đầu tiên: tạo MongoDB tạm cho test
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -19,7 +19,7 @@ async function startTestServer() {
   const mongo = await MongoMemoryServer.create();
   await mongoose.connect(mongo.getUri('shopcar-test'));
   const originalLog = console.log;
-  console.log = () => {}; // keep seed output out of test results
+  console.log = () => {};
   try {
     await seed();
   } finally {
@@ -52,7 +52,6 @@ async function login(api, role, username, password) {
   return res.body.token;
 }
 
-// The id and token from the last email link sent to an address
 function lastEmailLink(to) {
   const mail = [...email.outbox].reverse().find((m) => m.to === to);
   if (!mail) return null;

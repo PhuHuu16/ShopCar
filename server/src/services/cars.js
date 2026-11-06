@@ -15,7 +15,7 @@ const SORTS = {
 
 const listQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),
-  brand: z.string().trim().max(100).optional(), // brand slug or id
+  brand: z.string().trim().max(100).optional(),
   fuel: z.enum(FUELS).optional(),
   transmission: z.enum(TRANSMISSIONS).optional(),
   bodyType: z.enum(BODY_TYPES).optional(),
@@ -38,7 +38,7 @@ function range(min, max) {
   return r;
 }
 
-// Shared by the public car list and the admin car table.
+// -- Tìm xe (dùng chung cho web và trang quản trị) --
 async function listCars(rawQuery) {
   const q = listQuerySchema.parse(rawQuery);
   const filter = {};
@@ -58,7 +58,7 @@ async function listCars(rawQuery) {
   const year = range(q.minYear, q.maxYear);
   if (year) filter.year = year;
   if (q.inStock === 'true') filter.stock = { $gt: 0 };
-  if (q.inStock === 'false') filter.stock = 0; // sold out (used by the admin site)
+  if (q.inStock === 'false') filter.stock = 0;
 
   const [items, total] = await Promise.all([
     Car.find(filter)
@@ -71,7 +71,6 @@ async function listCars(rawQuery) {
   return { items, total, page: q.page, pages: Math.ceil(total / q.limit) };
 }
 
-// Everything the filter sidebar needs in one request.
 async function getFilterOptions() {
   const [brands, stats] = await Promise.all([
     Brand.find().sort({ name: 1 }),

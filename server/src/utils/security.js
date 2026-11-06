@@ -18,7 +18,6 @@ function signToken(id, role) {
   return jwt.sign({ id: String(id), role }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
 }
 
-// Returns the decoded payload, or null when the token is missing, expired or forged.
 function verifyToken(token) {
   if (!token) return null;
   try {
@@ -28,8 +27,7 @@ function verifyToken(token) {
   }
 }
 
-// One-time tokens for email links. Only the sha256 hash is stored in the
-// database, so a leaked database cannot be used to activate or reset accounts.
+// Chỉ lưu mã băm của token email, lộ database cũng không dùng được
 function createEmailToken() {
   const token = crypto.randomBytes(32).toString('hex');
   return { token, hash: hashEmailToken(token) };

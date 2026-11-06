@@ -7,15 +7,13 @@ import { toast } from 'sonner';
 import { formatPriceShort, shortId } from '../lib/format';
 import { api } from '../lib/api';
 
-// One Socket.IO connection for the whole admin site.
-// `activeChat` is the conversation open on screen, so its messages count as read.
+// -- Kết nối Socket.IO cho trang quản trị --
 export const useLive = create(() => ({ socket: null, connected: false, activeChat: null }));
 
 export function setActiveChat(id) {
   useLive.setState({ activeChat: id });
 }
 
-// Puts a conversation at the top of the chat list (newest message first)
 export function upsertConversation(list, conversation) {
   if (!list) return list;
   return [conversation, ...list.filter((c) => c._id !== conversation._id)];
@@ -30,7 +28,6 @@ export function addMessage(data, message, conversation) {
   };
 }
 
-// REST rather than the socket: the page can open a chat before the socket connects
 export function markChatRead(queryClient, conversationId) {
   api(`/chats/${conversationId}/read`, { method: 'POST' }).catch(() => {});
   const clear = (c) => (c._id === conversationId ? { ...c, unreadByAdmin: 0 } : c);
@@ -86,7 +83,6 @@ export function useLiveUpdates(token) {
       });
     });
 
-    // after a reconnect, fetch anything missed while offline
     socket.io.on('reconnect', () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
       queryClient.invalidateQueries({ queryKey: ['chat'] });

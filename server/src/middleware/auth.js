@@ -8,8 +8,7 @@ function readToken(req) {
   return req.headers['x-access-token'] || header || null;
 }
 
-// Loads the account on every request, so a blocked customer or a deleted
-// account is locked out right away instead of when the token expires.
+// Kiểm tra tài khoản mỗi lần gọi để khóa ngay tài khoản bị chặn
 async function loadAccount(token, role) {
   const decoded = verifyToken(token);
   if (!decoded || decoded.role !== role) return null;

@@ -11,7 +11,6 @@ import { api } from '../lib/api';
 import { useAuth } from '../stores/auth';
 import { useUi } from '../stores/ui';
 
-// Refreshes the saved customer details once per visit (name changes, blocked account...).
 function useRefreshAccount() {
   const token = useAuth((s) => s.token);
   const setCustomer = useAuth((s) => s.setCustomer);
@@ -47,7 +46,7 @@ export function Layout() {
   );
 }
 
-// Pages that need a logged-in customer send visitors to the login page first.
+// -- Trang cần đăng nhập --
 export function RequireAuth({ children }) {
   const token = useAuth((s) => s.token);
   const location = useLocation();

@@ -34,7 +34,6 @@ describe('ApiError.fieldErrors', () => {
   });
 });
 
-// The admin site must have a Vietnamese name for every code the API can send
 describe('labels match the API', () => {
   test.each([
     ['FUEL', 'FUELS'],

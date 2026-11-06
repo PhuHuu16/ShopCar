@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* dark mode follows the "dark" class on <html> (set by the theme toggle) */
+/* -- Giao diện tối theo class "dark" trên <html> -- */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// In development the API server runs on :3000; Vite forwards these paths to it.
+// Khi phát triển, chuyển các đường dẫn này sang API ở cổng 3000
 const API = 'http://localhost:3000';
 
 export default defineConfig({

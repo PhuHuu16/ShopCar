@@ -1,6 +1,4 @@
-// Fills the database with demo data.
-//   npm run seed   -> wipes the database and adds fresh demo data
-// The dev server also runs seed() by itself the first time (empty database).
+// -- Tạo dữ liệu mẫu (npm run seed: xóa sạch rồi tạo lại) --
 const fs = require('fs/promises');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -13,7 +11,6 @@ const { carSvg } = require('./car-art');
 
 const DEMO_PASSWORD = config.demoPassword;
 
-// Small fixed-seed random generator, so every seed gives the same demo data.
 function random(seed) {
   return () => {
     seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
@@ -65,7 +62,6 @@ async function seed({ reset = false } = {}) {
     data.images = await writeCarImages({ ...data, brand: brandName }, brand.color);
     data.description = describe(data);
     data.brand = brand.doc._id;
-    // spread "added" dates so "newest" sorting looks natural
     const createdAt = new Date(now - (CARS.length - i) * 3 * 86400000);
     cars.push(await Car.create({ ...data, createdAt, updatedAt: createdAt }));
   }
@@ -76,12 +72,10 @@ async function seed({ reset = false } = {}) {
     customers.push(await Customer.create({ ...c, password: passwordHash, emailVerified: true }));
   }
 
-  // ~30 orders over the last 12 months so the dashboard charts have data
   const sold = new Map();
   for (let i = 0; i < 30; i++) {
     const customer = customers[Math.floor(rand() * customers.length)];
     const car = cars[Math.floor(rand() * cars.length)];
-    // the first 4 are recent orders still waiting for the showroom to confirm
     const recent = i < 4;
     const days = recent ? Math.floor(rand() * 5) : 5 + Math.floor(rand() * 355);
     const createdAt = new Date(now - days * 86400000 - Math.floor(rand() * 86400000));
@@ -95,7 +89,6 @@ async function seed({ reset = false } = {}) {
       createdAt,
       updatedAt: createdAt
     };
-    // every third order (not cancelled) was secured with an online deposit
     if (i % 3 === 0 && status !== 'CANCELED') {
       order._id = new mongoose.Types.ObjectId();
       order.payment = {
@@ -119,7 +112,6 @@ async function seed({ reset = false } = {}) {
   }
   for (const [id, count] of sold) await Car.updateOne({ _id: id }, { sold: count });
 
-  // a short chat so the chat screens are not empty
   const demo = customers[0];
   const interested = cars.find((c) => c.slug.startsWith('mazda-cx-5')) || cars[0];
   const conversation = await Conversation.create({ customer: demo._id });
@@ -140,13 +132,11 @@ async function seed({ reset = false } = {}) {
   });
 
   console.log(`Demo data ready: ${cars.length} cars, ${customers.length} customers, 30 orders.`);
-  // passwords are not printed: they live in .env (or are the documented dev defaults)
   console.log(`  admin login: ${config.admin.username}, customer login: demo`);
 }
 
 module.exports = { seed };
 
-// npm run seed
 if (require.main === module) {
   const db = require('../src/db');
   db.connect()

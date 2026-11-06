@@ -1,5 +1,4 @@
-// Vietnamese wording for Zod's built-in errors. Schemas that pass their own
-// message (e.g. min(2, 'Tên xe tối thiểu 2 ký tự')) keep that message.
+// -- Thông báo lỗi kiểm tra dữ liệu bằng tiếng Việt --
 const { z } = require('zod');
 
 z.setErrorMap((issue, ctx) => {
