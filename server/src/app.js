@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const config = require('./config');
 const { apiNotFound, errorHandler } = require('./middleware/errors');
+const { serveImage } = require('./utils/images');
 
 // Production: phục vụ web khách hàng ở / và trang quản trị ở /admin
 function findBuild(folder) {
@@ -34,8 +35,8 @@ function createApp() {
   api.use(apiNotFound);
   app.use('/api', api);
 
-  // -- Ảnh xe đã tải lên --
-  app.use('/uploads', express.static(config.uploadDir, { maxAge: '30d', immutable: true, fallthrough: false }));
+  // -- Ảnh xe (lưu trong MongoDB) --
+  app.get('/uploads/*path', serveImage);
 
   // -- Hai web đã build --
   const adminBuild = findBuild('client-admin');

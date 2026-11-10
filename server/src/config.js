@@ -23,13 +23,13 @@ const config = {
   mongoDbName: process.env.MONGODB_DB || 'shopcar',
   jwtSecret: process.env.JWT_SECRET || (isProd ? '' : 'dev-only-secret-change-me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
-  clientUrl: (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, ''),
+  // Trên Render dùng luôn địa chỉ công khai của dịch vụ
+  clientUrl: (process.env.CLIENT_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5173').replace(/\/$/, ''),
   email: {
     // Không có thì email được in ra console
     user: isTest ? '' : process.env.EMAIL_USER || '',
     pass: isTest ? '' : process.env.EMAIL_PASS || ''
   },
-  uploadDir: path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')),
   dataDir: path.resolve(__dirname, '../.data'),
   payment: {
     depositPerCar: Number(process.env.DEPOSIT_PER_CAR) || 10_000_000,

@@ -1,8 +1,6 @@
 const { startTestServer, login, lastEmailLink } = require('./helpers');
 const { describe, test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
 const sharp = require('sharp');
 const { Car, Customer } = require('../src/models');
 
@@ -220,18 +218,26 @@ describe('orders and stock', () => {
 });
 
 describe('admin car management', () => {
-  test('upload photos -> create car -> replace a photo -> delete car removes files', async () => {
+  test('upload photos -> create car -> replace a photo -> delete car removes photos', async () => {
     const png = await sharp({ create: { width: 2400, height: 1600, channels: 3, background: '#c00' } }).png().toBuffer();
     const upload = await asAdmin(api.post('/api/admin/uploads'))
       .attach('images', png, { filename: 'a.png', contentType: 'image/png' })
       .attach('images', png, { filename: 'b.png', contentType: 'image/png' });
     assert.equal(upload.status, 201);
     assert.equal(upload.body.length, 2);
-    const fileOf = (url) => path.join(process.env.UPLOAD_DIR, url.replace('/uploads/', ''));
+    const fetchImage = (url) => api.get(url).buffer(true).parse((res, done) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c)).on('end', () => done(null, Buffer.concat(chunks)));
+    });
     for (const img of upload.body) {
-      assert.ok(fs.existsSync(fileOf(img.url)) && fs.existsSync(fileOf(img.thumbUrl)));
+      assert.equal((await fetchImage(img.url)).status, 200);
+      assert.equal((await fetchImage(img.thumbUrl)).status, 200);
     }
-    const big = await sharp(fileOf(upload.body[0].url)).metadata();
+    const first = await fetchImage(upload.body[0].url);
+    assert.equal(first.headers['content-type'], 'image/webp');
+    assert.match(first.headers['cache-control'], /immutable/);
+    assert.equal((await api.get(upload.body[0].url).set('If-None-Match', first.headers.etag)).status, 304);
+    const big = await sharp(first.body).metadata();
     assert.equal(big.format, 'webp');
     assert.equal(big.width, 1600, 'large photos are resized');
 
@@ -246,11 +252,21 @@ describe('admin car management', () => {
 
     const updated = await asAdmin(api.put(`/api/admin/cars/${created.body._id}`)).send({ ...body, images: [upload.body[1]] });
     assert.equal(updated.status, 200);
-    assert.ok(!fs.existsSync(fileOf(upload.body[0].url)), 'removed photo file is deleted');
+    assert.equal((await fetchImage(upload.body[0].url)).status, 404, 'removed photo is deleted');
 
     const del = await asAdmin(api.delete(`/api/admin/cars/${created.body._id}`));
     assert.equal(del.status, 200);
-    assert.ok(!fs.existsSync(fileOf(upload.body[1].url)));
+    assert.equal((await fetchImage(upload.body[1].url)).status, 404);
+    assert.equal((await fetchImage(upload.body[1].thumbUrl)).status, 404);
+  });
+
+  test('seeded car photos are served from the database', async () => {
+    const featured = await api.get('/api/cars/featured');
+    const photo = featured.body.newest.find((c) => c.images[0]?.url.endsWith('.svg')).images[0].url;
+    const res = await api.get(photo);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers['content-type'], 'image/svg+xml');
+    assert.equal((await api.get('/uploads/cars/missing.webp')).status, 404);
   });
 
   test('rejects files that are not images', async () => {

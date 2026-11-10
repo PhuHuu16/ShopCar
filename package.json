@@ -13,7 +13,8 @@
     "test:web": "npm test --prefix client-customer && npm test --prefix client-admin",
     "check": "npm run lint && npm test && npm run build",
     "seed": "npm run seed --prefix server",
-    "db:check": "npm run db:check --prefix server"
+    "db:check": "npm run db:check --prefix server",
+    "images:upload": "npm run images:upload --prefix server"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

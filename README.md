@@ -71,7 +71,7 @@ flowchart LR
   C <-- Socket.IO --> A
   M <-- Socket.IO --> A
   A[Express API] --> D[(MongoDB)]
-  A --> U["/uploads<br/>Ảnh WebP"]
+  A -->|"ảnh /uploads (GridFS)"| D
   A -- chuyển hướng có chữ ký --> V[VNPay]
   V -- IPN + trang kết quả --> A
 ```
@@ -83,8 +83,9 @@ Một số điểm kỹ thuật đáng chú ý:
 - **Server là nguồn dữ liệu chuẩn.** Giá và tổng tiền được tính lại từ cơ sở dữ liệu khi đặt hàng.
   Kho được trừ bằng lệnh cập nhật có điều kiện (`stock >= quantity`), nên hai quản trị viên xác nhận
   đơn cùng lúc cũng không thể bán vượt số xe còn lại (`server/src/services/orders.js`).
-- **Ảnh.** Ảnh tải lên được thu nhỏ và chuyển sang WebP, kèm một ảnh nhỏ riêng cho danh sách, và được
-  trình duyệt lưu cache lâu dài. Phiên bản gốc năm 2024 lưu ảnh dạng base64 ngay trong MongoDB.
+- **Ảnh.** Ảnh tải lên được thu nhỏ và chuyển sang WebP, kèm một ảnh nhỏ riêng cho danh sách, lưu trong
+  MongoDB GridFS (nên không mất khi máy chủ khởi động lại) và phục vụ qua `/uploads/...` với cache lâu dài
+  và ETag. Phiên bản gốc năm 2024 lưu ảnh dạng base64 lẫn trong dữ liệu xe.
 - **Thời gian thực.** Kết nối Socket.IO được xác thực bằng cùng JWT với REST API và được chia phòng
   (mỗi cuộc trò chuyện một phòng, một phòng chung cho tất cả quản trị viên).
 - **Thanh toán.** Yêu cầu gửi đi và kết quả VNPay trả về đều được ký bằng HMAC-SHA512 và so khớp bằng
@@ -115,6 +116,7 @@ npm test        # test API, rồi test hai web
 npm run lint    # ESLint cho API và hai web
 npm run seed    # tạo lại dữ liệu mẫu (tắt npm run dev trước)
 npm run db:check  # kiểm tra kết nối database
+npm run images:upload  # chép ảnh cũ trong server/uploads vào database (chỉ cần một lần)
 npm run build   # build hai web (client-*/dist)
 npm start       # server production: API + web ở / + quản trị ở /admin, chung một cổng
 ```
@@ -122,11 +124,25 @@ npm start       # server production: API + web ở / + quản trị ở /admin, 
 Cấu hình nằm trong `server/.env` (sao chép từ `server/.env.example`). Xem [server/README.md](server/README.md)
 để biết danh sách API và cách kết nối tài khoản VNPay sandbox thật.
 
+## Triển khai lên Render
+
+File `render.yaml` mô tả sẵn một dịch vụ web (gói miễn phí): build hai web rồi chạy server, phục vụ
+mọi thứ trên cùng một địa chỉ. Ảnh nằm trong MongoDB nên không cần ổ đĩa riêng.
+
+1. **MongoDB Atlas:** vào Network Access, thêm `0.0.0.0/0` (Render không có IP cố định).
+2. **Render:** New > Blueprint, chọn repo này. Render đọc `render.yaml` và hỏi các biến còn thiếu:
+   `MONGODB_URI`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` (ít nhất 8 ký tự); `EMAIL_*`, `VNPAY_*` có thể để trống.
+   `JWT_SECRET` được Render tự tạo.
+3. Link trong email và trang kết quả thanh toán tự dùng địa chỉ công khai của dịch vụ
+   (`RENDER_EXTERNAL_URL`); đặt `CLIENT_URL` nếu dùng tên miền riêng.
+
+Gói miễn phí tự tạm dừng khi không có truy cập, lần mở đầu tiên sau đó mất khoảng một phút.
+
 ## Kiểm thử
 
 | Bộ test | Công cụ | Nội dung |
 |---|---|---|
-| `server/test` (42) | node:test, supertest, MongoDB trong bộ nhớ | tài khoản và kích hoạt, phân quyền, bộ lọc xe, đơn hàng và tồn kho, quản lý xe và tải ảnh, chat qua Socket.IO, chữ ký VNPay và luồng đặt cọc |
+| `server/test` (48) | node:test, supertest, MongoDB trong bộ nhớ | tài khoản và kích hoạt, phân quyền, bộ lọc xe, đơn hàng và tồn kho, quản lý xe và tải ảnh, chat qua Socket.IO, chữ ký VNPay và luồng đặt cọc |
 | `client-customer/src/test` (18) | Vitest | tính trả góp, giỏ hàng và so sánh xe, định dạng giá, tên tiếng Việt cho mọi mã từ API |
 | `client-admin/src/test` (11) | Vitest | định dạng số liệu biểu đồ và giá, hiển thị lỗi form, tên tiếng Việt cho mọi mã từ API |
 

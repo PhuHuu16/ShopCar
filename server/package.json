@@ -7,7 +7,8 @@
     "start": "node index.js",
     "seed": "node scripts/seed.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
-    "db:check": "node scripts/db-check.js"
+    "db:check": "node scripts/db-check.js",
+    "images:upload": "node scripts/upload-images.js"
   },
   "keywords": [],
   "author": "",

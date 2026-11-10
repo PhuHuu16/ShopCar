@@ -1,10 +1,5 @@
 // Phải require file này đầu tiên: tạo MongoDB tạm cho test
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-
 process.env.NODE_ENV = 'test';
-process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'shopcar-test-uploads-'));
 
 const http = require('http');
 const mongoose = require('mongoose');
@@ -41,7 +36,6 @@ async function startTestServer() {
       await new Promise((resolve) => server.close(resolve));
       await mongoose.disconnect();
       await mongo.stop();
-      fs.rmSync(process.env.UPLOAD_DIR, { recursive: true, force: true });
     }
   };
 }

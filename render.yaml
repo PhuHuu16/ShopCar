@@ -1,0 +1,36 @@
+# Render Blueprint: một dịch vụ Node phục vụ API, web khách hàng (/) và trang quản trị (/admin)
+services:
+  - type: web
+    name: shopcar
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: >-
+      npm ci --include=dev --prefix client-customer &&
+      npm ci --include=dev --prefix client-admin &&
+      npm run build &&
+      npm ci --omit=dev --prefix server
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      # Các giá trị dưới đây nhập trên Render khi tạo dịch vụ
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: VNPAY_TMN_CODE
+        sync: false
+      - key: VNPAY_HASH_SECRET
+        sync: false

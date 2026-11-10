@@ -1,6 +1,4 @@
 // -- Tạo dữ liệu mẫu (npm run seed: xóa sạch rồi tạo lại) --
-const fs = require('fs/promises');
-const path = require('path');
 const mongoose = require('mongoose');
 const config = require('../src/config');
 const { Admin, Customer, Brand, Car, Order, Conversation, Message } = require('../src/models');
@@ -8,6 +6,7 @@ const { hashPassword } = require('../src/utils/security');
 const { slugify } = require('../src/utils/slug');
 const { BRANDS, CARS, CUSTOMERS, describe } = require('./seed-data');
 const { carSvg } = require('./car-art');
+const { putImage } = require('../src/utils/images');
 
 const DEMO_PASSWORD = config.demoPassword;
 
@@ -21,13 +20,9 @@ function random(seed) {
 }
 
 async function writeCarImages(car, brandColor) {
-  const dir = path.join(config.uploadDir, 'cars', 'seed');
-  await fs.mkdir(dir, { recursive: true });
   const images = [];
   for (let v = 0; v < 3; v++) {
-    const file = `${car.slug}-${v + 1}.svg`;
-    await fs.writeFile(path.join(dir, file), carSvg({ ...car, brandColor }, v));
-    const url = `/uploads/cars/seed/${file}`;
+    const url = await putImage(`cars/seed/${car.slug}-${v + 1}.svg`, Buffer.from(carSvg({ ...car, brandColor }, v)));
     images.push({ url, thumbUrl: url });
   }
   return images;
@@ -40,7 +35,6 @@ async function seed({ reset = false } = {}) {
     for (const { name } of collections) {
       if (!name.startsWith('system.')) await mongoose.connection.db.dropCollection(name);
     }
-    await fs.rm(path.join(config.uploadDir, 'cars', 'seed'), { recursive: true, force: true });
   }
   await Promise.all([Admin, Customer, Brand, Car, Order, Conversation, Message].map((M) => M.init()));
   const rand = random(2024);

@@ -54,7 +54,7 @@ Tiền cọc là `DEPOSIT_PER_CAR` (mặc định 10.000.000 đ) cho mỗi xe, k
 
 ```
 index.js              khởi động: cơ sở dữ liệu, dữ liệu mẫu, server HTTP + Socket.IO
-src/app.js            ứng dụng Express: API, ảnh đã tải lên, hai web đã build (/ và /admin)
+src/app.js            ứng dụng Express: API, ảnh (/uploads), hai web đã build (/ và /admin)
 src/config.js         cấu hình từ biến môi trường
 src/constants.js      các mã dùng chung (nhiên liệu, trạng thái đơn, trạng thái thanh toán...)
 src/db.js             kết nối MongoDB, tự khởi động MongoDB trên máy khi phát triển
@@ -63,9 +63,10 @@ src/routes/           public.js, customer.js, admin.js, payment.js
 src/services/         tìm xe, đơn hàng + tồn kho, chat, thanh toán
 src/socket.js         chat thời gian thực
 src/middleware/       xác thực (JWT + vai trò), xử lý lỗi, tải ảnh lên
-src/utils/            mật khẩu/token, email, ảnh, slug, chữ ký VNPay, thông báo lỗi tiếng Việt
+src/utils/            mật khẩu/token, email, ảnh (GridFS), slug, chữ ký VNPay, thông báo lỗi tiếng Việt
 scripts/dev.js        npm run dev: một MongoDB trên máy + API tự khởi động lại
 scripts/seed.js       dữ liệu mẫu (xe được tạo ảnh minh họa)
+scripts/upload-images.js  chép ảnh cũ từ server/uploads vào database
 test/                 node:test + supertest + socket.io-client
 ```
 
@@ -110,7 +111,7 @@ Các yêu cầu cần đăng nhập gửi kèm header `Authorization: Bearer <to
 | GET | `/stats` | số liệu tổng, doanh thu theo tháng (12 tháng), xe bán chạy, xe sắp hết, tiền cọc (đã nhận / cần hoàn) |
 | GET/POST/PUT/DELETE | `/brands` | không xóa được hãng vẫn còn xe |
 | POST | `/uploads` | multipart `images` (tối đa 12 ảnh) → `[{ url, thumbUrl }]`, chuyển sang WebP |
-| GET/POST/PUT/DELETE | `/cars` | ảnh bị gỡ khỏi xe sẽ bị xóa khỏi ổ đĩa |
+| GET/POST/PUT/DELETE | `/cars` | ảnh bị gỡ khỏi xe sẽ bị xóa khỏi database |
 | GET | `/orders` | `status, customer, payment (none, pending, paid, failed), q (tên, số điện thoại, email hoặc mã đơn), page, limit` |
 | PATCH | `/orders/:id/status` | `APPROVED` trừ kho, hủy đơn đã xác nhận thì trả lại kho |
 | GET | `/customers` | `q, page, limit`; mỗi khách có `orderCount` và `totalSpent` |
