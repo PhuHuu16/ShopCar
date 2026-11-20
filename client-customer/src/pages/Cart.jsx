@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CreditCard, Lock, Minus, Plus, ShoppingCart, Store, Trash2 } from 'lucide-react';
+import { CreditCard, Lock, LogIn, Minus, Plus, ShoppingCart, Store, Trash2, TriangleAlert } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatPriceShort, formatVnd } from '../lib/format';
-import { Button, ButtonLink, EmptyState, PageHeader } from '../components/ui';
+import { Button, ButtonLink, EmptyState, Input, PageHeader } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 import { useAuth } from '../stores/auth';
 import { useCart, cartTotal } from '../stores/cart';
+import { useGuestOrders } from '../stores/guestOrders';
 
 function PaymentOption({ checked, onChange, icon: Icon, title, text, badge }) {
   return (
@@ -38,33 +39,53 @@ export default function Cart() {
   const [note, setNote] = useState('');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const guest = useGuestOrders();
+  const [info, setInfo] = useState(guest.info);
+  const [errors, setErrors] = useState({});
+  const soldOut = items.filter((i) => i.car.stock === 0);
 
   const [payment, setPayment] = useState('showroom');
   const paymentConfig = useQuery({ queryKey: ['payment-config'], queryFn: () => api('/payment/config'), staleTime: Infinity });
   const carCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const holdHours = paymentConfig.data?.holdHours || 24;
   const deposit = paymentConfig.data ? Math.min(total, carCount * paymentConfig.data.depositPerCar) : 0;
 
   const checkout = useMutation({
-    mutationFn: () => api('/customer/orders', {
-      method: 'POST',
-      body: {
+    mutationFn: () => {
+      const body = {
         items: items.map((i) => ({ car: i.car._id, quantity: i.quantity })),
         note: note.trim() || undefined,
         payment
-      }
-    }),
+      };
+      if (token) return api('/customer/orders', { method: 'POST', body });
+      return api('/orders', { method: 'POST', body: { ...body, customerInfo: info } });
+    },
     onSuccess: (order) => {
       clear();
+      setErrors({});
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      if (order.trackToken) {
+        guest.add(order._id, order.trackToken);
+        guest.setInfo(info);
+      }
       if (order.payUrl) {
         toast.success('Đã tạo đơn hàng, đang chuyển sang trang thanh toán...');
         window.location.assign(order.payUrl);
         return;
       }
       toast.success('Đặt hàng thành công! Showroom sẽ liên hệ xác nhận với bạn sớm.');
-      navigate('/orders');
+      navigate(order.trackToken ? `/orders/track/${order._id}?token=${order.trackToken}` : '/orders');
     },
-    onError: (err) => toast.error(err.message)
+    onError: (err) => {
+      const fields = err.fieldErrors?.() || {};
+      setErrors(Object.fromEntries(Object.entries(fields).map(([k, v]) => [k.replace('customerInfo.', ''), v])));
+      toast.error(err.message);
+    }
+  });
+  const bind = (field) => ({
+    value: info[field] || '',
+    onChange: (e) => setInfo({ ...info, [field]: e.target.value }),
+    error: errors[field]
   });
 
   if (items.length === 0) {
@@ -94,6 +115,11 @@ export default function Cart() {
                     <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">{car.brand}</p>
                     <Link to={`/cars/${car.slug}`} className="block truncate font-semibold hover:text-brand-600">{car.name}</Link>
                     <p className="mt-0.5 text-sm text-slate-500">{formatVnd(car.price)}</p>
+                    {car.stock === 0 && (
+                      <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-red-600">
+                        <TriangleAlert className="size-4" /> Vừa hết hàng, hãy bỏ khỏi giỏ
+                      </p>
+                    )}
                   </div>
                   <button onClick={() => remove(car._id)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10" aria-label="Xóa khỏi giỏ">
                     <Trash2 className="size-5" />
@@ -143,33 +169,56 @@ export default function Cart() {
                 onChange={() => setPayment('showroom')}
                 icon={Store}
                 title="Thanh toán tại showroom"
-                text="Không cần trả trước. Showroom gọi xác nhận rồi bạn thanh toán khi nhận xe."
+                text={`Không cần trả trước. Xe được giữ ${holdHours} giờ; showroom gọi xác nhận rồi bạn thanh toán khi nhận xe.`}
               />
               <PaymentOption
                 checked={payment === 'vnpay'}
                 onChange={() => setPayment('vnpay')}
                 icon={CreditCard}
                 title={<>Đặt cọc online {deposit > 0 && <span className="text-brand-600">{formatVnd(deposit)}</span>}</>}
-                text={`Qua VNPay (thẻ ATM, Visa, QR) để giữ xe ngay. Cọc ${paymentConfig.data ? formatPriceShort(paymentConfig.data.depositPerCar) : '...'} mỗi xe, trừ vào tiền xe.`}
+                text={`Qua VNPay (thẻ ATM, Visa, QR) để giữ xe đến khi nhận, không giới hạn ${holdHours} giờ. Cọc ${paymentConfig.data ? formatPriceShort(paymentConfig.data.depositPerCar) : '...'} mỗi xe, trừ vào tiền xe.`}
                 badge={paymentConfig.data?.provider === 'demo' ? 'Demo' : undefined}
               />
             </div>
           </fieldset>
 
           {token ? (
-            <>
-              <p className="mt-4 text-sm text-slate-500">Đặt hàng với tên <b className="text-slate-700 dark:text-slate-200">{customer?.name}</b> · {customer?.phone}</p>
-              <Button size="lg" className="mt-4 w-full" loading={checkout.isPending} onClick={() => checkout.mutate()}>
-                {payment === 'vnpay' ? <><Lock className="size-4" /> Đặt hàng và thanh toán cọc</> : 'Đặt hàng'}
-              </Button>
-            </>
+            <p className="mt-4 text-sm text-slate-500">Đặt hàng với tên <b className="text-slate-700 dark:text-slate-200">{customer?.name}</b> · {customer?.phone}</p>
           ) : (
-            <ButtonLink size="lg" className="mt-6 w-full" to="/login?from=/cart">Đăng nhập để đặt hàng</ButtonLink>
+            <fieldset className="mt-6 space-y-3">
+              <legend className="label">Thông tin liên hệ để đặt xe</legend>
+              <p className="-mt-1 text-xs text-slate-500">Không cần tài khoản. Showroom gọi số này để xác nhận, link theo dõi đơn gửi qua email.</p>
+              <Input placeholder="Họ tên" aria-label="Họ tên" autoComplete="name" maxLength={80} {...bind('name')} />
+              <Input placeholder="Số điện thoại" aria-label="Số điện thoại" type="tel" autoComplete="tel" maxLength={15} {...bind('phone')} />
+              <Input placeholder="Email" aria-label="Email" type="email" autoComplete="email" {...bind('email')} />
+            </fieldset>
+          )}
+          <Button
+            size="lg"
+            className="mt-4 w-full"
+            loading={checkout.isPending}
+            disabled={soldOut.length > 0}
+            onClick={() => checkout.mutate()}
+          >
+            {payment === 'vnpay' ? <><Lock className="size-4" /> Đặt hàng và thanh toán cọc</> : 'Đặt hàng'}
+          </Button>
+          {!token && (
+            <>
+              <div className="my-4 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-slate-400">
+                <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" /> hoặc <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+              </div>
+              <ButtonLink to="/login?from=/cart" variant="outline" size="lg" className="w-full">
+                <LogIn className="size-4" /> Tiếp tục với đăng nhập
+              </ButtonLink>
+              <p className="mt-2 text-center text-xs text-slate-500">
+                Chưa có tài khoản? <Link to="/signup" className="font-semibold text-brand-600 hover:underline">Đăng ký</Link> để xem lại mọi đơn và chat với tư vấn viên
+              </p>
+            </>
           )}
           <p className="mt-3 text-center text-xs text-slate-500">
             {payment === 'vnpay'
               ? 'Bạn sẽ được chuyển sang cổng thanh toán an toàn. Cọc được hoàn nếu showroom không giao được xe.'
-              : 'Bạn chưa phải thanh toán ngay. Showroom sẽ gọi xác nhận đơn.'}
+              : `Bạn chưa phải thanh toán ngay. Xe được giữ ${holdHours} giờ, đặt cọc trong thời gian này để giữ xe đến khi nhận.`}
           </p>
         </aside>
       </div>

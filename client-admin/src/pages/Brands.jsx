@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Pencil, Plus, Tags, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
+import { useCan } from '../hooks/useCan';
 import { useTitle } from '../hooks/useTitle';
 import { confirm } from '../components/confirm';
 import { Button, EmptyState, ErrorBox, Input, Modal, PageHeader, Spinner, Table, td, th } from '../components/ui';
@@ -55,6 +56,7 @@ export default function Brands() {
   useTitle('Hãng xe');
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(null);
+  const canManage = useCan('brands.manage');
   const { data, error, isLoading, refetch } = useQuery({ queryKey: ['brands'], queryFn: () => api('/brands') });
 
   const remove = useMutation({
@@ -74,16 +76,18 @@ export default function Brands() {
   return (
     <>
       <PageHeader title="Hãng xe" description="Các hãng xe hiển thị trong bộ lọc của cửa hàng." />
-      <div className="card mb-4 p-4">
-        <BrandForm />
-      </div>
+      {canManage && (
+        <div className="card mb-4 p-4">
+          <BrandForm />
+        </div>
+      )}
       <div className="card overflow-hidden">
         {isLoading ? (
           <Spinner />
         ) : error ? (
           <div className="p-4"><ErrorBox error={error} onRetry={refetch} /></div>
         ) : data.length === 0 ? (
-          <EmptyState icon={Tags} title="Chưa có hãng xe nào">Thêm hãng xe đầu tiên ở ô phía trên.</EmptyState>
+          <EmptyState icon={Tags} title="Chưa có hãng xe nào">{canManage && 'Thêm hãng xe đầu tiên ở ô phía trên.'}</EmptyState>
         ) : (
           <Table>
             <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
@@ -92,7 +96,7 @@ export default function Brands() {
                 <th className={th}>Đường dẫn</th>
                 <th className={`${th} text-right`}>Số mẫu xe</th>
                 <th className={th}>Ngày thêm</th>
-                <th className={`${th} text-right`}>Thao tác</th>
+                {canManage && <th className={`${th} text-right`}>Thao tác</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -110,7 +114,7 @@ export default function Brands() {
                     )}
                   </td>
                   <td className={`${td} text-slate-500`}>{formatDate(brand.createdAt)}</td>
-                  <td className={`${td} text-right`}>
+                  {canManage && <td className={`${td} text-right`}>
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" onClick={() => setEditing(brand)} aria-label={`Sửa ${brand.name}`} title="Đổi tên">
                         <Pencil className="size-4" />
@@ -126,7 +130,7 @@ export default function Brands() {
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
-                  </td>
+                  </td>}
                 </tr>
               ))}
             </tbody>

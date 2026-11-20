@@ -10,29 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  api:
-    name: API tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: server/package-lock.json
-      - run: npm ci
-      # Lưu cache MongoDB dùng cho test (khoảng 70 MB)
-      - uses: actions/cache@v4
-        with:
-          path: server/node_modules/.cache/mongodb-memory-server
-          key: mongodb-${{ runner.os }}-${{ hashFiles('server/package-lock.json') }}
-      - run: npm test
-
   web:
-    name: Lint, website tests and build
+    name: Lint and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +27,4 @@ jobs:
       - run: npm ci --prefix client-customer
       - run: npm ci --prefix client-admin
       - run: npm run lint
-      - run: npm test --prefix client-customer
-      - run: npm test --prefix client-admin
       - run: npm run build

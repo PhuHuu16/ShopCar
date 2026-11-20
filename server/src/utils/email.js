@@ -70,8 +70,28 @@ function sendPasswordReset(customer, token) {
   });
 }
 
+function sendOrderConfirmation(order, link) {
+  const info = order.customerInfo || {};
+  if (!info.email) return Promise.resolve(false);
+  const code = `#${String(order._id).slice(-6).toUpperCase()}`;
+  const rows = order.items
+    .map((i) => `<li>${escapeHtml(i.name)} × ${i.quantity}</li>`)
+    .join('');
+  return send({
+    to: info.email,
+    subject: `ShopCar đã nhận đơn ${code}`,
+    text: `Chào ${info.name}, ShopCar đã nhận đơn ${code}. Theo dõi đơn tại: ${link}`,
+    html: layout(`Đã nhận đơn hàng ${code}`, `<p>Chào <b>${escapeHtml(info.name)}</b>,</p>
+      <p>Showroom đã nhận đơn của bạn và sẽ gọi số <b>${escapeHtml(info.phone)}</b> để xác nhận.</p>
+      ${order.holdUntil ? `<p>Xe được giữ cho bạn đến <b>${escapeHtml(order.holdUntil.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }))}</b>. Đặt cọc trước thời điểm này để tiếp tục giữ xe, nếu không đơn sẽ tự hủy.</p>` : ''}
+      <ul>${rows}</ul>
+      <p>Tổng tiền: <b>${order.total.toLocaleString('vi-VN')} ₫</b></p>${button(link, 'Theo dõi đơn hàng')}`),
+    link
+  });
+}
+
 function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-module.exports = { sendActivation, sendPasswordReset, outbox };
+module.exports = { sendActivation, sendPasswordReset, sendOrderConfirmation, outbox };

@@ -30,7 +30,6 @@ async function writeCarImages(car, brandColor) {
 
 async function seed({ reset = false } = {}) {
   if (reset) {
-    // Xóa từng collection: tài khoản Atlas chỉ có quyền đọc/ghi không được xóa cả database
     const collections = await mongoose.connection.db.listCollections({}, { nameOnly: true }).toArray();
     for (const { name } of collections) {
       if (!name.startsWith('system.')) await mongoose.connection.db.dropCollection(name);
@@ -42,7 +41,9 @@ async function seed({ reset = false } = {}) {
   await Admin.create({
     username: config.admin.username,
     password: await hashPassword(config.admin.password),
-    name: 'Quản trị viên'
+    name: 'Quản trị viên',
+    role: 'admin',
+    isOwner: true
   });
 
   const brandDocs = new Map();
@@ -84,6 +85,7 @@ async function seed({ reset = false } = {}) {
       items: [{ car: car._id, name: car.name, price: car.price, image: car.images[0].thumbUrl, quantity: 1 }],
       total: car.price,
       status,
+      stockHeld: status !== 'CANCELED',
       createdAt,
       updatedAt: createdAt
     };
@@ -133,11 +135,56 @@ async function seed({ reset = false } = {}) {
   console.log(`  admin login: ${config.admin.username}, customer login: demo`);
 }
 
-module.exports = { seed };
+// -- Chặn xóa nhầm database thật --
+function checkSeedTarget({ uri, isProd, argv }) {
+  if (isProd) {
+    return { ok: false, message: 'Không chạy npm run seed khi NODE_ENV=production: lệnh này xóa toàn bộ dữ liệu.' };
+  }
+  if (!uri) return { ok: true, confirm: false };
+  const { describeUri } = require('../src/db');
+  const host = describeUri(uri);
+  if (!argv.includes('--remote')) {
+    return {
+      ok: false,
+      message: `MONGODB_URI đang trỏ tới ${host}. npm run seed sẽ XÓA TOÀN BỘ dữ liệu ở đó (xe, đơn hàng, khách hàng, tin nhắn).\n` +
+        'Đã dừng, không có gì bị xóa. Muốn dùng dữ liệu mẫu khi dev: để trống MONGODB_URI.\n' +
+        'Nếu thật sự muốn xóa database này: cd server && npm run seed -- --remote'
+    };
+  }
+  return { ok: true, confirm: true, host };
+}
+
+function databaseName(uri) {
+  try {
+    return decodeURIComponent(new URL(uri).pathname.slice(1)) || config.mongoDbName;
+  } catch {
+    return config.mongoDbName;
+  }
+}
+
+async function confirmRemote(host, name) {
+  if (!process.stdin.isTTY) throw new Error('Cần xác nhận bằng bàn phím để xóa database ngoài máy dev. Đã dừng, không có gì bị xóa.');
+  const readline = require('readline/promises');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const answer = await rl.question(`⚠ Sẽ XÓA TOÀN BỘ database "${name}" trên ${host}. Gõ lại tên database để tiếp tục: `);
+    if (answer.trim() !== name) throw new Error('Tên không khớp. Đã dừng, không có gì bị xóa.');
+  } finally {
+    rl.close();
+  }
+}
+
+module.exports = { seed, checkSeedTarget };
 
 if (require.main === module) {
   const db = require('../src/db');
-  db.connect()
+  const target = checkSeedTarget({ uri: config.mongoUri, isProd: config.isProd, argv: process.argv.slice(2) });
+  if (!target.ok) {
+    console.error(target.message);
+    process.exit(1);
+  }
+  (target.confirm ? confirmRemote(target.host, databaseName(config.mongoUri)) : Promise.resolve())
+    .then(() => db.connect())
     .then(() => seed({ reset: true }))
     .then(() => db.disconnect())
     .catch(async (err) => {

@@ -9,6 +9,7 @@ import { Button, ButtonLink } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 import { useAuth } from '../stores/auth';
 import { useUi } from '../stores/ui';
+import { useGuestOrders } from '../stores/guestOrders';
 
 // -- Kết quả thanh toán VNPay --
 export default function PaymentResult() {
@@ -17,6 +18,7 @@ export default function PaymentResult() {
   const queryClient = useQueryClient();
   const token = useAuth((s) => s.token);
   const openChat = useUi((s) => s.openChat);
+  const addGuestOrder = useGuestOrders((s) => s.add);
 
   const result = useQuery({
     queryKey: ['payment-result', search],
@@ -26,12 +28,21 @@ export default function PaymentResult() {
     staleTime: Infinity
   });
 
+  const order = result.data?.order;
+  const trackToken = order?.trackToken;
+  const orderLink = trackToken ? `/orders/track/${order._id}?token=${trackToken}` : '/orders';
+
   useEffect(() => {
-    if (result.data) queryClient.invalidateQueries({ queryKey: ['orders'] });
-  }, [result.data, queryClient]);
+    if (!result.data) return;
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+    queryClient.invalidateQueries({ queryKey: ['guest-order'] });
+    if (trackToken) addGuestOrder(result.data.order._id, trackToken);
+  }, [result.data, trackToken, queryClient, addGuestOrder]);
 
   const retry = useMutation({
-    mutationFn: () => api(`/customer/orders/${result.data.order._id}/pay`, { method: 'POST' }),
+    mutationFn: () => trackToken
+      ? api(`/orders/${order._id}/pay`, { method: 'POST', query: { token: trackToken } })
+      : api(`/customer/orders/${order._id}/pay`, { method: 'POST' }),
     onSuccess: ({ payUrl }) => window.location.assign(payUrl),
     onError: (err) => toast.error(err.message)
   });
@@ -56,7 +67,7 @@ export default function PaymentResult() {
               {result.error?.message || data?.message || 'Liên kết không hợp lệ.'} Nếu tài khoản đã bị trừ tiền, hãy nhắn tin cho showroom để được kiểm tra.
             </p>
             <div className="mt-7 grid gap-3">
-              <ButtonLink to="/orders">Xem đơn hàng</ButtonLink>
+              <ButtonLink to={orderLink}>Xem đơn hàng</ButtonLink>
               <Button variant="outline" onClick={() => openChat()}>
                 <MessageCircle className="size-4" /> Nhắn tin cho showroom
               </Button>
@@ -79,7 +90,7 @@ export default function PaymentResult() {
                 <div className="flex justify-between gap-3"><dt className="text-slate-500">Thời gian</dt><dd>{formatDateTime(data.order.paidAt)}</dd></div>
               )}
             </dl>
-            <ButtonLink to="/orders" className="mt-7 w-full">Xem đơn hàng của tôi</ButtonLink>
+            <ButtonLink to={orderLink} className="mt-7 w-full">Xem đơn hàng của tôi</ButtonLink>
           </>
         ) : (
           <>
@@ -89,12 +100,12 @@ export default function PaymentResult() {
               {data.message}. Đơn hàng {data.order.code} vẫn được giữ, bạn có thể thanh toán lại hoặc chọn trả tại showroom.
             </p>
             <div className="mt-7 grid gap-3">
-              {token && (
+              {(token || trackToken) && (
                 <Button loading={retry.isPending} onClick={() => retry.mutate()}>
                   Thanh toán lại {formatVnd(data.order.deposit)}
                 </Button>
               )}
-              <ButtonLink to="/orders" variant="outline">Xem đơn hàng</ButtonLink>
+              <ButtonLink to={orderLink} variant="outline">Xem đơn hàng</ButtonLink>
             </div>
           </>
         )}

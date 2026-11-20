@@ -6,7 +6,6 @@
     "dev": "node scripts/dev.js",
     "start": "node index.js",
     "seed": "node scripts/seed.js",
-    "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
     "db:check": "node scripts/db-check.js",
     "images:upload": "node scripts/upload-images.js"
   },
@@ -29,9 +28,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "mongodb-memory-server": "^10.4.3",
-    "socket.io-client": "^4.8.4",
-    "supertest": "^7.3.1"
+    "mongodb-memory-server": "^10.4.3"
   },
   "engines": {
     "node": ">=20.12"

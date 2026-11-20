@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { BadgeCheck, Lock, MailWarning, MessageSquare, ReceiptText, Unlock, Users } from 'lucide-react';
+import { useCan } from '../hooks/useCan';
 import { api } from '../lib/api';
 import { formatDate, formatNumber, formatPriceShort } from '../lib/format';
 import { CUSTOMER_STATUS } from '../lib/labels';
@@ -40,6 +41,8 @@ export default function Customers() {
     setParams(next, { replace: true });
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const canChat = useCan('chats.reply');
+  const canBlock = useCan('customers.block');
   const customers = useQuery({
     queryKey: ['customers', filters],
     queryFn: () => api('/customers', { query: { ...filters, limit: LIMIT } }),
@@ -153,9 +156,9 @@ export default function Customers() {
                             {!(resend.isPending && resend.variables === c._id) && <MailWarning className="size-4" />}
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" title="Nhắn tin" aria-label={`Nhắn tin cho ${c.username}`} loading={startChat.isPending && startChat.variables === c._id} onClick={() => startChat.mutate(c._id)}>
+                        {canChat && <Button variant="ghost" size="icon" title="Nhắn tin" aria-label={`Nhắn tin cho ${c.username}`} loading={startChat.isPending && startChat.variables === c._id} onClick={() => startChat.mutate(c._id)}>
                           {!(startChat.isPending && startChat.variables === c._id) && <MessageSquare className="size-4" />}
-                        </Button>
+                        </Button>}
                         <Link
                           to={`/orders?customer=${c._id}`}
                           className="inline-flex size-9 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -164,7 +167,7 @@ export default function Customers() {
                         >
                           <ReceiptText className="size-4" />
                         </Link>
-                        <Button
+                        {canBlock && <Button
                           variant="ghost"
                           size="icon"
                           title={c.status === 'blocked' ? 'Mở khóa' : 'Khóa tài khoản'}
@@ -173,7 +176,7 @@ export default function Customers() {
                           className={c.status === 'blocked' ? '' : 'hover:!bg-red-50 hover:!text-red-600 dark:hover:!bg-red-500/10'}
                         >
                           {c.status === 'blocked' ? <Unlock className="size-4" /> : <Lock className="size-4" />}
-                        </Button>
+                        </Button>}
                       </div>
                     </td>
                   </tr>

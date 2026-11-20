@@ -13,9 +13,9 @@ export class ApiError extends Error {
 }
 
 // -- Gọi API --
-export async function api(path, { method = 'GET', body, query } = {}) {
+export async function api(path, { method = 'GET', body, query, headers: extra } = {}) {
   const token = useAuth.getState().token;
-  const headers = {};
+  const headers = { ...extra };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
 

@@ -28,7 +28,6 @@ function lockOwner() {
   }
 }
 
-// Dừng MongoDB bị bỏ lại khi app trước bị tắt đột ngột
 function stopOrphan(mongodPid) {
   try {
     const { mongod, app } = JSON.parse(fs.readFileSync(OWNER_FILE, 'utf8'));
@@ -36,9 +35,7 @@ function stopOrphan(mongodPid) {
       process.kill(mongodPid);
       console.log('Stopped a local MongoDB left running by a previous session.');
     }
-  } catch {
-    // tiến trình đã dừng sẵn
-  }
+  } catch {}
 }
 
 // -- MongoDB chạy trên máy khi phát triển --
@@ -77,9 +74,7 @@ async function connect(uri = config.mongoUri) {
     uri = localServer.getUri('shopcar');
     console.log(`Local MongoDB started at ${uri} (data in server/.data/db)`);
   }
-  // Windows có thể tắt MongoDB đột ngột: chờ ghi xuống ổ đĩa để không mất dữ liệu
   const options = local ? { writeConcern: { w: 1, j: true } } : { serverSelectionTimeoutMS: 10000 };
-  // Chuỗi kết nối Atlas thường không có tên database: mặc định là "shopcar"
   if (!hasDbName(uri)) options.dbName = config.mongoDbName;
   try {
     await mongoose.connect(uri, options);
@@ -97,7 +92,6 @@ function hasDbName(uri) {
   }
 }
 
-// Máy chủ MongoDB, không kèm tài khoản và mật khẩu
 function describeUri(uri) {
   try {
     return new URL(uri).host;

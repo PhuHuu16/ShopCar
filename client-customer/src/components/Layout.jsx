@@ -8,6 +8,7 @@ import { ChatWidget } from './ChatWidget';
 import { CompareBar } from './Compare';
 import { ButtonLink, Spinner } from './ui';
 import { api } from '../lib/api';
+import { useRealtime } from '../lib/live';
 import { useAuth } from '../stores/auth';
 import { useUi } from '../stores/ui';
 
@@ -28,6 +29,7 @@ function useRefreshAccount() {
 
 export function Layout() {
   useRefreshAccount();
+  useRealtime();
   const theme = useUi((s) => s.theme);
   return (
     <div className="flex min-h-screen flex-col">

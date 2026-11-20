@@ -31,3 +31,41 @@ export const PAYMENT_STATUS = {
   paid: { label: 'Đã cọc', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
   failed: { label: 'Cọc lỗi', className: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' }
 };
+
+// -- Tài khoản trang quản trị (khớp server/src/permissions.js) --
+export const ADMIN_ROLE = {
+  admin: {
+    label: 'Quản trị viên',
+    hint: 'Toàn quyền: doanh thu, sửa giá và ẩn xe, hủy đơn đã cọc, khóa khách, quản lý nhân viên.',
+    className: 'bg-brand-100 text-brand-800 dark:bg-brand-500/15 dark:text-brand-300'
+  },
+  staff: {
+    label: 'Nhân viên tư vấn',
+    hint: 'Chat với khách, xử lý liên hệ, xem và xác nhận đơn, hủy đơn chưa cọc. Không xem doanh thu, không sửa xe.',
+    className: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300'
+  }
+};
+
+export const ADMIN_STATUS = {
+  active: { label: 'Hoạt động', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
+  disabled: { label: 'Đã tắt', className: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200' }
+};
+
+export const PERMISSION = {
+  'dashboard.view': 'Xem tổng quan: đơn chờ, tin chưa đọc, xe sắp hết',
+  'stats.revenue': 'Xem doanh thu, tiền cọc, biểu đồ doanh thu',
+  'cars.view': 'Xem xe và hãng xe',
+  'cars.edit': 'Thêm / sửa xe, giá, tồn kho, ảnh',
+  'cars.hide': 'Ẩn xe khỏi web (ngừng bán) / hiện lại',
+  'brands.manage': 'Thêm / sửa / xóa hãng xe',
+  'orders.view': 'Xem đơn hàng',
+  'orders.approve': 'Xác nhận đơn',
+  'orders.cancel': 'Hủy đơn chưa đặt cọc',
+  'orders.cancelPaid': 'Hủy đơn đã đặt cọc (phải hoàn tiền)',
+  'customers.view': 'Xem khách hàng, gửi lại email kích hoạt',
+  'customers.block': 'Khóa / mở khóa tài khoản khách',
+  'contacts.handle': 'Xem và xử lý lời nhắn liên hệ',
+  'chats.reply': 'Chat với khách',
+  'staff.manage': 'Quản lý tài khoản nhân viên',
+  'audit.view': 'Xem nhật ký thao tác'
+};

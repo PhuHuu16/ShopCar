@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CarFront, ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react';
+import { CarFront, Eye, EyeOff, ExternalLink, FileText, Pencil, Plus } from 'lucide-react';
+import { useCan } from '../hooks/useCan';
 import { api, SHOP_URL } from '../lib/api';
 import { formatNumber, formatVnd } from '../lib/format';
 import { BODY_TYPE, CAR_SORTS, CONDITION } from '../lib/labels';
@@ -41,6 +42,7 @@ export default function Cars() {
     brand: params.get('brand') || '',
     condition: params.get('condition') || '',
     inStock: params.get('inStock') || '',
+    visibility: params.get('visibility') || '',
     sort: params.get('sort') || 'newest',
     page: Number(params.get('page')) || 1
   };
@@ -59,6 +61,8 @@ export default function Cars() {
     if (q !== filters.q) update({ q });
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const canEdit = useCan('cars.edit');
+  const canHide = useCan('cars.hide');
   const brands = useQuery({ queryKey: ['brands'], queryFn: () => api('/brands') });
   const cars = useQuery({
     queryKey: ['cars', filters],
@@ -66,25 +70,25 @@ export default function Cars() {
     placeholderData: keepPreviousData
   });
 
-  const remove = useMutation({
-    mutationFn: (car) => api(`/cars/${car._id}`, { method: 'DELETE' }),
-    onSuccess: () => {
+  const visibility = useMutation({
+    mutationFn: ({ car, hidden }) => api(`/cars/${car._id}/visibility`, { method: 'PATCH', body: { hidden } }),
+    onSuccess: (car) => {
       queryClient.invalidateQueries({ queryKey: ['cars'] });
-      queryClient.invalidateQueries({ queryKey: ['brands'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
-      toast.success('Đã xóa xe');
+      queryClient.setQueryData(['car', car._id], car);
+      toast.success(car.hidden ? `Đã ẩn ${car.name} khỏi web` : `${car.name} đã hiện lại trên web`);
     },
     onError: (err) => toast.error(err.message)
   });
 
-  async function onDelete(car) {
+  async function onToggleHidden(car) {
+    if (car.hidden) return visibility.mutate({ car, hidden: false });
     const ok = await confirm({
-      title: 'Xóa xe này?',
-      message: `"${car.name}" và toàn bộ ảnh của xe sẽ bị xóa. Các đơn hàng cũ vẫn giữ thông tin xe.`,
-      confirmText: 'Xóa xe',
-      danger: true
+      title: 'Ẩn xe khỏi web?',
+      message: `"${car.name}" sẽ không còn hiện trong danh sách, tìm kiếm và không đặt mua được nữa. Thông tin xe, ảnh và các đơn hàng cũ vẫn được giữ nguyên; bạn có thể hiện lại bất cứ lúc nào.`,
+      confirmText: 'Ẩn xe'
     });
-    if (ok) remove.mutate(car);
+    if (ok) visibility.mutate({ car, hidden: true });
   }
 
   const select = 'input w-auto py-2';
@@ -96,9 +100,11 @@ export default function Cars() {
         title="Xe"
         description={data ? `${formatNumber(data.total)} mẫu xe` : 'Danh sách xe trong showroom'}
         actions={
-          <ButtonLink to="/cars/new">
-            <Plus className="size-4" /> Thêm xe
-          </ButtonLink>
+          canEdit && (
+            <ButtonLink to="/cars/new">
+              <Plus className="size-4" /> Thêm xe
+            </ButtonLink>
+          )
         }
       />
 
@@ -121,6 +127,11 @@ export default function Cars() {
           <option value="true">Còn hàng</option>
           <option value="false">Hết hàng</option>
         </select>
+        <select className={select} value={filters.visibility} onChange={(e) => update({ visibility: e.target.value })} aria-label="Hiển thị trên web">
+          <option value="">Đang bán và đã ẩn</option>
+          <option value="visible">Đang bán</option>
+          <option value="hidden">Đã ẩn (ngừng bán)</option>
+        </select>
         <select className={select} value={filters.sort} onChange={(e) => update({ sort: e.target.value === 'newest' ? '' : e.target.value })} aria-label="Sắp xếp">
           {CAR_SORTS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -137,9 +148,9 @@ export default function Cars() {
           <EmptyState
             icon={CarFront}
             title="Không có xe phù hợp"
-            action={<ButtonLink to="/cars/new" size="sm"><Plus className="size-4" /> Thêm xe</ButtonLink>}
+            action={canEdit && <ButtonLink to="/cars/new" size="sm"><Plus className="size-4" /> Thêm xe</ButtonLink>}
           >
-            Thử bỏ bớt bộ lọc, hoặc thêm xe mới.
+            {canEdit ? 'Thử bỏ bớt bộ lọc, hoặc thêm xe mới.' : 'Thử bỏ bớt bộ lọc.'}
           </EmptyState>
         ) : (
           <div className={cars.isPlaceholderData ? 'opacity-60 transition' : ''}>
@@ -156,12 +167,15 @@ export default function Cars() {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {data.items.map((car) => (
-                  <tr key={car._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <tr key={car._id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 ${car.hidden ? 'bg-slate-50/60 dark:bg-slate-900/40' : ''}`}>
                     <td className={td}>
                       <Link to={`/cars/${car._id}`} className="flex items-center gap-3">
-                        <CarThumb car={car} className="h-11 w-16" />
+                        <CarThumb car={car} className={`h-11 w-16 ${car.hidden ? 'opacity-50 grayscale' : ''}`} />
                         <div className="min-w-0">
-                          <p className="truncate font-semibold hover:text-brand-600">{car.name}</p>
+                          <p className="flex items-center gap-2 font-semibold">
+                            <span className={`truncate hover:text-brand-600 ${car.hidden ? 'text-slate-500' : ''}`}>{car.name}</span>
+                            {car.hidden && <Badge className="shrink-0 bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200">Đã ẩn</Badge>}
+                          </p>
                           <p className="text-xs text-slate-500 dark:text-slate-400">
                             {car.brand?.name} · {car.year} · {car.condition === 'used' ? 'Đã qua sử dụng' : 'Xe mới'}
                           </p>
@@ -184,12 +198,25 @@ export default function Cars() {
                         >
                           <ExternalLink className="size-4" />
                         </a>
-                        <ButtonLink to={`/cars/${car._id}`} variant="ghost" size="icon" title="Sửa" aria-label={`Sửa ${car.name}`}>
-                          <Pencil className="size-4" />
+                        <ButtonLink
+                          to={`/cars/${car._id}`}
+                          variant="ghost"
+                          size="icon"
+                          title={canEdit ? 'Sửa' : 'Xem thông số'}
+                          aria-label={canEdit ? `Sửa ${car.name}` : `Xem ${car.name}`}
+                        >
+                          {canEdit ? <Pencil className="size-4" /> : <FileText className="size-4" />}
                         </ButtonLink>
-                        <Button variant="ghost" size="icon" onClick={() => onDelete(car)} title="Xóa" aria-label={`Xóa ${car.name}`}>
-                          <Trash2 className="size-4" />
-                        </Button>
+                        {canHide && <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onToggleHidden(car)}
+                          disabled={visibility.isPending}
+                          title={car.hidden ? 'Hiện lại trên web' : 'Ẩn khỏi web (ngừng bán)'}
+                          aria-label={car.hidden ? `Hiện lại ${car.name}` : `Ẩn ${car.name}`}
+                        >
+                          {car.hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                        </Button>}
                       </div>
                     </td>
                   </tr>

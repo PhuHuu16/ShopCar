@@ -16,14 +16,12 @@ function sign(params, secret) {
   return crypto.createHmac('sha512', secret).update(Buffer.from(signData(params), 'utf-8')).digest('hex');
 }
 
-// Giờ Việt Nam (GMT+7), dạng yyyyMMddHHmmss
 function vnDate(date = new Date()) {
   const d = new Date(date.getTime() + 7 * 3600 * 1000);
   const pad = (n) => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
 }
 
-// VNPay chỉ nhận chữ không dấu
 function plainText(text) {
   return String(text)
     .normalize('NFD')
@@ -45,7 +43,7 @@ function buildPaymentUrl({ gatewayUrl, tmnCode, secret, txnRef, amount, orderInf
     vnp_Version: VERSION,
     vnp_Command: 'pay',
     vnp_TmnCode: tmnCode,
-    vnp_Amount: String(Math.round(amount) * 100), // VNPay tính tiền theo đơn vị 1/100 đồng
+    vnp_Amount: String(Math.round(amount) * 100),
     vnp_CurrCode: 'VND',
     vnp_TxnRef: txnRef,
     vnp_OrderInfo: plainText(orderInfo),

@@ -3,10 +3,8 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const sharp = require('sharp');
 
-// Tắt cache của sharp để Windows xóa được file
 sharp.cache(false);
 
-// Ảnh lưu trong MongoDB (GridFS) để không mất khi máy chủ khởi động lại (Render xóa ổ đĩa)
 const BUCKET = 'images';
 const PREFIX = '/uploads/';
 const CAR_DIR = 'cars';

@@ -1,10 +1,11 @@
 import { useAuth } from '../stores/auth';
 
 export class ApiError extends Error {
-  constructor(status, message, errors = []) {
+  constructor(status, message, errors = [], code) {
     super(message);
     this.status = status;
     this.errors = errors || [];
+    this.code = code;
   }
 
   fieldErrors() {
@@ -46,7 +47,7 @@ export async function api(path, { method = 'GET', body, query, form } = {}) {
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     if (res.status === 401 && token) useAuth.getState().logout();
-    throw new ApiError(res.status, data?.message || 'Có lỗi xảy ra, vui lòng thử lại', data?.errors);
+    throw new ApiError(res.status, data?.message || 'Có lỗi xảy ra, vui lòng thử lại', data?.errors, data?.code);
   }
   return data;
 }

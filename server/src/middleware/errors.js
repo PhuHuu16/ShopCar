@@ -11,7 +11,7 @@ function apiNotFound(req, res) {
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   if (err instanceof HttpError) {
-    return res.status(err.status).json({ message: err.message });
+    return res.status(err.status).json(err.code ? { message: err.message, code: err.code } : { message: err.message });
   }
   if (err instanceof ZodError) {
     const errors = err.issues.map((i) => ({ field: i.path.join('.'), message: i.message }));

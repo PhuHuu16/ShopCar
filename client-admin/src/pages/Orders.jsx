@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Check, CreditCard, Mail, Phone, ReceiptText, StickyNote, TriangleAlert, User, X } from 'lucide-react';
+import { Check, Clock, CreditCard, Mail, Phone, ReceiptText, StickyNote, TriangleAlert, User, X } from 'lucide-react';
+import { useCan } from '../hooks/useCan';
 import { api } from '../lib/api';
 import { formatDateTime, formatNumber, formatVnd, shortId } from '../lib/format';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../lib/labels';
+import { actorName } from '../lib/audit';
 import { useTitle } from '../hooks/useTitle';
 import { confirm } from '../components/confirm';
 import { CarThumb } from '../components/CarThumb';
@@ -17,6 +19,10 @@ const LIMIT = 15;
 export function StatusBadge({ status }) {
   const s = ORDER_STATUS[status];
   return <Badge className={s.className}>{s.label}</Badge>;
+}
+
+function GuestBadge() {
+  return <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300">Vãng lai</Badge>;
 }
 
 export function PaymentBadge({ payment }) {
@@ -83,7 +89,7 @@ function useChangeStatus(onDone) {
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       queryClient.invalidateQueries({ queryKey: ['cars'] });
       queryClient.invalidateQueries({ queryKey: ['customers'] });
-      toast.success(order.status === 'APPROVED' ? 'Đã xác nhận đơn, kho xe đã được trừ' : 'Đã hủy đơn hàng');
+      toast.success(order.status === 'APPROVED' ? 'Đã xác nhận đơn' : 'Đã hủy đơn hàng');
       onDone?.(order);
     },
     onError: (err) => toast.error(err.message)
@@ -92,8 +98,12 @@ function useChangeStatus(onDone) {
 
 function Timeline({ order }) {
   const steps = [{ label: 'Khách đặt xe', at: order.createdAt }];
-  if (order.approvedAt) steps.push({ label: 'Showroom xác nhận', at: order.approvedAt });
-  if (order.status === 'CANCELED') steps.push({ label: 'Đơn bị hủy', at: order.updatedAt });
+  if (order.approvedAt) {
+    steps.push({ label: order.approvedBy ? `Xác nhận bởi ${actorName(order.approvedBy)}` : 'Showroom xác nhận', at: order.approvedAt });
+  }
+  if (order.status === 'CANCELED') {
+    steps.push({ label: order.canceledBy ? `Hủy bởi ${actorName(order.canceledBy)}` : 'Đơn bị hủy', at: order.canceledAt || order.updatedAt });
+  }
   return (
     <ol className="space-y-3 border-l border-slate-200 pl-4 dark:border-slate-700">
       {steps.map((s) => (
@@ -111,12 +121,16 @@ function OrderDetail({ id, onClose }) {
   const order = useQuery({ queryKey: ['order', id], queryFn: () => api(`/orders/${id}`) });
   const change = useChangeStatus();
   const o = order.data;
+  const canApprove = useCan('orders.approve');
+  const canCancel = useCan('orders.cancel');
+  const canCancelPaid = useCan('orders.cancelPaid');
+  const paidLocked = o?.payment?.status === 'paid' && !canCancelPaid;
 
   async function act(status) {
     const approve = status === 'APPROVED';
     const ok = await confirm(
       approve
-        ? { title: 'Xác nhận đơn hàng?', message: 'Số xe trong đơn sẽ được trừ khỏi kho.', confirmText: 'Xác nhận đơn' }
+        ? { title: 'Xác nhận đơn hàng?', message: 'Xe đã được giữ cho khách từ lúc đặt. Xác nhận sẽ bỏ hạn giữ xe và tính vào số xe đã bán.', confirmText: 'Xác nhận đơn' }
         : {
             title: 'Hủy đơn hàng?',
             message: [
@@ -130,12 +144,17 @@ function OrderDetail({ id, onClose }) {
     if (ok) change.mutate({ id, status });
   }
 
-  const footer = o && o.status !== 'CANCELED' && (
+  const footer = o && o.status !== 'CANCELED' && (canCancel || canApprove) && (
     <>
-      <Button variant="danger-outline" onClick={() => act('CANCELED')} loading={change.isPending && change.variables?.status === 'CANCELED'}>
-        <X className="size-4" /> Hủy đơn
-      </Button>
-      {o.status === 'PENDING' && (
+      {canCancel && paidLocked && (
+        <p className="mr-auto self-center text-xs text-slate-500 dark:text-slate-400">Khách đã đặt cọc: chỉ quản trị viên hủy được đơn này (cần hoàn cọc).</p>
+      )}
+      {canCancel && !paidLocked && (
+        <Button variant="danger-outline" onClick={() => act('CANCELED')} loading={change.isPending && change.variables?.status === 'CANCELED'}>
+          <X className="size-4" /> Hủy đơn
+        </Button>
+      )}
+      {o.status === 'PENDING' && canApprove && (
         <Button variant="success" onClick={() => act('APPROVED')} loading={change.isPending && change.variables?.status === 'APPROVED'}>
           <Check className="size-4" /> Xác nhận đơn
         </Button>
@@ -155,20 +174,36 @@ function OrderDetail({ id, onClose }) {
             <StatusBadge status={o.status} />
             <span className="text-sm text-slate-500 dark:text-slate-400">{formatDateTime(o.createdAt)}</span>
           </div>
+          {o.status === 'PENDING' && o.holdUntil && o.payment?.status !== 'paid' && (
+            <p className="flex gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+              <Clock className="mt-0.5 size-4 shrink-0" />
+              Khách chưa cọc: xe được giữ đến {formatDateTime(o.holdUntil)}, sau đó đơn tự hủy và xe về kho.
+            </p>
+          )}
 
           <section>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Khách hàng</h3>
             <div className="space-y-2 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
-              <p className="flex items-center gap-2 font-semibold"><User className="size-4 text-slate-400" /> {o.customerInfo?.name}</p>
+              <p className="flex items-center gap-2 font-semibold">
+                <User className="size-4 text-slate-400" /> {o.customerInfo?.name}
+                {!o.customer && <GuestBadge />}
+              </p>
               {o.customerInfo?.phone && (
                 <a href={`tel:${o.customerInfo.phone}`} className="flex items-center gap-2 hover:text-brand-600"><Phone className="size-4 text-slate-400" /> {o.customerInfo.phone}</a>
               )}
               {o.customerInfo?.email && (
                 <a href={`mailto:${o.customerInfo.email}`} className="flex items-center gap-2 hover:text-brand-600"><Mail className="size-4 text-slate-400" /> {o.customerInfo.email}</a>
               )}
-              <Link to={`/orders?customer=${o.customer}`} onClick={onClose} className="inline-block pt-1 text-xs font-semibold text-brand-600 dark:text-brand-500">
-                Xem các đơn khác của khách này
-              </Link>
+              {o.customer ? (
+                <Link to={`/orders?customer=${o.customer}`} onClick={onClose} className="inline-block pt-1 text-xs font-semibold text-brand-600 dark:text-brand-500">
+                  Xem các đơn khác của khách này
+                </Link>
+              ) : (
+                <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">Đặt không cần tài khoản: hãy gọi số điện thoại trên để xác nhận.</p>
+              )}
+              {o.status === 'CANCELED' && o.cancelReason && (
+                <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">Lý do hủy: {o.cancelReason}</p>
+              )}
             </div>
           </section>
 
@@ -241,6 +276,7 @@ export default function Orders() {
     if (q !== filters.q) update({ q });
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const canApprove = useCan('orders.approve');
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api('/stats') });
   const customer = useQuery({
     queryKey: ['customer', filters.customer],
@@ -331,7 +367,7 @@ export default function Orders() {
                       <button onClick={(e) => { e.stopPropagation(); update({ id: o._id }); }} className="hover:text-brand-600">{shortId(o._id)}</button>
                     </td>
                     <td className={td}>
-                      <p className="font-medium">{o.customerInfo?.name}</p>
+                      <p className="flex items-center gap-1.5 font-medium">{o.customerInfo?.name}{!o.customer && <GuestBadge />}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">{o.customerInfo?.phone}</p>
                     </td>
                     <td className={`${td} max-w-56`}>
@@ -347,13 +383,13 @@ export default function Orders() {
                       </div>
                     </td>
                     <td className={`${td} text-right`} onClick={(e) => e.stopPropagation()}>
-                      {o.status === 'PENDING' && (
+                      {o.status === 'PENDING' && canApprove && (
                         <Button
                           size="xs"
                           variant="success"
                           loading={change.isPending && change.variables?.id === o._id}
                           onClick={async () => {
-                            const ok = await confirm({ title: `Xác nhận đơn ${shortId(o._id)}?`, message: 'Số xe trong đơn sẽ được trừ khỏi kho.', confirmText: 'Xác nhận đơn' });
+                            const ok = await confirm({ title: `Xác nhận đơn ${shortId(o._id)}?`, message: 'Xe đã được giữ cho khách từ lúc đặt. Xác nhận sẽ bỏ hạn giữ xe và tính vào số xe đã bán.', confirmText: 'Xác nhận đơn' });
                             if (ok) change.mutate({ id: o._id, status: 'APPROVED' });
                           }}
                         >

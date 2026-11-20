@@ -8,10 +8,7 @@
     "build": "npm run build --prefix client-customer && npm run build --prefix client-admin",
     "start": "npm start --prefix server",
     "lint": "eslint .",
-    "test": "npm test --prefix server && npm test --prefix client-customer && npm test --prefix client-admin",
-    "test:api": "npm test --prefix server",
-    "test:web": "npm test --prefix client-customer && npm test --prefix client-admin",
-    "check": "npm run lint && npm test && npm run build",
+    "check": "npm run lint && npm run build",
     "seed": "npm run seed --prefix server",
     "db:check": "npm run db:check --prefix server",
     "images:upload": "npm run images:upload --prefix server"

@@ -1,4 +1,3 @@
-# Render Blueprint: một dịch vụ Node phục vụ API, web khách hàng (/) và trang quản trị (/admin)
 services:
   - type: web
     name: shopcar
@@ -19,7 +18,6 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
-      # Các giá trị dưới đây nhập trên Render khi tạo dịch vụ
       - key: MONGODB_URI
         sync: false
       - key: ADMIN_USERNAME

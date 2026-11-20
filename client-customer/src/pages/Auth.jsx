@@ -38,7 +38,6 @@ function Result({ ok, title, children, action }) {
   );
 }
 
-// Chỉ cho quay lại các trang trong web
 function safeRedirect(from) {
   return from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
 }
@@ -177,7 +176,7 @@ export function Activate() {
   useTitle('Kích hoạt tài khoản');
   const [params] = useSearchParams();
   const [state, setState] = useState({ status: 'loading' });
-  const started = useRef(false); // Link chỉ dùng được một lần, tránh gọi hai lần ở StrictMode
+  const started = useRef(false);
 
   useEffect(() => {
     if (started.current) return;

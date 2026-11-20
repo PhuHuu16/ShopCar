@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link, useBlocker, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
+import { ArrowLeft, Eye, ExternalLink, History, Save } from 'lucide-react';
 import { api, SHOP_URL } from '../lib/api';
 import { formatPriceShort } from '../lib/format';
 import { BODY_TYPE, CONDITION, FUEL, TRANSMISSION, toOptions } from '../lib/labels';
 import { useTitle } from '../hooks/useTitle';
+import { useCan } from '../hooks/useCan';
+import { Forbidden } from '../components/RequirePermission';
 import { confirm } from '../components/confirm';
 import { ImageManager } from '../components/ImageManager';
 import { Button, ErrorBox, Input, Select, Spinner, Textarea } from '../components/ui';
@@ -36,14 +38,15 @@ function Section({ title, description, children }) {
   );
 }
 
-function Editor({ car }) {
+function Editor({ car, readOnly = false }) {
   const navigate = useNavigate();
+  const canAudit = useCan('audit.view');
   const queryClient = useQueryClient();
   const initial = car ? fromCar(car) : EMPTY;
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState({});
   const brands = useQuery({ queryKey: ['brands'], queryFn: () => api('/brands') });
-  const dirty = JSON.stringify(form) !== JSON.stringify(initial);
+  const dirty = !readOnly && JSON.stringify(form) !== JSON.stringify(initial);
 
   const save = useMutation({
     mutationFn: () =>
@@ -96,23 +99,42 @@ function Editor({ car }) {
             <ArrowLeft className="size-4" /> Danh sách xe
           </Link>
           <h1 className="mt-1 truncate text-2xl font-bold tracking-tight">{car ? car.name : 'Thêm xe mới'}</h1>
+          {car?.hidden && <p className="mt-1 text-sm font-medium text-amber-600 dark:text-amber-400">Đã ẩn khỏi web (ngừng bán)</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {car && canAudit && (
+            <Link
+              to={`/audit?target=${car._id}&label=${encodeURIComponent(car.name)}`}
+              className="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              title="Ai đã sửa giá, tồn kho, ẩn / hiện xe này"
+            >
+              <History className="size-4" /> Lịch sử thay đổi
+            </Link>
+          )}
           {car && (
             <a href={`${SHOP_URL}/cars/${car.slug}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
               <ExternalLink className="size-4" /> Xem trên cửa hàng
             </a>
           )}
-          <Button type="submit" loading={save.isPending}>
-            <Save className="size-4" /> {car ? 'Lưu thay đổi' : 'Thêm xe'}
-          </Button>
+          {!readOnly && (
+            <Button type="submit" loading={save.isPending}>
+              <Save className="size-4" /> {car ? 'Lưu thay đổi' : 'Thêm xe'}
+            </Button>
+          )}
         </div>
       </div>
+
+      {readOnly && (
+        <p className="mb-4 flex items-center gap-2 rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:bg-sky-500/10 dark:text-sky-200">
+          <Eye className="size-4 shrink-0" /> Bạn đang xem thông số xe. Chỉ quản trị viên sửa được giá, tồn kho và ảnh.
+        </p>
+      )}
+      <fieldset disabled={readOnly} className="min-w-0">
 
       <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
         <div className="space-y-4">
           <Section title="Ảnh xe" description="Ảnh được nén sang WebP và tạo ảnh nhỏ tự động.">
-            <ImageManager images={form.images} onChange={(images) => setForm((f) => ({ ...f, images }))} error={errors.images} />
+            <ImageManager images={form.images} onChange={(images) => setForm((f) => ({ ...f, images }))} error={errors.images} readOnly={readOnly} />
           </Section>
 
           <Section title="Thông tin cơ bản">
@@ -167,11 +189,14 @@ function Editor({ car }) {
               )}
             </div>
           </Section>
-          <Button type="submit" className="w-full" size="lg" loading={save.isPending}>
-            <Save className="size-4" /> {car ? 'Lưu thay đổi' : 'Thêm xe'}
-          </Button>
+          {!readOnly && (
+            <Button type="submit" className="w-full" size="lg" loading={save.isPending}>
+              <Save className="size-4" /> {car ? 'Lưu thay đổi' : 'Thêm xe'}
+            </Button>
+          )}
         </div>
       </div>
+      </fieldset>
     </form>
   );
 }
@@ -179,10 +204,11 @@ function Editor({ car }) {
 export default function CarForm() {
   const { id } = useParams();
   const isNew = id === 'new';
-  useTitle(isNew ? 'Thêm xe' : 'Sửa xe');
+  const canEdit = useCan('cars.edit');
+  useTitle(isNew ? 'Thêm xe' : canEdit ? 'Sửa xe' : 'Thông số xe');
   const car = useQuery({ queryKey: ['car', id], queryFn: () => api(`/cars/${id}`), enabled: !isNew });
-  if (isNew) return <Editor />;
+  if (isNew) return canEdit ? <Editor /> : <Forbidden permission="cars.edit" />;
   if (car.isLoading) return <Spinner />;
   if (car.error) return <ErrorBox error={car.error} onRetry={car.refetch} />;
-  return <Editor key={car.data._id} car={car.data} />;
+  return <Editor key={car.data._id} car={car.data} readOnly={!canEdit} />;
 }

@@ -1,5 +1,6 @@
 import { Clock, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { Button, PageHeader } from '../components/ui';
+import { ContactForm } from '../components/ContactForm';
 import { SHOWROOM } from '../components/Footer';
 import { useTitle } from '../hooks/useTitle';
 import { useUi } from '../stores/ui';
@@ -32,14 +33,21 @@ export default function Contact() {
           ))}
           <div className="card p-5">
             <h2 className="font-semibold">Tư vấn trực tuyến</h2>
-            <p className="mt-1 text-sm text-slate-500">Hỏi giá lăn bánh, đặt lịch lái thử hoặc hỏi về trả góp ngay trong khung chat.</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Không cần tài khoản. Hỏi giá, lái thử, trả góp ngay trong khung chat; ngoài giờ có trợ lý tự động trả lời.
+            </p>
             <Button className="mt-4 w-full" onClick={() => openChat()}>
               <MessageCircle className="size-5" /> Bắt đầu chat
             </Button>
           </div>
         </div>
-        <div className="card overflow-hidden">
-          <iframe title="Bản đồ showroom" src={MAP_URL} className="h-[420px] w-full border-0 lg:h-full lg:min-h-[480px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+        <div className="card p-6">
+          <h2 className="text-lg font-semibold">Gửi lời nhắn cho showroom</h2>
+          <p className="mb-5 mt-1 text-sm text-slate-500">Không cần tài khoản. Để lại số điện thoại, tư vấn viên sẽ gọi lại cho bạn.</p>
+          <ContactForm />
+        </div>
+        <div className="card overflow-hidden lg:col-span-2">
+          <iframe title="Bản đồ showroom" src={MAP_URL} className="h-[420px] w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
         </div>
       </div>
     </div>

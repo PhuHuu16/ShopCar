@@ -12,6 +12,7 @@ const CarDetail = lazy(() => import('./pages/CarDetail'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Account = lazy(() => import('./pages/Account'));
 const Orders = lazy(() => import('./pages/Orders'));
+const OrderTrack = lazy(() => import('./pages/Orders').then((m) => ({ default: m.OrderTrack })));
 const Contact = lazy(() => import('./pages/Contact'));
 const PaymentResult = lazy(() => import('./pages/PaymentResult'));
 const Compare = lazy(() => import('./pages/Compare'));
@@ -51,7 +52,8 @@ const router = createBrowserRouter([
       { path: 'forgot-password', element: <ForgotPassword /> },
       { path: 'reset-password', element: <ResetPassword /> },
       { path: 'account', element: <RequireAuth><Account /></RequireAuth> },
-      { path: 'orders', element: <RequireAuth><Orders /></RequireAuth> },
+      { path: 'orders', element: <Orders /> },
+      { path: 'orders/track/:id', element: <OrderTrack /> },
       { path: '*', element: <NotFound /> }
     ]
   }

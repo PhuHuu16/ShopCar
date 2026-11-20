@@ -4,8 +4,8 @@ const config = require('../config');
 const { Order } = require('../models');
 const HttpError = require('../utils/httpError');
 const vnpay = require('../utils/vnpay');
+const realtime = require('../realtime');
 
-// Khóa cho trang thử nghiệm, lấy từ JWT_SECRET để không ai giả được kết quả
 const demoSecret = crypto.createHmac('sha256', config.jwtSecret).update('shopcar-demo-payment').digest('hex');
 
 function provider() {
@@ -20,10 +20,14 @@ function depositFor(order) {
 }
 
 const shortCode = (id) => String(id).slice(-6).toUpperCase();
+const PAYMENT_WINDOW_MS = 20 * 60 * 1000;
 
 async function startPayment(order, ipAddr) {
   if (order.status !== 'PENDING') throw new HttpError(409, 'Chỉ đặt cọc được cho đơn đang chờ xác nhận');
   if (order.payment?.status === 'paid') throw new HttpError(409, 'Đơn hàng này đã được đặt cọc');
+  if (order.holdUntil && order.holdUntil <= new Date()) {
+    throw new HttpError(409, 'Đơn đã hết thời gian giữ xe, hãy đặt lại hoặc liên hệ showroom');
+  }
 
   const p = provider();
   const attempt = (order.payment?.attempts || 0) + 1;
@@ -40,7 +44,8 @@ async function startPayment(order, ipAddr) {
         'payment.txnRef': txnRef,
         'payment.attempts': attempt
       },
-      $unset: { 'payment.responseCode': 1 }
+      $unset: { 'payment.responseCode': 1 },
+      ...(order.holdUntil ? { $max: { holdUntil: new Date(Date.now() + PAYMENT_WINDOW_MS) } } : {})
     },
     { new: true }
   );
@@ -59,7 +64,6 @@ async function startPayment(order, ipAddr) {
   return { order: updated, payUrl };
 }
 
-// Gọi hai lần vẫn an toàn: chỉ lần đầu thay đổi đơn hàng
 async function applyResult(query) {
   const p = provider();
   const params = vnpay.verify(query, p.secret);
@@ -82,10 +86,11 @@ async function applyResult(query) {
     : { 'payment.status': 'failed', 'payment.responseCode': params.vnp_ResponseCode };
   const updated = await Order.findOneAndUpdate(
     { _id: order._id, 'payment.txnRef': params.vnp_TxnRef, 'payment.status': 'pending' },
-    { $set: changes },
+    paid ? { $set: changes, $unset: { holdUntil: 1 } } : { $set: changes },
     { new: true }
   );
   if (!updated) return { code: 'already', order: await Order.findById(order._id) };
+  realtime.orderChanged(updated);
   return { code: 'ok', order: updated, paid, responseCode: params.vnp_ResponseCode };
 }
 

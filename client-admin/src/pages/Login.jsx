@@ -8,7 +8,6 @@ import { Logo } from '../components/Layout';
 import { Button, Input } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 
-// Chỉ cho quay lại các trang trong web
 function safeRedirect(from) {
   return from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
 }

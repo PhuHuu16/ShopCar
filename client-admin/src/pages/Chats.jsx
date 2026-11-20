@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, CarFront, Mail, MessageSquare, Phone, ReceiptText, SendHorizontal, X } from 'lucide-react';
+import { ArrowLeft, Bot, CarFront, Mail, MessageSquare, Phone, ReceiptText, SendHorizontal, X } from 'lucide-react';
 import { api, SHOP_URL } from '../lib/api';
 import { formatDate, formatPriceShort, formatTime } from '../lib/format';
 import { useTitle } from '../hooks/useTitle';
@@ -16,6 +16,19 @@ const QUICK_REPLIES = [
   'Anh/chị cho em xin số điện thoại để tư vấn kỹ hơn nhé.',
   'Anh/chị muốn hẹn lái thử vào ngày nào ạ?'
 ];
+
+function person(c) {
+  if (c?.customer) return { ...c.customer, guest: false };
+  return {
+    name: c?.visitor?.name || `Khách vãng lai #${String(c?.visitorId || c?._id || '').slice(-4).toUpperCase()}`,
+    phone: c?.visitor?.phone,
+    guest: true
+  };
+}
+
+function GuestTag() {
+  return <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-300">Vãng lai</span>;
+}
 
 function initials(name = '') {
   const parts = name.trim().split(/\s+/);
@@ -35,7 +48,7 @@ function ConversationList({ conversations, activeId }) {
   const list = useMemo(() => {
     const s = search.trim().toLowerCase();
     if (!s) return conversations;
-    return conversations.filter((c) => `${c.customer?.name} ${c.customer?.username} ${c.customer?.phone}`.toLowerCase().includes(s));
+    return conversations.filter((c) => { const p = person(c); return `${p.name} ${p.username || ''} ${p.phone || ''}`.toLowerCase().includes(s); });
   }, [conversations, search]);
 
   return (
@@ -49,6 +62,7 @@ function ConversationList({ conversations, activeId }) {
         <ul className="flex-1 overflow-y-auto">
           {list.map((c) => {
             const unread = c.unreadByAdmin > 0;
+            const p = person(c);
             return (
               <li key={c._id}>
                 <Link
@@ -59,15 +73,16 @@ function ConversationList({ conversations, activeId }) {
                       : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40'
                   }`}
                 >
-                  <Avatar name={c.customer?.name} />
+                  <Avatar name={p.name} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className={`truncate text-sm ${unread ? 'font-bold' : 'font-medium'}`}>{c.customer?.name || 'Khách hàng'}</p>
+                      <p className={`flex min-w-0 items-center gap-1.5 text-sm ${unread ? 'font-bold' : 'font-medium'}`}><span className="truncate">{p.name}</span>{p.guest && <GuestTag />}</p>
                       <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">{c.lastMessage?.at && formatTime(c.lastMessage.at)}</span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
                       <p className={`flex-1 truncate text-sm ${unread ? 'font-medium text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}`}>
                         {c.lastMessage?.sender === 'admin' && 'Bạn: '}
+                        {c.lastMessage?.sender === 'bot' && 'Trợ lý: '}
                         {c.lastMessage?.text}
                       </p>
                       {unread && <span className="min-w-5 rounded-full bg-brand-600 px-1.5 text-center text-[11px] font-bold leading-5 text-white">{c.unreadByAdmin}</span>}
@@ -112,8 +127,11 @@ function Messages({ messages }) {
   let lastDay = '';
   return (
     <div className="space-y-2">
-      {messages.map((m) => {
-        const mine = m.sender === 'admin';
+      {messages.map((m, i) => {
+        const mine = m.sender !== 'customer';
+        const isBot = m.sender === 'bot';
+        const prev = messages[i - 1];
+        const showStaff = m.sender === 'admin' && m.staffName && !(prev?.sender === 'admin' && prev.staffName === m.staffName);
         const day = formatDate(m.createdAt);
         const showDay = day !== lastDay;
         lastDay = day;
@@ -126,9 +144,15 @@ function Messages({ messages }) {
             )}
             <div className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div className="max-w-[78%]">
-                <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? 'rounded-br-md bg-brand-600 text-white' : 'rounded-bl-md bg-slate-100 dark:bg-slate-800'}`}>
+                {isBot && (
+                  <p className="mb-0.5 flex items-center justify-end gap-1 text-[11px] font-medium text-slate-500"><Bot className="size-3.5" /> Trợ lý tự động</p>
+                )}
+                {showStaff && <p className="mb-0.5 text-right text-[11px] font-medium text-slate-500">{m.staffName}</p>}
+                <div className={`rounded-2xl px-3.5 py-2 text-sm ${isBot ? 'rounded-br-md bg-slate-700 text-white dark:bg-slate-700' : mine ? 'rounded-br-md bg-brand-600 text-white' : 'rounded-bl-md bg-slate-100 dark:bg-slate-800'}`}>
                   {m.car && <CarChip car={m.car} mine={mine} />}
                   <p className="whitespace-pre-wrap break-words">{m.text}</p>
+                  {m.cars?.map((car) => <div key={car._id} className="mt-1.5"><CarChip car={car} mine /></div>)}
+                  {m.link?.to && <a href={`${SHOP_URL}${m.link.to}`} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-semibold underline">{m.link.label}</a>}
                 </div>
                 <p className={`mt-0.5 text-[11px] text-slate-500 ${mine ? 'text-right' : ''}`}>
                   {new Date(m.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -287,7 +311,7 @@ function ChatPane({ id }) {
 
   if (chat.isLoading) return <Spinner className="m-auto" />;
   if (chat.error) return <div className="m-auto p-6"><ErrorBox error={chat.error} onRetry={chat.refetch} /></div>;
-  const customer = chat.data.conversation.customer;
+  const customer = person(chat.data.conversation);
 
   return (
     <>
@@ -297,18 +321,18 @@ function ChatPane({ id }) {
         </Link>
         <Avatar name={customer?.name} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">{customer?.name}</p>
+          <p className="flex items-center gap-1.5 truncate font-semibold">{customer.name}{customer.guest && <GuestTag />}</p>
           <div className="flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
             {customer?.phone && <a href={`tel:${customer.phone}`} className="inline-flex items-center gap-1 hover:text-brand-600"><Phone className="size-3" /> {customer.phone}</a>}
             {customer?.email && <a href={`mailto:${customer.email}`} className="hidden items-center gap-1 hover:text-brand-600 sm:inline-flex"><Mail className="size-3" /> {customer.email}</a>}
           </div>
         </div>
-        <Link
-          to={`/orders?customer=${customer?._id}`}
+        {!customer.guest && <Link
+          to={`/orders?customer=${customer._id}`}
           className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <ReceiptText className="size-4" /> <span className="hidden sm:inline">Đơn hàng</span>
-        </Link>
+        </Link>}
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
         <Messages messages={chat.data.messages} />
@@ -340,7 +364,7 @@ export default function Chats() {
           <ChatPane key={id} id={id} />
         ) : (
           <div className="m-auto">
-            <EmptyState icon={MessageSquare} title="Chọn một cuộc trò chuyện">Tin nhắn mới của khách sẽ hiện ở đây ngay lập tức.</EmptyState>
+            <EmptyState icon={MessageSquare} title="Chọn một cuộc trò chuyện">Tin nhắn mới của khách (kể cả khách chưa đăng nhập) hiện ở đây ngay lập tức. Khi không có quản trị viên nào online, trợ lý tự động sẽ trả lời khách.</EmptyState>
           </div>
         )}
       </section>

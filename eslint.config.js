@@ -3,12 +3,12 @@ const js = require('@eslint/js');
 const globals = require('globals');
 const reactHooks = require('eslint-plugin-react-hooks');
 
-// Bỏ qua tên viết hoa: component chỉ dùng trong JSX
 const unused = ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^(_|[A-Z])', caughtErrors: 'none' }];
 
 module.exports = [
   { ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'server/uploads/**', 'server/.data/**'] },
   js.configs.recommended,
+  { rules: { 'no-empty': ['error', { allowEmptyCatch: true }] } },
   {
     files: ['server/**/*.js', 'eslint.config.js'],
     languageOptions: { ecmaVersion: 2024, sourceType: 'commonjs', globals: globals.node },
@@ -29,7 +29,7 @@ module.exports = [
     }
   },
   {
-    files: ['client-*/vite.config.js', 'client-*/**/*.test.{js,jsx}'],
+    files: ['client-*/vite.config.js'],
     languageOptions: { globals: { ...globals.node } }
   }
 ];

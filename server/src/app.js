@@ -8,7 +8,6 @@ const config = require('./config');
 const { apiNotFound, errorHandler } = require('./middleware/errors');
 const { serveImage } = require('./utils/images');
 
-// Production: phục vụ web khách hàng ở / và trang quản trị ở /admin
 function findBuild(folder) {
   for (const name of ['dist', 'build']) {
     const dir = path.resolve(__dirname, '../..', folder, name);
@@ -19,7 +18,7 @@ function findBuild(folder) {
 
 function createApp() {
   const app = express();
-  app.set('trust proxy', 1); // Lấy đúng IP khách khi chạy sau proxy (Render) để giới hạn số lần thử
+  app.set('trust proxy', 1);
 
   if (!config.isTest) app.use(morgan(config.isProd ? 'combined' : 'dev'));
   app.use(express.json({ limit: '1mb' }));
@@ -30,6 +29,8 @@ function createApp() {
   api.get('/health', (req, res) => res.json({ ok: true }));
   api.use('/', require('./routes/public'));
   api.use('/customer', require('./routes/customer'));
+  api.use('/orders', require('./routes/orders'));
+  api.use('/chat', require('./routes/chat'));
   api.use('/payment', require('./routes/payment'));
   api.use('/admin', require('./routes/admin'));
   api.use(apiNotFound);

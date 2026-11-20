@@ -14,9 +14,7 @@ export const useUi = create((set, get) => ({
     document.documentElement.classList.toggle('dark', theme === 'dark');
     try {
       localStorage.setItem('shopcar-theme', theme);
-    } catch {
-      // chế độ ẩn danh: không lưu được lựa chọn
-    }
+    } catch {}
     set({ theme });
   }
 }));

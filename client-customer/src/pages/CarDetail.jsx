@@ -140,14 +140,21 @@ export default function CarDetail() {
             <p className="text-sm text-slate-400">{formatVnd(car.price)}</p>
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-sm">
-            <Warehouse className="size-4 text-slate-400" />
-            {car.stock > 0
-              ? <span>Còn <b>{car.stock}</b> xe tại showroom</span>
-              : <span className="font-semibold text-red-600">Tạm hết hàng - hãy chat để đặt trước</span>}
-          </div>
+          {car.hidden ? (
+            <div className="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+              <p className="font-semibold">Mẫu xe này đã ngừng kinh doanh</p>
+              <p className="mt-1">Thông tin được giữ lại để bạn tra cứu. Cần hỗ trợ về xe đã mua (bảo hành, giấy tờ, khiếu nại), hãy chat với showroom.</p>
+            </div>
+          ) : (
+            <div className="mt-6 flex items-center gap-2 text-sm">
+              <Warehouse className="size-4 text-slate-400" />
+              {car.stock > 0
+                ? <span>Còn <b>{car.stock}</b> xe tại showroom</span>
+                : <span className="font-semibold text-red-600">Tạm hết hàng - hãy chat để đặt trước</span>}
+            </div>
+          )}
 
-          {car.stock > 0 && (
+          {car.stock > 0 && !car.hidden && (
             <div className="mt-4 flex items-center gap-3">
               <div className="flex h-12 items-center rounded-xl border border-slate-300 dark:border-slate-700">
                 <button className="flex size-12 items-center justify-center disabled:opacity-30" onClick={() => setQuantity(quantity - 1)} disabled={quantity <= 1} aria-label="Giảm">
@@ -163,17 +170,21 @@ export default function CarDetail() {
           )}
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Button size="lg" onClick={() => add(true)} disabled={available === 0}>
-              Mua ngay
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => add(false)} disabled={available === 0}>
-              <ShoppingCart className="size-5" /> Thêm vào giỏ
-            </Button>
+            {!car.hidden && (
+              <>
+                <Button size="lg" onClick={() => add(true)} disabled={available === 0}>
+                  Mua ngay
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => add(false)} disabled={available === 0}>
+                  <ShoppingCart className="size-5" /> Thêm vào giỏ
+                </Button>
+              </>
+            )}
             <Button size="lg" variant="secondary" className="sm:col-span-2" onClick={() => openChat(car)}>
               <MessageCircle className="size-5" /> Chat với người bán về xe này
             </Button>
           </div>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+          <div className={`mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold ${car.hidden ? 'hidden' : ''}`}>
             <button onClick={() => toggleCompare(car)} className={`inline-flex items-center gap-1.5 ${comparing ? 'text-brand-600' : 'text-slate-600 hover:text-brand-600 dark:text-slate-300'}`}>
               <GitCompareArrows className="size-4" /> {comparing ? 'Đã thêm vào so sánh' : 'Thêm vào so sánh'}
             </button>

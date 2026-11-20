@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, ArrowUpRight, CarFront, CreditCard, Clock, MessageSquare, PackageX, Trophy, Users, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, CarFront, CreditCard, Clock, Inbox, MessageSquare, PackageX, Trophy, Users, Wallet } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatDateTime, formatNumber, formatPriceShort, formatVnd, shortId } from '../lib/format';
 import { ORDER_STATUS } from '../lib/labels';
@@ -26,7 +26,6 @@ function Tile({ label, value, icon: Icon, children, to }) {
   return to ? <Link to={to} className="block">{body}</Link> : body;
 }
 
-// Tháng này chưa hết nên chỉ hiện % khi đã vượt tháng trước
 function Delta({ now, before }) {
   if (!before) return <span>Tháng trước chưa có doanh thu</span>;
   if (now < before) {
@@ -74,18 +73,21 @@ export default function Dashboard() {
   if (error) return <ErrorBox error={error} onRetry={refetch} />;
 
   const months = data.revenueByMonth;
-  const thisMonth = months.at(-1);
-  const lastMonth = months.at(-2);
-  const year = months.reduce((sum, m) => sum + m.revenue, 0);
+  const money = Array.isArray(months);
+  const thisMonth = money ? months.at(-1) : null;
+  const lastMonth = money ? months.at(-2) : null;
+  const year = money ? months.reduce((sum, m) => sum + m.revenue, 0) : 0;
 
   return (
     <>
       <PageHeader title={`Xin chào, ${admin?.username || 'admin'}`} description="Tình hình kinh doanh của showroom hôm nay." />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile label="Doanh thu tháng này" value={formatPriceShort(thisMonth.revenue)} icon={Wallet}>
-          <Delta now={thisMonth.revenue} before={lastMonth.revenue} />
-        </Tile>
+        {money && (
+          <Tile label="Doanh thu tháng này" value={formatPriceShort(thisMonth.revenue)} icon={Wallet}>
+            <Delta now={thisMonth.revenue} before={lastMonth.revenue} />
+          </Tile>
+        )}
         <Tile label="Đơn chờ xác nhận" value={formatNumber(data.orders.PENDING)} icon={Clock} to="/orders?status=PENDING">
           trên tổng {formatNumber(data.counts.orders)} đơn
         </Tile>
@@ -100,18 +102,24 @@ export default function Dashboard() {
           ) : (
             'Không có tin nhắn chưa đọc'
           )}
+          {data.newContacts > 0 && (
+            <Link to="/contacts" className="mt-1 flex items-center gap-1 font-semibold text-brand-600 dark:text-brand-500">
+              <Inbox className="size-4" /> {data.newContacts} lời nhắn chờ gọi lại
+            </Link>
+          )}
         </Tile>
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
-        <Panel title="Doanh thu 12 tháng" className="xl:col-span-2">
+        {money && <Panel title="Doanh thu 12 tháng" className="xl:col-span-2">
           <p className="-mt-3 mb-2 text-sm text-slate-500 dark:text-slate-400">
             Từ các đơn đã xác nhận · tổng <b className="text-slate-800 dark:text-slate-200">{formatVnd(year)}</b>
           </p>
           <RevenueChart data={months} />
-        </Panel>
+        </Panel>}
         <Panel title="Trạng thái đơn hàng" action={more('/orders')}>
           <StatusBar counts={data.orders} />
+          {money && <>
           <div className="mt-6 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
             <p className="text-sm text-slate-500 dark:text-slate-400">Tổng doanh thu từ trước đến nay</p>
             <p className="mt-1 text-xl font-bold tabular-nums">{formatVnd(data.revenue)}</p>
@@ -128,6 +136,7 @@ export default function Dashboard() {
               )}
             </p>
           </Link>
+          </>}
         </Panel>
       </div>
 

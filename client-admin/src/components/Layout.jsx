@@ -3,12 +3,14 @@ import { Link, Navigate, NavLink, Outlet, ScrollRestoration, useLocation, useRou
 import { useQuery } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import {
-  CarFront, ExternalLink, LayoutDashboard, LogOut, Menu, MessageSquare, Moon, ReceiptText, Sun, Tags, Users, X
+  CarFront, ExternalLink, History, Inbox, LayoutDashboard, LogOut, Menu, MessageSquare, Moon, ReceiptText, Sun, Tags, UserCog, Users, X
 } from 'lucide-react';
 import { api, SHOP_URL } from '../lib/api';
 import { useAuth } from '../stores/auth';
 import { useUi } from '../stores/ui';
 import { useLive, useLiveUpdates } from '../hooks/live';
+import { useCan } from '../hooks/useCan';
+import { ADMIN_ROLE } from '../lib/labels';
 import { ConfirmHost } from './confirm';
 import { ButtonLink, Spinner } from './ui';
 
@@ -30,21 +32,27 @@ export function Logo({ light = false }) {
 
 function useBadges() {
   const token = useAuth((s) => s.token);
-  const stats = useQuery({ queryKey: ['stats'], queryFn: () => api('/stats'), enabled: !!token, refetchInterval: 60_000 });
-  const chats = useQuery({ queryKey: ['chats'], queryFn: () => api('/chats'), enabled: !!token });
+  const canStats = useCan('dashboard.view');
+  const canChat = useCan('chats.reply');
+  const stats = useQuery({ queryKey: ['stats'], queryFn: () => api('/stats'), enabled: !!token && canStats, refetchInterval: 60_000 });
+  const chats = useQuery({ queryKey: ['chats'], queryFn: () => api('/chats'), enabled: !!token && canChat });
   return {
     orders: stats.data?.orders?.PENDING || 0,
+    contacts: stats.data?.newContacts || 0,
     chats: (chats.data || []).filter((c) => c.unreadByAdmin > 0).length
   };
 }
 
 const NAV = [
-  { to: '/', label: 'Tổng quan', icon: LayoutDashboard, end: true },
-  { to: '/cars', label: 'Xe', icon: CarFront },
-  { to: '/brands', label: 'Hãng xe', icon: Tags },
-  { to: '/orders', label: 'Đơn hàng', icon: ReceiptText, badge: 'orders' },
-  { to: '/customers', label: 'Khách hàng', icon: Users },
-  { to: '/chats', label: 'Tin nhắn', icon: MessageSquare, badge: 'chats' }
+  { to: '/', label: 'Tổng quan', icon: LayoutDashboard, end: true, permission: 'dashboard.view' },
+  { to: '/cars', label: 'Xe', icon: CarFront, permission: 'cars.view' },
+  { to: '/brands', label: 'Hãng xe', icon: Tags, permission: 'cars.view' },
+  { to: '/orders', label: 'Đơn hàng', icon: ReceiptText, badge: 'orders', permission: 'orders.view' },
+  { to: '/customers', label: 'Khách hàng', icon: Users, permission: 'customers.view' },
+  { to: '/chats', label: 'Tin nhắn', icon: MessageSquare, badge: 'chats', permission: 'chats.reply' },
+  { to: '/contacts', label: 'Liên hệ', icon: Inbox, badge: 'contacts', permission: 'contacts.handle' },
+  { to: '/staff', label: 'Nhân viên', icon: UserCog, permission: 'staff.manage' },
+  { to: '/audit', label: 'Nhật ký', icon: History, permission: 'audit.view' }
 ];
 
 function Sidebar() {
@@ -52,6 +60,7 @@ function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUi();
   const admin = useAuth((s) => s.admin);
   const logout = useAuth((s) => s.logout);
+  const nav = NAV.filter((item) => !item.permission || admin?.permissions?.includes(item.permission));
 
   const content = (
     <div className="flex h-full flex-col bg-slate-950 px-4 py-5 text-slate-300">
@@ -62,7 +71,7 @@ function Sidebar() {
         </button>
       </div>
       <nav className="mt-8 flex flex-1 flex-col gap-1" aria-label="Menu quản trị">
-        {NAV.map(({ to, label, icon: Icon, end, badge }) => (
+        {nav.map(({ to, label, icon: Icon, end, badge }) => (
           <NavLink
             key={to}
             to={to}
@@ -89,14 +98,21 @@ function Sidebar() {
         ))}
       </nav>
       <div className="border-t border-white/10 pt-4">
-        <div className="flex items-center gap-3 px-2">
-          <span className="flex size-9 items-center justify-center rounded-full bg-white/10 font-semibold uppercase text-white">
-            {admin?.username?.[0] || 'A'}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-white">{admin?.username}</p>
-            <p className="text-xs text-slate-400">Quản trị viên</p>
-          </div>
+        <div className="flex items-center gap-1">
+          <NavLink
+            to="/account"
+            onClick={() => setSidebarOpen(false)}
+            title="Tài khoản của tôi"
+            className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/5 ${isActive ? 'bg-white/10' : ''}`}
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 font-semibold uppercase text-white">
+              {(admin?.name || admin?.username)?.[0] || 'A'}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-white">{admin?.name || admin?.username}</span>
+              <span className="block truncate text-xs text-slate-400">{ADMIN_ROLE[admin?.role || 'admin'].label}</span>
+            </span>
+          </NavLink>
           <button onClick={logout} className="rounded-lg p-2 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
             <LogOut className="size-4" />
           </button>
@@ -135,7 +151,7 @@ function Topbar() {
       <div className="flex-1" />
       <span
         className="hidden items-center gap-2 text-xs font-medium text-slate-500 sm:flex dark:text-slate-400"
-        title={connected ? 'Nhận tin nhắn và đơn hàng mới ngay lập tức' : 'Đang kết nối lại...'}
+        title={connected ? 'Nhận tin nhắn, lời nhắn và đơn hàng mới ngay lập tức' : 'Đang kết nối lại...'}
       >
         <span className={`size-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
         {connected ? 'Trực tuyến' : 'Đang kết nối...'}

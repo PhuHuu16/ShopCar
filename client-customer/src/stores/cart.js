@@ -41,6 +41,18 @@ export const useCart = create(
           )
         });
       },
+      updateStock(carId, stock) {
+        const before = get().items.find((i) => i.car._id === carId);
+        if (!before) return null;
+        set({
+          items: get().items.map((i) => {
+            if (i.car._id !== carId) return i;
+            const quantity = stock > 0 ? Math.min(i.quantity, Math.min(stock, MAX_PER_CAR)) : i.quantity;
+            return { car: { ...i.car, stock }, quantity };
+          })
+        });
+        return before;
+      },
       remove(carId) {
         set({ items: get().items.filter((i) => i.car._id !== carId) });
       },

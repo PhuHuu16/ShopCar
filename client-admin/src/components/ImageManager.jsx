@@ -8,7 +8,7 @@ const MAX_SIZE = 10 * 1024 * 1024;
 const PER_REQUEST = 12;
 
 // -- Ảnh xe: kéo thả để tải lên, kéo để sắp xếp, ảnh đầu tiên là ảnh bìa --
-export function ImageManager({ images, onChange, error }) {
+export function ImageManager({ images, onChange, error, readOnly = false }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(0);
   const [dragOver, setDragOver] = useState(false);
@@ -58,6 +58,22 @@ export function ImageManager({ images, onChange, error }) {
   }
 
   const full = images.length + uploading >= MAX_IMAGES;
+
+  if (readOnly) {
+    if (!images.length) return <p className="text-sm text-slate-500 dark:text-slate-400">Xe chưa có ảnh.</p>;
+    return (
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {images.map((img, i) => (
+          <li key={img.url} className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+            <a href={img.url} target="_blank" rel="noreferrer">
+              <img src={img.thumbUrl || img.url} alt={`Ảnh ${i + 1}`} className="aspect-[4/3] w-full object-cover" />
+            </a>
+            {i === 0 && <span className="absolute left-2 top-2 rounded-md bg-slate-950/75 px-2 py-0.5 text-[11px] font-semibold text-white">Ảnh bìa</span>}
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <div>

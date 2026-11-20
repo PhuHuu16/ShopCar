@@ -10,12 +10,13 @@ const email = require('../utils/email');
 const HttpError = require('../utils/httpError');
 const { createOrder, changeStatus } = require('../services/orders');
 const chat = require('../services/chat');
+const bot = require('../services/bot');
 const payments = require('../services/payments');
-const { PAYMENT_METHODS } = require('../constants');
+const realtime = require('../realtime');
+const { objectId, phone, orderInput } = require('./schemas');
 
 const router = express.Router();
 
-// Giới hạn số lần thử từ một IP (chống dò mật khẩu, spam email)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
@@ -23,9 +24,7 @@ const authLimiter = rateLimit({
   message: { message: 'Bạn thao tác quá nhiều lần, hãy thử lại sau ít phút' }
 });
 
-const objectId = z.string().refine(mongoose.isValidObjectId, 'ID không hợp lệ');
 const password = z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(72);
-const phone = z.string().trim().regex(/^[0-9+\s.-]{8,15}$/, 'Số điện thoại không hợp lệ');
 
 const signupSchema = z.object({
   username: z.string().trim().min(3, 'Tên đăng nhập tối thiểu 3 ký tự').max(30)
@@ -77,7 +76,6 @@ router.post('/resend-activation', authLimiter, async (req, res) => {
     await Customer.updateOne({ _id: customer._id }, { activationTokenHash: hash });
     await email.sendActivation(customer, token);
   }
-  // Trả lời giống nhau để không lộ email nào đã có tài khoản
   res.json({ message: 'Nếu email thuộc một tài khoản chưa kích hoạt, chúng tôi đã gửi lại link kích hoạt.' });
 });
 
@@ -149,15 +147,11 @@ router.put('/me', requireCustomer, async (req, res) => {
 // -- Đơn hàng --
 
 router.post('/orders', requireCustomer, async (req, res) => {
-  const { items, note, payment } = z.object({
-    items: z.array(z.object({ car: objectId, quantity: z.coerce.number().int().min(1).max(10) })).min(1, 'Giỏ hàng trống').max(20),
-    note: z.string().trim().max(500).optional(),
-    payment: z.enum(PAYMENT_METHODS).default('showroom')
-  }).parse(req.body);
+  const { items, note, payment } = orderInput.parse(req.body);
   let order = await createOrder(req.customer, items, note);
   let payUrl;
   if (payment === 'vnpay') ({ order, payUrl } = await payments.startPayment(order, req.ip));
-  req.app.get('io')?.to('admins').emit('order:new', order);
+  realtime.orderChanged(order, 'order:new');
   res.status(201).json({ ...order.toJSON(), payUrl });
 });
 
@@ -188,7 +182,7 @@ router.post('/orders/:id/cancel', requireCustomer, async (req, res) => {
   if (order.payment?.status === 'paid') {
     throw new HttpError(409, 'Đơn đã đặt cọc, hãy nhắn tin cho showroom để được hủy và hoàn cọc');
   }
-  res.json(await changeStatus(order._id, 'CANCELED'));
+  res.json(await changeStatus(order._id, 'CANCELED', { reason: 'Khách hủy đơn', by: { kind: 'customer', name: req.customer.name || req.customer.username } }));
 });
 
 // -- Chat với showroom --
@@ -204,6 +198,7 @@ router.post('/chat/messages', requireCustomer, async (req, res) => {
   const result = await chat.saveMessage(conversation, 'customer', req.body);
   chat.broadcast(req.app.get('io'), result.conversation, result.message);
   res.status(201).json(result.message);
+  bot.respond(req.app.get('io'), result.conversation, result.message, { customer: req.customer });
 });
 
 router.post('/chat/read', requireCustomer, async (req, res) => {

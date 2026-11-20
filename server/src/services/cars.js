@@ -1,8 +1,10 @@
 const { z } = require('zod');
 const mongoose = require('mongoose');
 const { Car, Brand } = require('../models');
-const { escapeRegex } = require('../utils/slug');
+const search = require('../utils/search');
 const { FUELS, TRANSMISSIONS, BODY_TYPES, CONDITIONS } = require('../constants');
+
+const VISIBLE = { hidden: { $ne: true } };
 
 const SORTS = {
   newest: { createdAt: -1 },
@@ -25,6 +27,7 @@ const listQuerySchema = z.object({
   minYear: z.coerce.number().int().optional(),
   maxYear: z.coerce.number().int().optional(),
   inStock: z.enum(['true', 'false']).optional(),
+  visibility: z.enum(['visible', 'hidden', 'all']).optional(),
   sort: z.enum(Object.keys(SORTS)).default('newest'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(48).default(12)
@@ -38,11 +41,43 @@ function range(min, max) {
   return r;
 }
 
+async function matchingCars(tokens, base, fields = 'name brand') {
+  const cars = await Car.find(base).select(fields).populate('brand', 'name').lean();
+  return cars.filter((car) => search.matches(car, tokens));
+}
+
+// -- Gợi ý khi đang gõ ô tìm kiếm (web khách, chỉ xe đang hiện) --
+async function suggestCars(query, limit = 6) {
+  const tokens = search.searchTokens(query);
+  if (!tokens.length) return { items: [], total: 0 };
+  const found = await matchingCars(tokens, VISIBLE, 'name slug brand price stock sold images');
+  found.sort((a, b) =>
+    search.score(b, tokens) - search.score(a, tokens)
+    || (b.stock > 0) - (a.stock > 0)
+    || (b.sold || 0) - (a.sold || 0)
+    || a.name.localeCompare(b.name));
+  const items = found.slice(0, limit).map((car) => ({
+    _id: car._id,
+    name: car.name,
+    slug: car.slug,
+    brand: car.brand?.name,
+    price: car.price,
+    stock: car.stock,
+    image: car.images?.[0]?.thumbUrl || car.images?.[0]?.url
+  }));
+  return { items, total: found.length };
+}
+
 // -- Tìm xe (dùng chung cho web và trang quản trị) --
-async function listCars(rawQuery) {
+async function listCars(rawQuery, { admin = false } = {}) {
   const q = listQuerySchema.parse(rawQuery);
-  const filter = {};
-  if (q.q) filter.name = { $regex: escapeRegex(q.q), $options: 'i' };
+  const visibility = admin ? q.visibility || 'all' : 'visible';
+  const filter = visibility === 'visible' ? { ...VISIBLE } : visibility === 'hidden' ? { hidden: true } : {};
+  if (q.q) {
+    const tokens = search.searchTokens(q.q);
+    const ids = tokens.length ? (await matchingCars(tokens, { ...filter })).map((car) => car._id) : [];
+    filter._id = { $in: ids };
+  }
   if (q.brand) {
     const brand = mongoose.isValidObjectId(q.brand)
       ? await Brand.findById(q.brand)
@@ -74,7 +109,7 @@ async function listCars(rawQuery) {
 async function getFilterOptions() {
   const [brands, stats] = await Promise.all([
     Brand.find().sort({ name: 1 }),
-    Car.aggregate([{
+    Car.aggregate([{ $match: VISIBLE }, {
       $group: {
         _id: null,
         minPrice: { $min: '$price' }, maxPrice: { $max: '$price' },
@@ -94,4 +129,4 @@ async function getFilterOptions() {
   };
 }
 
-module.exports = { listCars, getFilterOptions };
+module.exports = { listCars, suggestCars, getFilterOptions, VISIBLE };
