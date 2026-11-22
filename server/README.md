@@ -73,7 +73,7 @@ src/db.js             kết nối MongoDB, tự khởi động MongoDB trên má
 src/models/           schema Mongoose (Admin, Customer, Brand, Car, Order, Contact, Conversation, Message)
 src/routes/           public.js, customer.js, orders.js (đơn không đăng nhập), chat.js (chat không đăng nhập),
                       admin.js, payment.js, schemas.js (schema Zod dùng chung)
-src/services/         tìm xe, đơn hàng + giữ xe, chat, trợ lý tự động (bot.js), thanh toán
+src/services/         tìm xe, giỏ hàng theo tài khoản (cart.js), đơn hàng + giữ xe, chat, trợ lý tự động (bot.js), thanh toán
 src/socket.js         Socket.IO: xác thực, phòng, chat, theo dõi đơn
 src/realtime.js       phát sự kiện (đơn, tồn kho, có nhân viên online không) từ mọi nơi trong server
 src/middleware/       xác thực (JWT + vai trò), xử lý lỗi, tải ảnh lên
@@ -112,7 +112,9 @@ Các yêu cầu cần đăng nhập gửi kèm header `Authorization: Bearer <to
 | POST | `/forgot-password` | `{ email }`, link có hiệu lực 30 phút |
 | POST | `/reset-password` | `{ id, token, password }` |
 | GET / PUT | `/me` | thông tin cá nhân; đổi mật khẩu cần `currentPassword` |
-| POST | `/orders` | `{ items: [{ car, quantity }], note, payment: 'showroom' \| 'vnpay' }`: giá và tổng tiền do server tính, xe được giữ ngay (`holdUntil`); với `vnpay`, phản hồi có thêm `payUrl` |
+| GET / PUT | `/cart` | giỏ hàng lưu theo tài khoản; `PUT { items: [{ car, quantity }] }` thay cả giỏ. Trả về `{ items: [{ car: {_id, slug, name, price, stock, image, brand}, quantity }] }`, bỏ xe đã ẩn, tối đa 20 xe, 10 chiếc/xe |
+| POST | `/cart/merge` | gộp giỏ của tab (lúc chưa đăng nhập) vào giỏ tài khoản; trùng xe thì lấy số lượng lớn hơn |
+| POST | `/orders` | `{ items: [{ car, quantity }], note, payment: 'showroom' \| 'vnpay' }`: giá và tổng tiền do server tính, xe được giữ ngay (`holdUntil`), giỏ hàng trên server được xóa; với `vnpay`, phản hồi có thêm `payUrl` |
 | POST | `/orders/:id/pay` | tạo link thanh toán mới cho đơn đang chờ và chưa đặt cọc |
 | GET | `/orders`, `/orders/:id` | chỉ đơn hàng của chính mình |
 | POST | `/orders/:id/cancel` | khi đơn còn chờ xác nhận và chưa đặt cọc |

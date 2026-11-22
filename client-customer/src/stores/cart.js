@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tabStorage } from './tabStorage';
 
 const MAX_PER_CAR = 10;
 
@@ -7,7 +8,7 @@ function maxFor(car) {
   return Math.max(0, Math.min(car.stock ?? MAX_PER_CAR, MAX_PER_CAR));
 }
 
-// -- Giỏ hàng (server kiểm tra lại giá và tồn kho khi đặt) --
+// -- Giỏ hàng (server kiểm tra lại giá và tồn kho khi đặt; đã đăng nhập thì lưu theo tài khoản, xem cartSync.js) --
 function snapshot(car) {
   return {
     _id: car._id,
@@ -24,6 +25,7 @@ export const useCart = create(
   persist(
     (set, get) => ({
       items: [],
+      owner: null,
       add(car, quantity = 1) {
         const items = [...get().items];
         const index = items.findIndex((i) => i.car._id === car._id);
@@ -60,7 +62,7 @@ export const useCart = create(
         set({ items: [] });
       }
     }),
-    { name: 'shopcar-cart' }
+    { name: 'shopcar-cart', storage: tabStorage }
   )
 );
 

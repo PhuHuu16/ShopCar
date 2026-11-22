@@ -50,9 +50,14 @@ const customerSchema = new Schema({
   status: { type: String, enum: CUSTOMER_STATUSES, default: 'active' },
   activationTokenHash: { type: String, select: false },
   resetTokenHash: { type: String, select: false },
-  resetTokenExpires: { type: Date, select: false }
+  resetTokenExpires: { type: Date, select: false },
+  cart: {
+    type: [{ car: { type: ObjectId, ref: 'Car', required: true }, quantity: { type: Number, min: 1, required: true }, _id: false }],
+    default: [],
+    select: false
+  }
 }, { timestamps: true });
-hideSecrets(customerSchema);
+hideSecrets(customerSchema, ['cart']);
 
 const brandSchema = new Schema({
   name: { type: String, required: true, unique: true, trim: true },

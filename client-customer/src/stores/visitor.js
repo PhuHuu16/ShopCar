@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tabStorage } from './tabStorage';
 import { api } from '../lib/api';
 
 // -- Mã khách cho người chat chưa đăng nhập (giống tawk.to: chat gắn với trình duyệt) --
@@ -10,7 +11,7 @@ export const useVisitor = create(
       setToken: (token) => set({ token }),
       clear: () => set({ token: null })
     }),
-    { name: 'shopcar-visitor' }
+    { name: 'shopcar-visitor', storage: tabStorage }
   )
 );
 

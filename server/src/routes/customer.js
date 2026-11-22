@@ -9,6 +9,7 @@ const security = require('../utils/security');
 const email = require('../utils/email');
 const HttpError = require('../utils/httpError');
 const { createOrder, changeStatus } = require('../services/orders');
+const cart = require('../services/cart');
 const chat = require('../services/chat');
 const bot = require('../services/bot');
 const payments = require('../services/payments');
@@ -144,11 +145,35 @@ router.put('/me', requireCustomer, async (req, res) => {
   res.json(await Customer.findByIdAndUpdate(req.customer._id, update, { new: true }));
 });
 
+// -- Giỏ hàng (lưu theo tài khoản) --
+
+const cartInput = z.object({
+  items: z.array(z.object({
+    car: objectId,
+    quantity: z.number().int().min(1).max(cart.MAX_PER_CAR)
+  })).max(cart.MAX_ITEMS)
+});
+
+router.get('/cart', requireCustomer, async (req, res) => {
+  res.json(await cart.getCart(req.customer._id));
+});
+
+router.put('/cart', requireCustomer, async (req, res) => {
+  const { items } = cartInput.parse(req.body);
+  res.json(await cart.saveCart(req.customer._id, items));
+});
+
+router.post('/cart/merge', requireCustomer, async (req, res) => {
+  const { items } = cartInput.parse(req.body);
+  res.json(await cart.mergeCart(req.customer._id, items));
+});
+
 // -- Đơn hàng --
 
 router.post('/orders', requireCustomer, async (req, res) => {
   const { items, note, payment } = orderInput.parse(req.body);
   let order = await createOrder(req.customer, items, note);
+  await cart.clearCart(req.customer._id);
   let payUrl;
   if (payment === 'vnpay') ({ order, payUrl } = await payments.startPayment(order, req.ip));
   realtime.orderChanged(order, 'order:new');

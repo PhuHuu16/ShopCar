@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tabStorage } from './tabStorage';
 
 const MAX_ORDERS = 20;
 
@@ -20,6 +21,6 @@ export const useGuestOrders = create(
         set({ info: { ...get().info, ...info } });
       }
     }),
-    { name: 'shopcar-guest-orders' }
+    { name: 'shopcar-guest-orders', storage: tabStorage }
   )
 );

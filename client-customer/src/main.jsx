@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
+import './stores/cartSync';
 import { Layout, NotFound, RequireAuth, RouteError } from './components/Layout';
 import { Spinner } from './components/ui';
 import Home from './pages/Home';

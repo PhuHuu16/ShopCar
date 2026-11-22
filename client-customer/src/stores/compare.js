@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tabStorage } from './tabStorage';
 
 export const MAX_COMPARE = 3;
 
@@ -22,6 +23,6 @@ export const useCompare = create(
       remove: (id) => set({ items: get().items.filter((c) => c._id !== id) }),
       clear: () => set({ items: [] })
     }),
-    { name: 'shopcar-compare' }
+    { name: 'shopcar-compare', storage: tabStorage }
   )
 );
