@@ -1,8 +1,3 @@
-/* Hallmark · shape: app screen · genre: editorial · theme: Atelier (deal 1/3, seed car-showroom-vietnam-selling-1013·48a5bb66·2026-11-22·r0) · redesign: full
- * nav: the project's own sidebar shell, kept · signature: the orders ledger, ruled like a register · states: loading, empty, error, full
- * axes: light/roman-serif/cool · posture: restrained · contrast: pass · scope: app · v2.0.0 */
-/* Hallmark · pre-emit critique: P3 H4 E4 S3 R4 V3 · weakest: S, an admin shell is generic by nature; page titles in the display serif and ruled tables carry the house voice */
-/* Hallmark · display face: Newsreader stands in for Sentient, which has no Vietnamese glyphs */
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/base.css" layer(base);

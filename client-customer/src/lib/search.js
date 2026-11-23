@@ -1,4 +1,4 @@
-// -- Tìm xe: cùng quy tắc với server/src/utils/search.js (có test so khớp hai bên) --
+// -- Tìm xe: cùng quy tắc với server/src/utils/search.js, sửa một bên thì sửa cả hai --
 
 export function fold(text) {
   return String(text ?? '')

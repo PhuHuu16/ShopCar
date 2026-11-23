@@ -6,8 +6,7 @@
     "dev": "node scripts/dev.js",
     "start": "node index.js",
     "seed": "node scripts/seed.js",
-    "db:check": "node scripts/db-check.js",
-    "images:upload": "node scripts/upload-images.js"
+    "db:check": "node scripts/db-check.js"
   },
   "keywords": [],
   "author": "",

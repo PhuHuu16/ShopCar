@@ -6,7 +6,7 @@ const reactHooks = require('eslint-plugin-react-hooks');
 const unused = ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^(_|[A-Z])', caughtErrors: 'none' }];
 
 module.exports = [
-  { ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'server/uploads/**', 'server/.data/**'] },
+  { ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'server/.data/**'] },
   js.configs.recommended,
   { rules: { 'no-empty': ['error', { allowEmptyCatch: true }] } },
   {

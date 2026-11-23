@@ -1,14 +1,3 @@
-/* Hallmark · shape: buy anatomy (hero, facts as rows, rail, index, band of makes, band close) · genre: editorial · theme: Atelier (deal 1/3, seed car-showroom-vietnam-selling-1013·48a5bb66·2026-11-22·r0) · redesign: full
- * hero: Counter (/) · nav: three-part bar · footer: index columns · imagery: the catalogue's own car images, none from the library · signature: the best seller hung as a matted print with its price set large
- * axes: light/roman-serif/cool · posture: restrained · contrast: pass · fold: pass · job: buy · draw: 354744 · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: S, a showroom page risks reading like any shop; every card and the hero hang the car as a print with a wall label, prices set in the display serif */
-/* Hallmark · display face: Newsreader stands in for Sentient, which has no Vietnamese glyphs */
-/* Hallmark · waive 44c · /cars, /cart, /login, /contact and /cars/:slug open on their task under the nav · task pages in a shop carry no hero; only / has one */
-/* Hallmark · waive 77 · the cart, login and contact screens are one form or one list · each showroom task page is one form or one list of cars, not a landing strip */
-/* Hallmark · waive 78 · detail-page h2s (Mô tả, Thông số chính, Tính trả góp) at --text-3xl under the car name · subsections of one product, not page sections */
-/* Hallmark · waive 3 · div.grid on /cars/:slug is the Mua ngay / Thêm vào giỏ pair, buttons with an inline icon, no tiles · the showroom detail page pairs two buy buttons here, there are no feature tiles */
-/* Hallmark · reworded "Bảo hành chính hãng / Trả góp đến 80% / Lái thử tận nơi / Giá minh bạch" to the ruled facts under "Mua xe ở ShopCar" · 58 (perk tiles became rows, same claims) */
-/* Hallmark · reworded the featured car cards on / to the best-seller index rows and the new-arrivals rail · 58, car names now sit in rows and rail cards, not section headings */
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/base.css" layer(base);

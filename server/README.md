@@ -80,7 +80,6 @@ src/middleware/       xác thực (JWT + vai trò), xử lý lỗi, tải ảnh 
 src/utils/            mật khẩu/token, email, ảnh (GridFS), slug, tìm xe (bỏ dấu, tách từ khóa), chữ ký VNPay, thông báo lỗi tiếng Việt
 scripts/dev.js        npm run dev: một MongoDB trên máy + API tự khởi động lại
 scripts/seed.js       dữ liệu mẫu (xe được tạo ảnh minh họa)
-scripts/upload-images.js  chép ảnh cũ từ server/uploads vào database
 ```
 
 ## API

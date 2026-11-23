@@ -10,8 +10,7 @@
     "lint": "eslint .",
     "check": "npm run lint && npm run build",
     "seed": "npm run seed --prefix server",
-    "db:check": "npm run db:check --prefix server",
-    "images:upload": "npm run images:upload --prefix server"
+    "db:check": "npm run db:check --prefix server"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
