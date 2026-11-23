@@ -36,32 +36,32 @@ function ContactCard({ contact }) {
     <div className={`card p-5 ${done ? 'opacity-70' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 font-semibold">
+          <p className="flex flex-wrap items-center gap-2 font-medium">
             {contact.name}
             {contact.customer
-              ? <Badge className="bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">Có tài khoản</Badge>
-              : <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300">Vãng lai</Badge>}
-            {done && <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">Đã xử lý</Badge>}
+              ? <Badge className="bg-paper-2 text-accent">Có tài khoản</Badge>
+              : <Badge className="bg-info-soft text-accent">Vãng lai</Badge>}
+            {done && <Badge className="bg-success-soft text-success">Đã xử lý</Badge>}
           </p>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600 dark:text-slate-300">
-            <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 hover:text-brand-600"><Phone className="size-4 text-slate-400" /> {contact.phone}</a>
+          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-2">
+            <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 hover:text-accent"><Phone className="size-4 text-muted" /> {contact.phone}</a>
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-brand-600"><Mail className="size-4 text-slate-400" /> {contact.email}</a>
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-accent"><Mail className="size-4 text-muted" /> {contact.email}</a>
             )}
           </div>
         </div>
-        <span className="text-xs text-slate-500 dark:text-slate-400">{formatDateTime(contact.createdAt)}</span>
+        <span className="text-xs text-muted">{formatDateTime(contact.createdAt)}</span>
       </div>
 
-      <p className="mt-3 whitespace-pre-line break-words rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50">{contact.message}</p>
+      <p className="mt-3 whitespace-pre-line break-words rounded-md bg-paper p-3 text-sm">{contact.message}</p>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         {contact.car ? (
-          <a href={`${SHOP_URL}/cars/${contact.car.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm hover:text-brand-600">
+          <a href={`${SHOP_URL}/cars/${contact.car.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm hover:text-accent">
             <CarThumb car={contact.car} />
             <span>
               <span className="block font-medium">{contact.car.name}</span>
-              <span className="text-xs text-slate-500">{formatPriceShort(contact.car.price)}</span>
+              <span className="text-xs text-muted">{formatPriceShort(contact.car.price)}</span>
             </span>
           </a>
         ) : <span />}
@@ -70,7 +70,7 @@ function ContactCard({ contact }) {
         </Button>
       </div>
       {done && contact.handledAt && (
-        <p className="mt-2 text-right text-xs text-slate-500">
+        <p className="mt-2 text-right text-xs text-muted">
           {contact.handledBy ? `${actorName(contact.handledBy)} xử lý lúc ` : 'Xử lý lúc '}
           {formatDateTime(contact.handledAt)}
         </p>
@@ -106,8 +106,8 @@ export default function Contacts() {
           <button
             key={t.value || 'all'}
             onClick={() => update({ status: t.value })}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-              status === t.value ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700'
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+              status === t.value ? 'bg-ink text-paper  ' : 'bg-paper-2 hover:bg-paper-3  '
             }`}
           >
             {t.label}

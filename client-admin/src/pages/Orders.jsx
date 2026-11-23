@@ -22,7 +22,7 @@ export function StatusBadge({ status }) {
 }
 
 function GuestBadge() {
-  return <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300">Vãng lai</Badge>;
+  return <Badge className="bg-info-soft text-accent">Vãng lai</Badge>;
 }
 
 export function PaymentBadge({ payment }) {
@@ -35,33 +35,33 @@ function PaymentInfo({ order }) {
   const refund = order.status === 'CANCELED' && p.status === 'paid';
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Thanh toán</h3>
-      <div className="space-y-2 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
+      <h3 className="mb-2 text-xs font-medium text-muted">Thanh toán</h3>
+      <div className="space-y-2 rounded-md bg-paper p-4 text-sm">
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 font-semibold">
-            <CreditCard className="size-4 text-slate-400" />
+          <span className="flex items-center gap-2 font-medium">
+            <CreditCard className="size-4 text-muted" />
             {p.method === 'vnpay' ? `Đặt cọc online ${p.provider === 'demo' ? '(cổng demo)' : 'qua VNPay'}` : 'Thanh toán tại showroom'}
           </span>
           <PaymentBadge payment={p} />
         </div>
         {p.method === 'vnpay' && (
           <dl className="grid grid-cols-2 gap-x-3 gap-y-1 pt-1">
-            <dt className="text-slate-500">Tiền cọc</dt><dd className="text-right font-semibold tabular-nums">{formatVnd(p.deposit)}</dd>
+            <dt className="text-muted">Tiền cọc</dt><dd className="text-right font-medium tabular-nums">{formatVnd(p.deposit)}</dd>
             {p.status === 'paid' && (
               <>
-                <dt className="text-slate-500">Còn phải thu</dt><dd className="text-right tabular-nums">{formatVnd(order.total - p.deposit)}</dd>
-                <dt className="text-slate-500">Thời gian</dt><dd className="text-right">{formatDateTime(p.paidAt)}</dd>
-                <dt className="text-slate-500">Mã giao dịch</dt><dd className="text-right font-mono text-xs">{p.transactionNo} · {p.bankCode}</dd>
+                <dt className="text-muted">Còn phải thu</dt><dd className="text-right tabular-nums">{formatVnd(order.total - p.deposit)}</dd>
+                <dt className="text-muted">Thời gian</dt><dd className="text-right">{formatDateTime(p.paidAt)}</dd>
+                <dt className="text-muted">Mã giao dịch</dt><dd className="text-right font-mono text-xs">{p.transactionNo}, {p.bankCode}</dd>
               </>
             )}
             {p.status === 'failed' && (
-              <><dt className="text-slate-500">Mã lỗi VNPay</dt><dd className="text-right font-mono text-xs">{p.responseCode}</dd></>
+              <><dt className="text-muted">Mã lỗi VNPay</dt><dd className="text-right font-mono text-xs">{p.responseCode}</dd></>
             )}
-            <dt className="text-slate-500">Số lần thanh toán</dt><dd className="text-right tabular-nums">{p.attempts}</dd>
+            <dt className="text-muted">Số lần thanh toán</dt><dd className="text-right tabular-nums">{p.attempts}</dd>
           </dl>
         )}
         {refund && (
-          <p className="flex gap-2 rounded-lg bg-red-50 p-3 text-red-800 dark:bg-red-500/10 dark:text-red-300">
+          <p className="flex gap-2 rounded-lg bg-error-soft p-3 text-error">
             <TriangleAlert className="mt-0.5 size-4 shrink-0" /> Đơn đã hủy nhưng khách đã cọc: cần hoàn {formatVnd(p.deposit)} cho khách.
           </p>
         )}
@@ -105,12 +105,12 @@ function Timeline({ order }) {
     steps.push({ label: order.canceledBy ? `Hủy bởi ${actorName(order.canceledBy)}` : 'Đơn bị hủy', at: order.canceledAt || order.updatedAt });
   }
   return (
-    <ol className="space-y-3 border-l border-slate-200 pl-4 dark:border-slate-700">
+    <ol className="space-y-3 border-l border-rule pl-4">
       {steps.map((s) => (
         <li key={s.label} className="relative">
-          <span className="absolute -left-[21px] top-1.5 size-2.5 rounded-full bg-slate-400 ring-4 ring-white dark:ring-slate-900" />
+          <span className="absolute -left-[21px] top-1.5 size-2.5 rounded-full bg-rule ring-4 ring-paper" />
           <p className="text-sm font-medium">{s.label}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{formatDateTime(s.at)}</p>
+          <p className="text-xs text-muted">{formatDateTime(s.at)}</p>
         </li>
       ))}
     </ol>
@@ -147,7 +147,7 @@ function OrderDetail({ id, onClose }) {
   const footer = o && o.status !== 'CANCELED' && (canCancel || canApprove) && (
     <>
       {canCancel && paidLocked && (
-        <p className="mr-auto self-center text-xs text-slate-500 dark:text-slate-400">Khách đã đặt cọc: chỉ quản trị viên hủy được đơn này (cần hoàn cọc).</p>
+        <p className="mr-auto self-center text-xs text-muted">Khách đã đặt cọc: chỉ quản trị viên hủy được đơn này (cần hoàn cọc).</p>
       )}
       {canCancel && !paidLocked && (
         <Button variant="danger-outline" onClick={() => act('CANCELED')} loading={change.isPending && change.variables?.status === 'CANCELED'}>
@@ -172,58 +172,58 @@ function OrderDetail({ id, onClose }) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <StatusBadge status={o.status} />
-            <span className="text-sm text-slate-500 dark:text-slate-400">{formatDateTime(o.createdAt)}</span>
+            <span className="text-sm text-muted">{formatDateTime(o.createdAt)}</span>
           </div>
           {o.status === 'PENDING' && o.holdUntil && o.payment?.status !== 'paid' && (
-            <p className="flex gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+            <p className="flex gap-2 rounded-md bg-warn-soft p-3 text-sm text-warn">
               <Clock className="mt-0.5 size-4 shrink-0" />
               Khách chưa cọc: xe được giữ đến {formatDateTime(o.holdUntil)}, sau đó đơn tự hủy và xe về kho.
             </p>
           )}
 
           <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Khách hàng</h3>
-            <div className="space-y-2 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
-              <p className="flex items-center gap-2 font-semibold">
-                <User className="size-4 text-slate-400" /> {o.customerInfo?.name}
+            <h3 className="mb-2 text-xs font-medium text-muted">Khách hàng</h3>
+            <div className="space-y-2 rounded-md bg-paper p-4 text-sm">
+              <p className="flex items-center gap-2 font-medium">
+                <User className="size-4 text-muted" /> {o.customerInfo?.name}
                 {!o.customer && <GuestBadge />}
               </p>
               {o.customerInfo?.phone && (
-                <a href={`tel:${o.customerInfo.phone}`} className="flex items-center gap-2 hover:text-brand-600"><Phone className="size-4 text-slate-400" /> {o.customerInfo.phone}</a>
+                <a href={`tel:${o.customerInfo.phone}`} className="flex items-center gap-2 hover:text-accent"><Phone className="size-4 text-muted" /> {o.customerInfo.phone}</a>
               )}
               {o.customerInfo?.email && (
-                <a href={`mailto:${o.customerInfo.email}`} className="flex items-center gap-2 hover:text-brand-600"><Mail className="size-4 text-slate-400" /> {o.customerInfo.email}</a>
+                <a href={`mailto:${o.customerInfo.email}`} className="flex items-center gap-2 hover:text-accent"><Mail className="size-4 text-muted" /> {o.customerInfo.email}</a>
               )}
               {o.customer ? (
-                <Link to={`/orders?customer=${o.customer}`} onClick={onClose} className="inline-block pt-1 text-xs font-semibold text-brand-600 dark:text-brand-500">
+                <Link to={`/orders?customer=${o.customer}`} onClick={onClose} className="inline-block pt-1 text-sm text-ink underline decoration-accent underline-offset-4 hover:decoration-2">
                   Xem các đơn khác của khách này
                 </Link>
               ) : (
-                <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">Đặt không cần tài khoản: hãy gọi số điện thoại trên để xác nhận.</p>
+                <p className="pt-1 text-xs text-muted">Đặt không cần tài khoản: hãy gọi số điện thoại trên để xác nhận.</p>
               )}
               {o.status === 'CANCELED' && o.cancelReason && (
-                <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">Lý do hủy: {o.cancelReason}</p>
+                <p className="pt-1 text-xs text-muted">Lý do hủy: {o.cancelReason}</p>
               )}
             </div>
           </section>
 
           <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Xe đặt mua</h3>
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            <h3 className="mb-2 text-xs font-medium text-muted">Xe đặt mua</h3>
+            <ul className="divide-y divide-rule">
               {o.items.map((item) => (
                 <li key={item.car} className="flex items-center gap-3 py-3">
                   <CarThumb car={item} className="h-12 w-[72px]" />
                   <div className="min-w-0 flex-1">
-                    <Link to={`/cars/${item.car}`} onClick={onClose} className="block truncate font-medium hover:text-brand-600">{item.name}</Link>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{formatVnd(item.price)} × {item.quantity}</p>
+                    <Link to={`/cars/${item.car}`} onClick={onClose} className="block truncate font-medium hover:text-accent">{item.name}</Link>
+                    <p className="text-sm text-muted">{formatVnd(item.price)} × {item.quantity}</p>
                   </div>
-                  <p className="font-semibold tabular-nums">{formatVnd(item.price * item.quantity)}</p>
+                  <p className="font-medium tabular-nums">{formatVnd(item.price * item.quantity)}</p>
                 </li>
               ))}
             </ul>
-            <div className="flex items-center justify-between border-t border-slate-200 pt-3 dark:border-slate-800">
+            <div className="flex items-center justify-between border-t border-rule pt-3">
               <span className="font-medium">Tổng cộng</span>
-              <span className="text-lg font-bold tabular-nums">{formatVnd(o.total)}</span>
+              <span className="text-lg font-medium tabular-nums">{formatVnd(o.total)}</span>
             </div>
           </section>
 
@@ -231,15 +231,15 @@ function OrderDetail({ id, onClose }) {
 
           {o.note && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Ghi chú của khách</h3>
-              <p className="flex gap-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+              <h3 className="mb-2 text-xs font-medium text-muted">Ghi chú của khách</h3>
+              <p className="flex gap-2 rounded-md bg-warn-soft p-4 text-sm text-warn">
                 <StickyNote className="mt-0.5 size-4 shrink-0" /> {o.note}
               </p>
             </section>
           )}
 
           <section>
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Lịch sử</h3>
+            <h3 className="mb-3 text-xs font-medium text-muted">Lịch sử</h3>
             <Timeline order={o} />
           </section>
         </div>
@@ -302,19 +302,19 @@ export default function Orders() {
       <PageHeader title="Đơn hàng" description="Xác nhận đơn để trừ kho; hủy đơn đã xác nhận sẽ trả xe về kho." />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex gap-1 overflow-x-auto rounded-xl bg-slate-200/60 p-1 dark:bg-slate-800/60" role="tablist">
+        <div className="flex gap-1 overflow-x-auto rounded-md bg-paper-3/60 p-1" role="tablist">
           {tabs.map((t) => (
             <button
               key={t.value}
               role="tab"
               aria-selected={filters.status === t.value}
               onClick={() => update({ status: t.value })}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                filters.status === t.value ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                filters.status === t.value ? 'bg-card text-ink shadow-sm  ' : 'text-ink-2 hover:text-ink  '
               }`}
             >
               {t.label}
-              {t.count !== undefined && <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{formatNumber(t.count)}</span>}
+              {t.count !== undefined && <span className="text-xs font-medium text-muted">{formatNumber(t.count)}</span>}
             </button>
           ))}
         </div>
@@ -329,10 +329,10 @@ export default function Orders() {
 
       {filters.customer && (
         <div className="mb-4 flex items-center gap-2 text-sm">
-          <span className="text-slate-500">Đang xem đơn của</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 py-1 pl-3 pr-1.5 font-semibold text-white dark:bg-white dark:text-slate-900">
-            {customer.data?.name || '...'}
-            <button onClick={() => update({ customer: '' })} className="rounded-full p-0.5 hover:bg-white/20 dark:hover:bg-slate-900/10" aria-label="Bỏ lọc theo khách">
+          <span className="text-muted">Đang xem đơn của</span>
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-ink py-1 pl-3 pr-1.5 font-medium text-paper">
+            {customer.data?.name || '…'}
+            <button onClick={() => update({ customer: '' })} className="rounded-md p-0.5 hover:bg-paper/20" aria-label="Bỏ lọc theo khách">
               <X className="size-3.5" />
             </button>
           </span>
@@ -347,9 +347,9 @@ export default function Orders() {
         ) : data.items.length === 0 ? (
           <EmptyState icon={ReceiptText} title="Không có đơn hàng nào">Thử đổi trạng thái hoặc từ khóa tìm kiếm.</EmptyState>
         ) : (
-          <div className={orders.isPlaceholderData ? 'opacity-60 transition' : ''}>
+          <div className={orders.isPlaceholderData ? 'opacity-60 transition-colors' : ''}>
             <Table>
-              <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+              <thead>
                 <tr>
                   <th className={th}>Mã đơn</th>
                   <th className={th}>Khách hàng</th>
@@ -360,22 +360,22 @@ export default function Orders() {
                   <th className={`${th} text-right`}><span className="sr-only">Thao tác</span></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-rule">
                 {data.items.map((o) => (
-                  <tr key={o._id} onClick={() => update({ id: o._id })} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className={`${td} font-mono text-xs font-semibold`}>
-                      <button onClick={(e) => { e.stopPropagation(); update({ id: o._id }); }} className="hover:text-brand-600">{shortId(o._id)}</button>
+                  <tr key={o._id} onClick={() => update({ id: o._id })} className="cursor-pointer hover:bg-paper">
+                    <td className={`${td} font-mono text-xs font-medium`}>
+                      <button onClick={(e) => { e.stopPropagation(); update({ id: o._id }); }} className="hover:text-accent">{shortId(o._id)}</button>
                     </td>
                     <td className={td}>
                       <p className="flex items-center gap-1.5 font-medium">{o.customerInfo?.name}{!o.customer && <GuestBadge />}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{o.customerInfo?.phone}</p>
+                      <p className="text-xs text-muted">{o.customerInfo?.phone}</p>
                     </td>
                     <td className={`${td} max-w-56`}>
                       <p className="truncate">{o.items[0]?.name}</p>
-                      {o.items.length > 1 && <p className="text-xs text-slate-500">và {o.items.length - 1} xe khác</p>}
+                      {o.items.length > 1 && <p className="text-xs text-muted">và {o.items.length - 1} xe khác</p>}
                     </td>
-                    <td className={`${td} text-right font-semibold tabular-nums`}>{formatVnd(o.total)}</td>
-                    <td className={`${td} whitespace-nowrap text-slate-500 dark:text-slate-400`}>{formatDateTime(o.createdAt)}</td>
+                    <td className={`${td} text-right font-medium tabular-nums`}>{formatVnd(o.total)}</td>
+                    <td className={`${td} whitespace-nowrap text-muted `}>{formatDateTime(o.createdAt)}</td>
                     <td className={td}>
                       <div className="flex flex-col items-start gap-1">
                         <StatusBadge status={o.status} />

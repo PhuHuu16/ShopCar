@@ -1,47 +1,117 @@
+/* Hallmark · shape: buy anatomy (hero, facts as rows, rail, index, band of makes, band close) · genre: editorial · theme: Atelier (deal 1/3, seed car-showroom-vietnam-selling-1013·48a5bb66·2026-11-22·r0) · redesign: full
+ * hero: Counter (/) · nav: three-part bar · footer: index columns · imagery: the catalogue's own car images, none from the library · signature: the best seller hung as a matted print with its price set large
+ * axes: light/roman-serif/cool · posture: restrained · contrast: pass · fold: pass · job: buy · draw: 354744 · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: S, a showroom page risks reading like any shop; every card and the hero hang the car as a print with a wall label, prices set in the display serif */
+/* Hallmark · display face: Newsreader stands in for Sentient, which has no Vietnamese glyphs */
+/* Hallmark · waive 44c · /cars, /cart, /login, /contact and /cars/:slug open on their task under the nav · task pages in a shop carry no hero; only / has one */
+/* Hallmark · waive 77 · the cart, login and contact screens are one form or one list · each showroom task page is one form or one list of cars, not a landing strip */
+/* Hallmark · waive 78 · detail-page h2s (Mô tả, Thông số chính, Tính trả góp) at --text-3xl under the car name · subsections of one product, not page sections */
+/* Hallmark · waive 3 · div.grid on /cars/:slug is the Mua ngay / Thêm vào giỏ pair, buttons with an inline icon, no tiles · the showroom detail page pairs two buy buttons here, there are no feature tiles */
+/* Hallmark · reworded "Bảo hành chính hãng / Trả góp đến 80% / Lái thử tận nơi / Giá minh bạch" to the ruled facts under "Mua xe ở ShopCar" · 58 (perk tiles became rows, same claims) */
+/* Hallmark · reworded the featured car cards on / to the best-seller index rows and the new-arrivals rail · 58, car names now sit in rows and rail cards, not section headings */
 @import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/base.css" layer(base);
 
-/* -- Giao diện tối theo class "dark" trên <html> -- */
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* -- Bổ sung token: font tiếng Việt, màu trạng thái, chế độ tối -- */
+:root {
+  --font-display: "Newsreader", Georgia, serif;
+  --gutter: clamp(20px, 5vw, 64px);
+  --color-warn: oklch(50% 0.1 70);
+  --color-success-soft: oklch(93.5% 0.03 150);
+  --color-error-soft: oklch(93.5% 0.025 27);
+  --color-warn-soft: oklch(93.5% 0.04 85);
+  --color-info-soft: oklch(93% 0.018 248);
+  --shadow-pop: 0 1px 2px oklch(25% 0.02 55 / 0.08), 0 12px 32px -12px oklch(25% 0.02 55 / 0.28);
+  --container: 1440px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: oklch(17% 0.012 62); --color-paper-2: oklch(20.5% 0.013 62); --color-paper-3: oklch(24.5% 0.014 62);
+  --color-ink: oklch(93% 0.01 76); --color-ink-2: oklch(84% 0.012 72); --color-muted: oklch(71% 0.012 68);
+  --color-rule: oklch(34% 0.012 62);
+  --color-accent: oklch(76% 0.075 248); --color-accent-ink: oklch(18% 0.02 250); --color-focus: oklch(78% 0.095 248);
+  --color-card: oklch(20.5% 0.012 62); --color-card-edge: oklch(31% 0.012 62); --color-pencil: oklch(66% 0.01 62);
+  --card-lit: oklch(23% 0.012 62); --card-shade: oklch(19% 0.012 62); --lit: oklch(30% 0.01 62 / 0.6);
+  --color-error: oklch(72% 0.15 27); --color-success: oklch(76% 0.12 150); --color-warn: oklch(80% 0.11 80);
+  --color-success-soft: oklch(26% 0.04 150); --color-error-soft: oklch(26% 0.04 27);
+  --color-warn-soft: oklch(27% 0.04 80); --color-info-soft: oklch(26% 0.03 248);
+  --shadow-card: 0 0 0 1px oklch(5% 0.01 60 / 0.4), 0 12px 32px -16px oklch(5% 0.01 60 / 0.7);
+  --shadow-pop: 0 0 0 1px oklch(40% 0.01 60 / 0.5), 0 16px 40px -12px oklch(5% 0.01 60 / 0.8);
+}
 
 @theme {
-  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
-  --color-brand-50: var(--color-red-50);
-  --color-brand-100: var(--color-red-100);
-  --color-brand-500: var(--color-red-500);
-  --color-brand-600: var(--color-red-600);
-  --color-brand-700: var(--color-red-700);
+  --color-*: initial;
+  --radius-xs: 2px; --radius-sm: 2px; --radius-md: 3px; --radius-lg: 3px; --radius-xl: 3px; --radius-2xl: 3px; --radius-3xl: 3px;
+  --shadow-sm: 0 1px 2px oklch(25% 0.02 55 / 0.06);
+  --shadow-md: 0 1px 2px oklch(25% 0.02 55 / 0.06);
+  --shadow-lg: var(--shadow-pop); --shadow-xl: var(--shadow-pop); --shadow-2xl: var(--shadow-pop);
+  --animate-pulse: pulse 1.6s var(--ease-in-out) infinite;
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --color-paper: var(--color-paper); --color-paper-2: var(--color-paper-2); --color-paper-3: var(--color-paper-3);
+  --color-ink: var(--color-ink); --color-ink-2: var(--color-ink-2); --color-muted: var(--color-muted);
+  --color-rule: var(--color-rule); --color-card: var(--color-card); --color-card-edge: var(--color-card-edge); --color-pencil: var(--color-pencil);
+  --color-accent: var(--color-accent); --color-accent-ink: var(--color-accent-ink); --color-focus: var(--color-focus);
+  --color-error: var(--color-error); --color-success: var(--color-success); --color-warn: var(--color-warn);
+  --color-error-soft: var(--color-error-soft); --color-success-soft: var(--color-success-soft);
+  --color-warn-soft: var(--color-warn-soft); --color-info-soft: var(--color-info-soft);
+  --color-transparent: transparent; --color-current: currentColor;
 }
 
 @layer base {
-  html {
-    color-scheme: light;
-  }
-  html.dark {
-    color-scheme: dark;
-  }
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
-  }
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    cursor: pointer;
-  }
+  html { background: var(--color-paper); }
+  body { color: var(--color-ink-2); line-height: 1.6; }
+  h1, h2 { color: var(--color-ink); }
+  h3 { color: var(--color-ink); font-weight: var(--serif-small); }
+  h4, h5, h6 { margin: 0; font-weight: 500; color: var(--color-ink); }
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offset: -2px; }
+  :disabled { cursor: not-allowed; }
+  .num { font-variant-numeric: tabular-nums; }
 }
 
 @layer components {
   .container-page {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter);
   }
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+    position: relative; border-radius: var(--radius-pill); background: var(--color-card);
+    box-shadow: 0 0 0 1px var(--color-card-edge);
   }
+  .stock {
+    position: relative; border-radius: 2px;
+    background: linear-gradient(160deg, var(--card-lit), var(--color-card) 55%, var(--card-shade));
+    box-shadow: var(--shadow-card), inset 1px 1px 0 var(--lit);
+  }
+  .mat {
+    background: var(--color-card); padding: var(--space-sm); box-shadow: var(--shadow-card);
+  }
+  .mat > img, .mat > .frame { outline: 1px solid color-mix(in oklab, var(--color-ink) 8%, transparent); outline-offset: -1px; }
   .input {
-    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition
-      placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15
-      disabled:bg-slate-100 disabled:text-slate-500
-      dark:border-slate-700 dark:bg-slate-900 dark:disabled:bg-slate-800;
+    width: 100%; min-height: 44px; border: 1px solid var(--color-muted); border-radius: var(--radius-pill);
+    background: var(--color-card); color: var(--color-ink); padding: var(--space-xs) var(--space-sm); font-size: var(--text-md);
   }
-  .label {
-    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
-  }
+  .input::placeholder { color: var(--color-muted); }
+  .input:disabled { opacity: 0.55; cursor: not-allowed; }
+  .input[aria-invalid="true"] { border-color: var(--color-error); }
+  .label { display: block; margin-bottom: var(--space-2xs); font-size: var(--text-sm); color: var(--color-ink-2); }
+  .ruled { border-top: var(--rule-head) solid var(--color-ink); }
+  .ruled > * + * { border-top: var(--rule-hair) solid var(--color-rule); }
+  .link { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 0.2em; transition: color var(--dur-short) var(--ease-out); }
+  .link:hover { color: var(--color-accent); }
+  .link:active { color: var(--color-ink-2); }
+  button.link { min-height: 44px; }
+  .display-s { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-display-s); letter-spacing: var(--tracking-statement); line-height: 1.05; color: var(--color-ink); }
+  /* Logo chữ SHOPCAR: chữ khắc Cinzel, giãn chữ; lề phải âm bù khoảng giãn sau chữ R để logo cân giữa */
+  .wordmark { font-family: "Cinzel", var(--font-display); font-weight: 500; letter-spacing: 0.14em; margin-right: -0.14em; line-height: 1; color: var(--color-ink); }
+  .price { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--tracking-display); color: var(--color-ink); font-variant-numeric: tabular-nums; }
 }
+
+@keyframes pulse { 50% { opacity: 0.45; } }

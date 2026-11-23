@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
-const config = require('../config');
 const { Brand, Car, Contact } = require('../models');
 const { loadAccount } = require('../middleware/auth');
 const realtime = require('../realtime');
@@ -55,7 +54,6 @@ router.get('/cars/:slugOrId', async (req, res) => {
 const contactLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   limit: 5,
-  skip: () => config.isTest,
   message: { message: 'Bạn đã gửi nhiều lời nhắn, hãy chờ showroom phản hồi hoặc gọi hotline' }
 });
 

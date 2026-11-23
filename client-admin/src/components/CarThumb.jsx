@@ -5,10 +5,10 @@ export function CarThumb({ car, className = 'h-10 w-16' }) {
   const src = typeof image === 'string' ? image : image?.thumbUrl || image?.url;
   if (!src) {
     return (
-      <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 dark:bg-slate-800`}>
+      <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-paper-2 text-muted `}>
         <CarFront className="size-5" />
       </div>
     );
   }
-  return <img src={src} alt="" loading="lazy" className={`${className} shrink-0 rounded-lg bg-slate-100 object-cover dark:bg-slate-800`} />;
+  return <img src={src} alt="" loading="lazy" className={`${className} shrink-0 rounded-lg bg-paper-2 object-cover `} />;
 }

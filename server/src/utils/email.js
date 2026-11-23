@@ -1,8 +1,6 @@
 const nodemailer = require('nodemailer');
 const config = require('../config');
 
-const outbox = [];
-
 let transporter = null;
 if (config.email.user && config.email.pass) {
   transporter = nodemailer.createTransport({
@@ -28,11 +26,7 @@ function button(link, label) {
 <p style="font-size:12px;color:#6b7280;word-break:break-all">Hoặc mở link: ${link}</p>`;
 }
 
-async function send({ to, subject, html, text, link }) {
-  if (config.isTest) {
-    outbox.push({ to, subject, text, link });
-    return true;
-  }
+async function send({ to, subject, html, text }) {
   if (!transporter) {
     console.log(`\n[email] (EMAIL_USER/EMAIL_PASS not set, not sent)\n  to: ${to}\n  subject: ${subject}\n  ${text}\n`);
     return true;
@@ -94,4 +88,4 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-module.exports = { sendActivation, sendPasswordReset, sendOrderConfirmation, outbox };
+module.exports = { sendActivation, sendPasswordReset, sendOrderConfirmation };

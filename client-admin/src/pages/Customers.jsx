@@ -97,9 +97,9 @@ export default function Customers() {
         ) : data.items.length === 0 ? (
           <EmptyState icon={Users} title="Không tìm thấy khách hàng">Thử từ khóa khác.</EmptyState>
         ) : (
-          <div className={customers.isPlaceholderData ? 'opacity-60 transition' : ''}>
+          <div className={customers.isPlaceholderData ? 'opacity-60 transition-colors' : ''}>
             <Table>
-              <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+              <thead>
                 <tr>
                   <th className={th}>Khách hàng</th>
                   <th className={th}>Liên hệ</th>
@@ -110,17 +110,17 @@ export default function Customers() {
                   <th className={`${th} text-right`}>Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-rule">
                 {data.items.map((c) => (
-                  <tr key={c._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <tr key={c._id} className="hover:bg-paper">
                     <td className={td}>
                       <div className="flex items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-paper-2 text-sm font-medium text-ink-2">
                           {c.name?.trim().split(/\s+/).at(-1)?.[0] || c.username[0]}
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate font-semibold">{c.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">@{c.username}</p>
+                          <p className="truncate font-medium">{c.name}</p>
+                          <p className="text-xs text-muted">@{c.username}</p>
                         </div>
                       </div>
                     </td>
@@ -128,24 +128,24 @@ export default function Customers() {
                       <p className="flex items-center gap-1.5">
                         {c.email}
                         {c.emailVerified ? (
-                          <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" aria-label="Đã xác thực email" />
+                          <BadgeCheck className="size-4 text-success" aria-label="Đã xác thực email" />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-warn">
                             <MailWarning className="size-3.5" /> Chưa kích hoạt
                           </span>
                         )}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{c.phone}</p>
+                      <p className="text-xs text-muted">{c.phone}</p>
                     </td>
                     <td className={`${td} text-right tabular-nums`}>
                       {c.orderCount > 0 ? (
-                        <Link to={`/orders?customer=${c._id}`} className="font-semibold text-brand-600 hover:underline dark:text-brand-500">{c.orderCount}</Link>
+                        <Link to={`/orders?customer=${c._id}`} className="text-ink underline decoration-accent underline-offset-4 hover:decoration-2 tabular-nums">{c.orderCount}</Link>
                       ) : (
-                        <span className="text-slate-400">0</span>
+                        <span className="text-muted">0</span>
                       )}
                     </td>
-                    <td className={`${td} text-right font-medium tabular-nums`}>{c.totalSpent ? formatPriceShort(c.totalSpent) : <span className="text-slate-400">—</span>}</td>
-                    <td className={`${td} text-slate-500 dark:text-slate-400`}>{formatDate(c.createdAt)}</td>
+                    <td className={`${td} text-right font-medium tabular-nums`}>{c.totalSpent ? formatPriceShort(c.totalSpent) : <span className="text-muted">Chưa mua</span>}</td>
+                    <td className={`${td} text-muted `}>{formatDate(c.createdAt)}</td>
                     <td className={td}>
                       <Badge className={CUSTOMER_STATUS[c.status].className}>{CUSTOMER_STATUS[c.status].label}</Badge>
                     </td>
@@ -161,7 +161,7 @@ export default function Customers() {
                         </Button>}
                         <Link
                           to={`/orders?customer=${c._id}`}
-                          className="inline-flex size-9 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                          className="inline-flex size-9 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2"
                           title="Xem đơn hàng"
                           aria-label={`Đơn hàng của ${c.username}`}
                         >
@@ -173,7 +173,7 @@ export default function Customers() {
                           title={c.status === 'blocked' ? 'Mở khóa' : 'Khóa tài khoản'}
                           aria-label={c.status === 'blocked' ? `Mở khóa ${c.username}` : `Khóa ${c.username}`}
                           onClick={() => toggleBlock(c)}
-                          className={c.status === 'blocked' ? '' : 'hover:!bg-red-50 hover:!text-red-600 dark:hover:!bg-red-500/10'}
+                          className={c.status === 'blocked' ? '' : 'hover:!bg-error-soft hover:!text-error'}
                         >
                           {c.status === 'blocked' ? <Unlock className="size-4" /> : <Lock className="size-4" />}
                         </Button>}

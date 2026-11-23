@@ -17,7 +17,6 @@ const router = express.Router();
 const guestOrderLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 10,
-  skip: () => config.isTest,
   message: { message: 'Bạn đã đặt quá nhiều đơn, hãy thử lại sau hoặc gọi hotline showroom' }
 });
 

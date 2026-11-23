@@ -23,7 +23,7 @@ export function RevenueChart({ data }) {
   return (
     <div>
       <div className="mb-4 flex justify-end">
-        <div className="inline-flex rounded-lg border border-slate-200 p-0.5 dark:border-slate-700" role="group" aria-label="Kiểu hiển thị">
+        <div className="inline-flex rounded-lg border border-rule p-0.5" role="group" aria-label="Kiểu hiển thị">
           {[
             ['chart', BarChart3, 'Biểu đồ'],
             ['table', Table2, 'Bảng']
@@ -32,8 +32,8 @@ export function RevenueChart({ data }) {
               key={key}
               onClick={() => setView(key)}
               aria-pressed={view === key}
-              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
-                view === key ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                view === key ? 'bg-ink text-paper  ' : 'text-muted hover:text-ink '
               }`}
             >
               <Icon className="size-3.5" /> {label}
@@ -46,13 +46,13 @@ export function RevenueChart({ data }) {
         <div className="max-h-72 overflow-y-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                <th className="py-2 font-semibold">Tháng</th>
-                <th className="py-2 text-right font-semibold">Số đơn</th>
-                <th className="py-2 text-right font-semibold">Doanh thu</th>
+              <tr className="text-left text-xs text-muted">
+                <th className="py-2 font-medium">Tháng</th>
+                <th className="py-2 text-right font-medium">Số đơn</th>
+                <th className="py-2 text-right font-medium">Doanh thu</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {data.map((d) => (
                 <tr key={d.month}>
                   <td className="py-2">{formatMonth(d.month)}</td>
@@ -65,7 +65,7 @@ export function RevenueChart({ data }) {
         </div>
       ) : (
         <div className="flex gap-3">
-          <div className="relative h-64 w-12 shrink-0 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+          <div className="relative h-72 w-12 shrink-0 text-right text-xs tabular-nums text-muted">
             {ticks.map((t) => (
               <span key={t} className="absolute right-0 -translate-y-1/2" style={{ bottom: `${(t / top) * 100}%` }}>
                 {formatAxisVnd(t)}
@@ -73,11 +73,11 @@ export function RevenueChart({ data }) {
             ))}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="relative h-64">
+            <div className="relative h-72">
               {ticks.map((t) => (
                 <div
                   key={t}
-                  className={`absolute inset-x-0 h-px ${t === 0 ? 'bg-slate-300 dark:bg-slate-600' : 'bg-slate-100 dark:bg-slate-800'}`}
+                  className={`absolute inset-x-0 h-px ${t === 0 ? 'bg-ink' : 'bg-rule'}`}
                   style={{ bottom: `${(t / top) * 100}%` }}
                 />
               ))}
@@ -91,32 +91,32 @@ export function RevenueChart({ data }) {
                       tabIndex={0}
                       role="img"
                       aria-label={`${formatMonth(d.month)}: ${formatVnd(d.revenue)}, ${d.orders} đơn`}
-                      className="group relative flex flex-1 cursor-default items-end justify-center outline-none"
+                      className="group relative flex flex-1 cursor-default items-end justify-center"
                       onMouseEnter={() => setActive(i)}
                       onMouseLeave={() => setActive(null)}
                       onFocus={() => setActive(i)}
                       onBlur={() => setActive(null)}
                     >
-                      <div className={`absolute inset-x-0.5 inset-y-0 rounded-md transition ${isActive ? 'bg-slate-100 dark:bg-slate-800/70' : ''}`} />
+                      <div className={`absolute inset-x-0.5 inset-y-0 rounded-sm transition-colors duration-[var(--dur-micro)] ${isActive ? 'bg-paper-2' : ''}`} />
                       <div
-                        className="relative w-full max-w-6 rounded-t-[4px] bg-brand-600 transition-[height] duration-500 dark:bg-brand-500"
+                        className={`relative w-full max-w-7 rounded-t-sm ${i === data.length - 1 ? 'bg-accent' : 'bg-muted'}`}
                         style={{ height: `${pct}%`, minHeight: d.revenue > 0 ? 2 : 0 }}
                       />
                       {i === peak && !isActive && (
-                        <span className="absolute -translate-y-1.5 whitespace-nowrap text-[11px] font-semibold text-slate-700 dark:text-slate-200" style={{ bottom: `${pct}%` }}>
+                        <span className="absolute -translate-y-1.5 whitespace-nowrap text-xs text-ink-2 tabular-nums" style={{ bottom: `${pct}%` }}>
                           {formatAxisVnd(d.revenue)}
                         </span>
                       )}
                       {isActive && (
                         <div
-                          className={`pointer-events-none absolute z-10 w-max rounded-xl bg-slate-900 px-3 py-2 text-xs text-white shadow-xl dark:bg-white dark:text-slate-900 ${
+                          className={`pointer-events-none absolute z-10 w-max rounded-md border border-rule bg-card px-3 py-2 text-sm text-ink shadow-md ${
                             i > data.length - 4 ? 'right-0' : i < 3 ? 'left-0' : 'left-1/2 -translate-x-1/2'
                           }`}
                           style={{ bottom: `calc(${Math.min(pct, 80)}% + 10px)` }}
                         >
-                          <p className="font-semibold">{formatMonth(d.month)}</p>
-                          <p className="mt-0.5 tabular-nums">{formatVnd(d.revenue)}</p>
-                          <p className="text-slate-300 dark:text-slate-500">{d.orders} đơn đã xác nhận</p>
+                          <p className="text-muted">{formatMonth(d.month)}</p>
+                          <p className="mt-0.5 font-display text-lg leading-tight tabular-nums">{formatVnd(d.revenue)}</p>
+                          <p className="text-muted">{d.orders} đơn đã xác nhận</p>
                         </div>
                       )}
                     </div>
@@ -124,7 +124,7 @@ export function RevenueChart({ data }) {
                 })}
               </div>
             </div>
-            <div className="mt-2 flex text-[11px] text-slate-500 dark:text-slate-400">
+            <div className="mt-2 flex text-xs text-muted">
               {data.map((d, i) => (
                 <span key={d.month} className={`flex-1 text-center ${i % 2 ? 'hidden sm:block' : ''}`}>
                   {formatMonth(d.month, true)}
@@ -145,7 +145,7 @@ export function StatusBar({ counts }) {
   const [active, setActive] = useState(null);
   return (
     <div>
-      <div className="flex h-3 gap-0.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+      <div className="flex h-3 gap-0.5 overflow-hidden rounded-md bg-paper-2">
         {entries.map((e) =>
           e.count > 0 ? (
             <div
@@ -168,9 +168,9 @@ export function StatusBar({ counts }) {
             onMouseLeave={() => setActive(null)}
           >
             <span className={`size-2.5 rounded-full ${e.dot}`} />
-            <span className="flex-1 text-slate-600 dark:text-slate-300">{e.label}</span>
-            <span className="font-semibold tabular-nums">{formatNumber(e.count)}</span>
-            <span className="w-10 text-right text-xs tabular-nums text-slate-500 dark:text-slate-400">
+            <span className="flex-1 text-ink-2">{e.label}</span>
+            <span className="font-medium tabular-nums">{formatNumber(e.count)}</span>
+            <span className="w-10 text-right text-xs tabular-nums text-muted">
               {total ? Math.round((e.count / total) * 100) : 0}%
             </span>
           </li>

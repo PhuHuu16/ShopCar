@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Clock, Package, Radio } from 'lucide-react';
+import { Clock, Package } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatDateTime, formatVnd, shortId } from '../lib/format';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../lib/labels';
@@ -14,15 +14,15 @@ import { useGuestOrders } from '../stores/guestOrders';
 
 function StatusBadge({ status }) {
   const s = ORDER_STATUS[status];
-  return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${s.className}`}>{s.label}</span>;
+  return <span className={`rounded-sm px-2.5 py-0.5 text-sm ${s.className}`}>{s.label}</span>;
 }
 
 function LiveHint() {
   const connected = useLive((s) => s.connected);
   if (!connected) return null;
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-      <Radio className="size-3.5" /> Tự cập nhật khi showroom xử lý đơn
+    <span className="mt-1 flex items-center gap-2 text-sm text-muted">
+      <span className="size-1.5 rounded-full bg-success" aria-hidden="true" /> Tự cập nhật khi showroom xử lý đơn
     </span>
   );
 }
@@ -53,50 +53,50 @@ export function OrderCard({ order, trackToken }) {
 
   return (
     <div className="card overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3 dark:border-slate-800 dark:bg-slate-800/40">
-        <div className="text-sm">
-          <span className="font-semibold">Đơn {shortId(order._id)}</span>
-          <span className="ml-2 text-slate-500">{formatDateTime(order.createdAt)}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule px-6 py-4">
+        <div className="flex flex-wrap items-baseline gap-x-3 text-sm">
+          <span className="text-ink">Đơn {shortId(order._id)}</span>
+          <span className="text-muted tabular-nums">{formatDateTime(order.createdAt)}</span>
         </div>
         <StatusBadge status={order.status} />
       </div>
-      <div className="divide-y divide-slate-100 px-5 dark:divide-slate-800">
+      <div className="divide-y divide-rule px-6">
         {order.items.map((item) => (
-          <div key={item.car} className="flex items-center gap-4 py-4">
-            <div className="w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
-              {item.image && <img src={item.image} alt="" className="aspect-[16/10] size-full object-cover" />}
+          <div key={item.car} className="flex items-center gap-5 py-5">
+            <div className="aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-sm bg-paper-2">
+              {item.image && <img src={item.image} alt="" className="size-full object-cover" />}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{item.name}</p>
-              <p className="text-sm text-slate-500">{formatVnd(item.price)} × {item.quantity}</p>
+              <p className="truncate font-display text-xl text-ink">{item.name}</p>
+              <p className="mt-1 text-sm text-muted tabular-nums">{formatVnd(item.price)} × {item.quantity}</p>
             </div>
-            <p className="font-semibold">{formatVnd(item.price * item.quantity)}</p>
+            <p className="text-ink tabular-nums">{formatVnd(item.price * item.quantity)}</p>
           </div>
         ))}
       </div>
-      {order.note && <p className="mx-5 mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-800/60 dark:text-slate-400">Ghi chú: {order.note}</p>}
+      {order.note && <p className="mx-6 mb-4 rounded-sm bg-paper-2 px-4 py-3 text-sm text-ink-2">Ghi chú: {order.note}</p>}
       {order.status === 'CANCELED' && order.cancelReason && (
-        <p className="mx-5 mb-4 text-sm text-slate-500">Lý do hủy: {order.cancelReason}</p>
+        <p className="mx-6 mb-4 text-sm text-muted">Lý do hủy: {order.cancelReason}</p>
       )}
-      <div className="mx-5 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${PAYMENT_STATUS[payment.status].className}`}>
+      <div className="mx-6 mb-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className={`rounded-sm px-2.5 py-0.5 text-sm ${PAYMENT_STATUS[payment.status].className}`}>
           {PAYMENT_STATUS[payment.status].label}
         </span>
         {payment.status === 'paid' && (
-          <span className="text-slate-500 dark:text-slate-400">
-            {formatVnd(payment.deposit)} lúc {formatDateTime(payment.paidAt)} · còn lại {formatVnd(order.total - payment.deposit)} khi nhận xe
+          <span className="text-muted">
+            {formatVnd(payment.deposit)} lúc {formatDateTime(payment.paidAt)}, còn lại {formatVnd(order.total - payment.deposit)} khi nhận xe
           </span>
         )}
       </div>
       {holding && (
-        <p className="mx-5 mb-4 flex gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
-          <Clock className="mt-0.5 size-4 shrink-0" />
+        <p className="mx-6 mb-5 flex gap-2.5 rounded-sm bg-warn-soft px-4 py-3 text-sm text-ink">
+          <Clock className="mt-0.5 size-4 shrink-0 text-warn" aria-hidden="true" />
           <span>
-            Xe được giữ đến <b>{formatDateTime(order.holdUntil)}</b>. Đặt cọc trước thời điểm này để tiếp tục giữ xe, nếu không đơn sẽ tự hủy.
+            Xe được giữ đến <span className="tabular-nums">{formatDateTime(order.holdUntil)}</span>. Đặt cọc trước thời điểm này để tiếp tục giữ xe, nếu không đơn sẽ tự hủy.
           </span>
         </p>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-rule px-6 py-5">
         {order.status === 'PENDING' ? (
           <div className="flex flex-wrap gap-2">
             {canPay && (
@@ -116,7 +116,7 @@ export function OrderCard({ order, trackToken }) {
             )}
           </div>
         ) : <span />}
-        <p className="text-sm">Tổng tiền: <span className="text-lg font-bold text-brand-600">{formatVnd(order.total)}</span></p>
+        <p className="flex items-baseline gap-3 text-sm text-muted">Tổng tiền <span className="price text-2xl leading-none tabular-nums">{formatVnd(order.total)}</span></p>
       </div>
     </div>
   );
@@ -163,7 +163,7 @@ export default function Orders() {
 
       {guestCount > 0 && (
         <section className={token ? 'mt-10' : ''}>
-          {token && <h2 className="mb-4 text-lg font-semibold">Đơn đặt không cần đăng nhập trên máy này</h2>}
+          {token && <h2 className="mb-5 text-2xl">Đơn đặt không cần đăng nhập trên máy này</h2>}
           <GuestOrders />
         </section>
       )}
@@ -176,13 +176,13 @@ export default function Orders() {
         >
           {token
             ? 'Khi bạn đặt xe, đơn hàng sẽ hiện ở đây.'
-            : <>Đơn đặt không cần đăng nhập sẽ hiện ở đây trên máy này, hoặc mở link theo dõi trong email. Có tài khoản? <Link to="/login?from=/orders" className="font-semibold text-brand-600 hover:underline">Đăng nhập</Link></>}
+            : <>Đơn đặt không cần đăng nhập sẽ hiện ở đây trên máy này, hoặc mở link theo dõi trong email. Có tài khoản? <Link to="/login?from=/orders" className="link">Đăng nhập</Link></>}
         </EmptyState>
       )}
 
       {(data?.length > 0 || guestCount > 0) && (
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Muốn đặt thêm? <Link to="/cars" className="font-semibold text-brand-600 hover:underline">Xem các mẫu xe</Link>
+        <p className="mt-8 text-sm text-muted">
+          Muốn đặt thêm? <Link to="/cars" className="link">Xem các mẫu xe</Link>
         </p>
       )}
     </div>
@@ -214,8 +214,8 @@ export function OrderTrack() {
       ) : isLoading ? <Spinner /> : error ? <ErrorBox error={error} onRetry={refetch} /> : (
         <>
           {data.status === 'PENDING' && (
-            <p className="mb-5 rounded-xl bg-brand-50 p-4 text-sm text-brand-800 dark:bg-brand-500/10 dark:text-brand-300">
-              Đã nhận đơn và giữ xe cho bạn. Showroom sẽ gọi số <b>{data.customerInfo?.phone}</b> để xác nhận.
+            <p className="mb-5 rounded-sm bg-info-soft px-4 py-3 text-sm text-ink">
+              Đã nhận đơn và giữ xe cho bạn. Showroom sẽ gọi số <span className="tabular-nums">{data.customerInfo?.phone}</span> để xác nhận.
             </p>
           )}
           <OrderCard order={data} trackToken={token} />

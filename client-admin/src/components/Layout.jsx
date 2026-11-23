@@ -14,18 +14,11 @@ import { ADMIN_ROLE } from '../lib/labels';
 import { ConfirmHost } from './confirm';
 import { ButtonLink, Spinner } from './ui';
 
-export function Logo({ light = false }) {
+export function Logo({ className = '' }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/30">
-        <CarFront className="size-5" />
-      </span>
-      <span className={`text-lg font-bold tracking-tight ${light ? 'text-white' : ''}`}>
-        Shop<span className="text-brand-500">Car</span>
-        <span className="ml-1.5 rounded-md bg-white/10 px-1.5 py-0.5 align-middle text-[11px] font-semibold uppercase tracking-wider text-slate-300">
-          Admin
-        </span>
-      </span>
+    <Link to="/" aria-label="ShopCar Admin, về trang tổng quan" className={`flex items-baseline gap-2 ${className}`}>
+      <span className="wordmark text-[1.5rem]">SHOPCAR</span>
+      <span className="text-sm text-muted">Admin</span>
     </Link>
   );
 }
@@ -63,14 +56,14 @@ function Sidebar() {
   const nav = NAV.filter((item) => !item.permission || admin?.permissions?.includes(item.permission));
 
   const content = (
-    <div className="flex h-full flex-col bg-slate-950 px-4 py-5 text-slate-300">
+    <div className="flex h-full flex-col border-r border-rule bg-paper-2 px-4 py-5 text-ink-2">
       <div className="flex items-center justify-between px-2">
-        <Logo light />
-        <button className="rounded-lg p-1.5 hover:bg-white/10 lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu">
+        <Logo />
+        <button type="button" className="flex size-9 items-center justify-center rounded-md hover:bg-paper-3 lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu">
           <X className="size-5" />
         </button>
       </div>
-      <nav className="mt-8 flex flex-1 flex-col gap-1" aria-label="Menu quản trị">
+      <nav className="mt-8 flex flex-1 flex-col gap-0.5" aria-label="Menu quản trị">
         {nav.map(({ to, label, icon: Icon, end, badge }) => (
           <NavLink
             key={to}
@@ -78,17 +71,17 @@ function Sidebar() {
             end={end}
             onClick={() => setSidebarOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                isActive ? 'bg-white/10 text-white' : 'hover:bg-white/5 hover:text-white'
+              `flex min-h-10 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-[var(--dur-micro)] ${
+                isActive ? 'bg-card text-ink shadow-sm ring-1 ring-rule' : 'hover:bg-paper-3 hover:text-ink'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon className={`size-5 ${isActive ? 'text-brand-500' : ''}`} />
+                <Icon className={`size-[1.125rem] ${isActive ? 'text-accent' : 'text-muted'}`} aria-hidden="true" />
                 <span className="flex-1">{label}</span>
                 {badge && badges[badge] > 0 && (
-                  <span className="min-w-6 rounded-full bg-brand-600 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                  <span className="min-w-6 rounded-sm bg-ink px-1.5 py-0.5 text-center text-xs text-paper tabular-nums">
                     {badges[badge]}
                   </span>
                 )}
@@ -97,23 +90,23 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="border-t border-white/10 pt-4">
+      <div className="border-t border-rule pt-4">
         <div className="flex items-center gap-1">
           <NavLink
             to="/account"
             onClick={() => setSidebarOpen(false)}
             title="Tài khoản của tôi"
-            className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/5 ${isActive ? 'bg-white/10' : ''}`}
+            className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-[var(--dur-micro)] hover:bg-paper-3 ${isActive ? 'bg-card ring-1 ring-rule' : ''}`}
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 font-semibold uppercase text-white">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-ink font-display text-lg text-ink">
               {(admin?.name || admin?.username)?.[0] || 'A'}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-white">{admin?.name || admin?.username}</span>
-              <span className="block truncate text-xs text-slate-400">{ADMIN_ROLE[admin?.role || 'admin'].label}</span>
+              <span className="block truncate text-sm text-ink">{admin?.name || admin?.username}</span>
+              <span className="block truncate text-xs text-muted">{ADMIN_ROLE[admin?.role || 'admin'].label}</span>
             </span>
           </NavLink>
-          <button onClick={logout} className="rounded-lg p-2 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
+          <button type="button" onClick={logout} className="flex size-9 items-center justify-center rounded-md hover:bg-paper-3 hover:text-ink" title="Đăng xuất" aria-label="Đăng xuất">
             <LogOut className="size-4" />
           </button>
         </div>
@@ -125,8 +118,8 @@ function Sidebar() {
     <>
       <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">{content}</aside>
       {sidebarOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-slate-950/60" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-[var(--z-modal)] lg:hidden">
+          <div className="absolute inset-0 bg-ink/60" onClick={() => setSidebarOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%]">{content}</aside>
         </div>
       )}
@@ -138,33 +131,29 @@ function Topbar() {
   const { theme, toggleTheme, setSidebarOpen } = useUi();
   const connected = useLive((s) => s.connected);
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/85 px-4 backdrop-blur sm:px-6 dark:border-slate-800 dark:bg-slate-950/85">
-      <button className="rounded-lg p-2 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" onClick={() => setSidebarOpen(true)} aria-label="Mở menu">
+    <header className="sticky top-0 z-[var(--z-sticky-nav)] flex h-16 items-center gap-3 border-b border-rule bg-paper px-4 sm:px-6">
+      <button type="button" className="flex size-10 items-center justify-center rounded-md hover:bg-paper-2 lg:hidden" onClick={() => setSidebarOpen(true)} aria-label="Mở menu">
         <Menu className="size-5" />
       </button>
-      <Link to="/" className="flex items-center gap-2 font-bold tracking-tight lg:hidden">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <CarFront className="size-4" />
-        </span>
-        <span>Shop<span className="text-brand-600">Car</span></span>
-      </Link>
+      <Logo className="lg:hidden" />
       <div className="flex-1" />
       <span
-        className="hidden items-center gap-2 text-xs font-medium text-slate-500 sm:flex dark:text-slate-400"
-        title={connected ? 'Nhận tin nhắn, lời nhắn và đơn hàng mới ngay lập tức' : 'Đang kết nối lại...'}
+        role="status"
+        className="hidden items-center gap-2 text-sm text-muted sm:flex"
+        title={connected ? 'Nhận tin nhắn, lời nhắn và đơn hàng mới ngay lập tức' : 'Đang kết nối lại…'}
       >
-        <span className={`size-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-        {connected ? 'Trực tuyến' : 'Đang kết nối...'}
+        <span className={`size-2 rounded-full ${connected ? 'bg-success' : 'bg-warn'}`} />
+        {connected ? 'Trực tuyến' : 'Đang kết nối…'}
       </span>
       <a
         href={SHOP_URL || '/'}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-md px-3 text-sm text-ink-2 hover:bg-paper-2 hover:text-ink"
       >
         <ExternalLink className="size-4" /> <span className="hidden sm:inline">Xem cửa hàng</span>
       </a>
-      <button onClick={toggleTheme} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đổi giao diện sáng/tối">
+      <button type="button" onClick={toggleTheme} className="flex size-10 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2 hover:text-ink" aria-label="Đổi giao diện sáng/tối">
         {theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />}
       </button>
     </header>
@@ -186,7 +175,7 @@ export function AdminLayout() {
   useLiveUpdates(token);
   if (!token) return <Navigate to={`/login?from=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   return (
-    <div className="min-h-screen lg:pl-64">
+    <div className="min-h-svh lg:pl-64">
       <Sidebar />
       <Topbar />
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8">
@@ -215,8 +204,8 @@ export function Root() {
 export function NotFound() {
   return (
     <div className="py-20 text-center">
-      <p className="text-6xl font-extrabold text-brand-600">404</p>
-      <h1 className="mt-4 text-xl font-semibold">Không tìm thấy trang</h1>
+      <p className="font-display text-8xl font-light text-muted">404</p>
+      <h1 className="mt-4 text-3xl">Không tìm thấy trang</h1>
       <ButtonLink to="/" className="mt-6">Về trang tổng quan</ButtonLink>
     </div>
   );
@@ -226,10 +215,10 @@ export function RouteError() {
   const error = useRouteError();
   console.error(error);
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-      <h1 className="text-xl font-semibold">Đã có lỗi xảy ra</h1>
-      <p className="mt-2 text-slate-500">Hãy tải lại trang. Nếu vẫn lỗi, kiểm tra máy chủ API đang chạy.</p>
-      <a href="/admin/" className="mt-6 font-semibold text-brand-600">Tải lại</a>
+    <div className="flex min-h-svh flex-col items-center justify-center px-4 text-center">
+      <h1 className="text-3xl">Đã có lỗi xảy ra</h1>
+      <p className="mt-2 text-muted">Hãy tải lại trang. Nếu vẫn lỗi, kiểm tra máy chủ API đang chạy.</p>
+      <a href="/admin/" className="mt-6 text-ink underline decoration-accent underline-offset-4">Tải lại</a>
     </div>
   );
 }

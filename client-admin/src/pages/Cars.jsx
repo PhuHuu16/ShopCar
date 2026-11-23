@@ -16,8 +16,8 @@ import { Badge, Button, ButtonLink, EmptyState, ErrorBox, PageHeader, SearchInpu
 const LIMIT = 15;
 
 function StockBadge({ stock }) {
-  if (stock === 0) return <Badge className="bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300">Hết hàng</Badge>;
-  if (stock <= 1) return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">Còn {stock}</Badge>;
+  if (stock === 0) return <Badge className="bg-error-soft text-error">Hết hàng</Badge>;
+  if (stock <= 1) return <Badge className="bg-warn-soft text-warn">Còn {stock}</Badge>;
   return <span className="tabular-nums">{stock}</span>;
 }
 
@@ -153,9 +153,9 @@ export default function Cars() {
             {canEdit ? 'Thử bỏ bớt bộ lọc, hoặc thêm xe mới.' : 'Thử bỏ bớt bộ lọc.'}
           </EmptyState>
         ) : (
-          <div className={cars.isPlaceholderData ? 'opacity-60 transition' : ''}>
+          <div className={cars.isPlaceholderData ? 'opacity-60 transition-colors' : ''}>
             <Table>
-              <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+              <thead>
                 <tr>
                   <th className={th}>Xe</th>
                   <th className={th}>Kiểu dáng</th>
@@ -165,34 +165,34 @@ export default function Cars() {
                   <th className={`${th} text-right`}>Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-rule">
                 {data.items.map((car) => (
-                  <tr key={car._id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 ${car.hidden ? 'bg-slate-50/60 dark:bg-slate-900/40' : ''}`}>
+                  <tr key={car._id} className={`hover:bg-paper  ${car.hidden ? 'bg-paper/60 ' : ''}`}>
                     <td className={td}>
                       <Link to={`/cars/${car._id}`} className="flex items-center gap-3">
                         <CarThumb car={car} className={`h-11 w-16 ${car.hidden ? 'opacity-50 grayscale' : ''}`} />
                         <div className="min-w-0">
-                          <p className="flex items-center gap-2 font-semibold">
-                            <span className={`truncate hover:text-brand-600 ${car.hidden ? 'text-slate-500' : ''}`}>{car.name}</span>
-                            {car.hidden && <Badge className="shrink-0 bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200">Đã ẩn</Badge>}
+                          <p className="flex items-center gap-2 font-medium">
+                            <span className={`truncate hover:text-accent ${car.hidden ? 'text-muted' : ''}`}>{car.name}</span>
+                            {car.hidden && <Badge className="shrink-0 bg-paper-3 text-ink-2">Đã ẩn</Badge>}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {car.brand?.name} · {car.year} · {car.condition === 'used' ? 'Đã qua sử dụng' : 'Xe mới'}
+                          <p className="text-xs text-muted">
+                            {car.brand?.name}, {car.year}, {car.condition === 'used' ? 'Đã qua sử dụng' : 'Xe mới'}
                           </p>
                         </div>
                       </Link>
                     </td>
-                    <td className={`${td} text-slate-600 dark:text-slate-300`}>{BODY_TYPE[car.bodyType]}</td>
+                    <td className={`${td} text-ink-2 `}>{BODY_TYPE[car.bodyType]}</td>
                     <td className={`${td} text-right font-medium tabular-nums`}>{formatVnd(car.price)}</td>
                     <td className={`${td} text-right`}><StockBadge stock={car.stock} /></td>
-                    <td className={`${td} text-right tabular-nums text-slate-600 dark:text-slate-300`}>{car.sold}</td>
+                    <td className={`${td} text-right tabular-nums text-ink-2 `}>{car.sold}</td>
                     <td className={`${td} text-right`}>
                       <div className="flex justify-end gap-1">
                         <a
                           href={`${SHOP_URL}/cars/${car.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex size-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                          className="inline-flex size-9 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2"
                           title="Xem trên cửa hàng"
                           aria-label={`Xem ${car.name} trên cửa hàng`}
                         >

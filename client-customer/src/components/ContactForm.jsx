@@ -45,9 +45,9 @@ export function ContactForm({ car, onSent, compact = false }) {
   if (sent) {
     return (
       <div className="py-6 text-center">
-        <CircleCheck className="mx-auto size-12 text-emerald-500" />
-        <p className="mt-3 font-semibold">Đã gửi lời nhắn!</p>
-        <p className="mt-1 text-sm text-slate-500">Tư vấn viên sẽ gọi lại số {form.phone} trong giờ làm việc.</p>
+        <CircleCheck className="mx-auto size-12 text-success" />
+        <p className="mt-3 font-medium">Đã gửi lời nhắn</p>
+        <p className="mt-1 text-sm text-muted">Tư vấn viên sẽ gọi lại số {form.phone} trong giờ làm việc.</p>
         <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSent(false); setForm({ ...form, message: '' }); }}>
           Gửi lời nhắn khác
         </Button>
@@ -74,7 +74,7 @@ export function ContactForm({ car, onSent, compact = false }) {
           required
           minLength={5}
           maxLength={2000}
-          placeholder="Hỏi giá lăn bánh, đặt lịch lái thử, trả góp..."
+          placeholder="Hỏi giá lăn bánh, đặt lịch lái thử, trả góp"
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
         />

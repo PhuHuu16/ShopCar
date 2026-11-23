@@ -24,7 +24,8 @@ const ROLES = ['admin', 'staff'];
 const ROLE_LABELS = { admin: 'Quản trị viên', staff: 'Nhân viên tư vấn' };
 
 const ROLE_PERMISSIONS = {
-  admin: Object.keys(PERMISSIONS),
+  // Quản trị viên không chat với khách: hội thoại do nhân viên tư vấn trả lời
+  admin: Object.keys(PERMISSIONS).filter((p) => p !== 'chats.reply'),
   staff: [
     'dashboard.view',
     'cars.view',

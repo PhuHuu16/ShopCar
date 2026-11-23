@@ -20,7 +20,7 @@ function createApp() {
   const app = express();
   app.set('trust proxy', 1);
 
-  if (!config.isTest) app.use(morgan(config.isProd ? 'combined' : 'dev'));
+  app.use(morgan(config.isProd ? 'combined' : 'dev'));
   app.use(express.json({ limit: '1mb' }));
 
   // -- API --

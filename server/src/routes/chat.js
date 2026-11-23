@@ -1,7 +1,6 @@
 // -- Chat cho khách chưa đăng nhập (như tawk.to) --
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const config = require('../config');
 const HttpError = require('../utils/httpError');
 const { createVisitorToken, readVisitorToken } = require('../utils/security');
 const chat = require('../services/chat');
@@ -11,7 +10,6 @@ const router = express.Router();
 const visitorLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 30,
-  skip: () => config.isTest,
   message: { message: 'Bạn thao tác quá nhiều lần, hãy thử lại sau' }
 });
 

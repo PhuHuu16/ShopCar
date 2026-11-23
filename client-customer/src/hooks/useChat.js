@@ -61,7 +61,7 @@ export function useChat(isOpen) {
   }, [isOpen, unread, socket, queryClient, identity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = useCallback(async (text, carId) => {
-    if (!socket || !socket.connected) throw new Error('Mất kết nối, đang thử kết nối lại...');
+    if (!socket || !socket.connected) throw new Error('Mất kết nối, đang thử kết nối lại…');
     const ack = await socket.timeout(10000).emitWithAck('message:send', { text, car: carId || undefined });
     if (!ack.ok) throw new Error(ack.message);
     queryClient.setQueryData(key, (data) => addMessage(data, ack.message));

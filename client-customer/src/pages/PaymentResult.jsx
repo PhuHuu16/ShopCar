@@ -56,14 +56,14 @@ export default function PaymentResult() {
       <div className="card w-full max-w-md p-8 text-center">
         {result.isLoading ? (
           <>
-            <LoaderCircle className="mx-auto size-14 animate-spin text-brand-600" />
-            <h1 className="mt-5 text-xl font-bold">Đang xác nhận thanh toán...</h1>
+            <LoaderCircle className="mx-auto size-8 animate-spin text-muted" aria-hidden="true" />
+            <h1 className="mt-5 text-3xl">Đang xác nhận thanh toán…</h1>
           </>
         ) : invalid ? (
           <>
-            <CircleX className="mx-auto size-16 text-red-500" />
-            <h1 className="mt-5 text-xl font-bold">Không xác nhận được thanh toán</h1>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
+            <CircleX className="mx-auto size-8 text-error" aria-hidden="true" />
+            <h1 className="mt-5 text-3xl">Không xác nhận được thanh toán</h1>
+            <p className="mt-2 text-muted">
               {result.error?.message || data?.message || 'Liên kết không hợp lệ.'} Nếu tài khoản đã bị trừ tiền, hãy nhắn tin cho showroom để được kiểm tra.
             </p>
             <div className="mt-7 grid gap-3">
@@ -75,28 +75,26 @@ export default function PaymentResult() {
           </>
         ) : paid ? (
           <>
-            <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/15">
-              <CircleCheck className="size-11 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h1 className="mt-5 text-2xl font-bold">Đặt cọc thành công!</h1>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
-              Xe đã được giữ cho bạn. Showroom sẽ gọi điện xác nhận và hẹn lịch nhận xe.
+            <CircleCheck className="mx-auto size-8 text-success" aria-hidden="true" />
+            <h1 className="mt-5 text-3xl">Đã đặt cọc, xe được giữ cho bạn</h1>
+            <p className="mt-2 text-muted">
+              Showroom sẽ gọi điện xác nhận và hẹn lịch nhận xe.
             </p>
-            <dl className="mt-6 space-y-2 rounded-xl bg-slate-50 p-4 text-left text-sm dark:bg-slate-800/60">
-              <div className="flex justify-between gap-3"><dt className="text-slate-500">Đơn hàng</dt><dd className="font-semibold">{data.order.code}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-slate-500">Đã đặt cọc</dt><dd className="font-semibold text-emerald-600 dark:text-emerald-400">{formatVnd(data.order.deposit)}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-slate-500">Còn lại khi nhận xe</dt><dd className="font-semibold">{formatVnd(data.order.total - data.order.deposit)}</dd></div>
+            <dl className="mt-6 border-t border-ink text-left text-sm [&>div]:border-b [&>div]:border-rule [&>div]:py-2.5">
+              <div className="flex justify-between gap-3"><dt className="text-muted">Đơn hàng</dt><dd className="text-ink tabular-nums">{data.order.code}</dd></div>
+              <div className="flex justify-between gap-3"><dt className="text-muted">Đã đặt cọc</dt><dd className="text-ink tabular-nums">{formatVnd(data.order.deposit)}</dd></div>
+              <div className="flex justify-between gap-3"><dt className="text-muted">Còn lại khi nhận xe</dt><dd className="price text-lg leading-none tabular-nums">{formatVnd(data.order.total - data.order.deposit)}</dd></div>
               {data.order.paidAt && (
-                <div className="flex justify-between gap-3"><dt className="text-slate-500">Thời gian</dt><dd>{formatDateTime(data.order.paidAt)}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-muted">Thời gian</dt><dd className="text-ink tabular-nums">{formatDateTime(data.order.paidAt)}</dd></div>
               )}
             </dl>
             <ButtonLink to={orderLink} className="mt-7 w-full">Xem đơn hàng của tôi</ButtonLink>
           </>
         ) : (
           <>
-            <CircleX className="mx-auto size-16 text-red-500" />
-            <h1 className="mt-5 text-xl font-bold">Đặt cọc chưa thành công</h1>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
+            <CircleX className="mx-auto size-8 text-error" aria-hidden="true" />
+            <h1 className="mt-5 text-3xl">Đặt cọc chưa thành công</h1>
+            <p className="mt-2 text-muted">
               {data.message}. Đơn hàng {data.order.code} vẫn được giữ, bạn có thể thanh toán lại hoặc chọn trả tại showroom.
             </p>
             <div className="mt-7 grid gap-3">

@@ -49,7 +49,7 @@ function CreateForm({ onDone }) {
       <Input id="s-username" label="Tên đăng nhập" value={form.username} onChange={set('username')} error={errors.username} hint="Chữ không dấu, số, dấu chấm hoặc gạch. Ví dụ: lan.tran" autoComplete="off" required />
       <Select id="s-role" label="Vai trò" value={form.role} onChange={set('role')} options={ROLE_OPTIONS} hint={ADMIN_ROLE[form.role].hint} />
       <Input id="s-password" type="password" label="Mật khẩu" value={form.password} onChange={set('password')} error={errors.password} hint={PASSWORD_HINT} autoComplete="new-password" required />
-      {errors._ && <p className="text-sm text-red-600 dark:text-red-400">{errors._}</p>}
+      {errors._ && <p className="text-sm text-error">{errors._}</p>}
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onDone}>Hủy</Button>
         <Button type="submit" loading={mutation.isPending}>Tạo tài khoản</Button>
@@ -73,11 +73,11 @@ function EditForm({ account, onDone }) {
       <Input id="e-name" label="Họ tên" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} error={errors.name} required />
       <Select id="e-role" label="Vai trò" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={ROLE_OPTIONS} hint={ADMIN_ROLE[form.role].hint} />
       {form.role !== account.role && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="rounded-md bg-warn-soft p-3 text-sm text-warn">
           Quyền mới có hiệu lực ngay; trang quản trị của {account.name || account.username} sẽ tự kết nối lại.
         </p>
       )}
-      {errors._ && <p className="text-sm text-red-600 dark:text-red-400">{errors._}</p>}
+      {errors._ && <p className="text-sm text-error">{errors._}</p>}
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onDone}>Hủy</Button>
         <Button type="submit" loading={mutation.isPending}>Lưu</Button>
@@ -102,7 +102,7 @@ function ResetForm({ account, onDone }) {
         mutation.mutate();
       }}
     >
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+      <p className="text-sm text-ink-2">
         {account.name || account.username} sẽ bị đăng xuất khỏi mọi thiết bị và đăng nhập lại bằng mật khẩu mới bạn đặt ở đây.
       </p>
       <Input id="r-password" type="password" label="Mật khẩu mới" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password || errors._} hint={PASSWORD_HINT} autoComplete="new-password" autoFocus required />
@@ -125,12 +125,12 @@ function StatusSwitch({ account, disabled, title, onToggle }) {
       title={title || (on ? 'Tắt tài khoản' : 'Bật lại tài khoản')}
       disabled={disabled}
       onClick={onToggle}
-      className="inline-flex items-center gap-2 rounded-full text-sm font-medium focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-9 items-center gap-2.5 rounded-md text-sm disabled:cursor-not-allowed disabled:opacity-70"
     >
-      <span className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${on ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-        <span className={`inline-block size-5 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
+      <span className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors duration-[var(--dur-short)] ${on ? 'border-ink bg-ink' : 'border-muted bg-paper-2'}`}>
+        <span className={`inline-block size-4 rounded-full transition-transform duration-[var(--dur-short)] ${on ? 'translate-x-[1.375rem] bg-paper' : 'translate-x-1 bg-muted'}`} />
       </span>
-      <span className={on ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}>{ADMIN_STATUS[account.status || 'active'].label}</span>
+      <span className={on ? 'text-ink' : 'text-muted'}>{ADMIN_STATUS[account.status || 'active'].label}</span>
     </button>
   );
 }
@@ -148,16 +148,16 @@ function DeleteForm({ account, onDone }) {
         if (matches) mutation.mutate();
       }}
     >
-      <p className="text-sm text-slate-600 dark:text-slate-300">
-        Xóa vĩnh viễn tài khoản <b className="text-slate-900 dark:text-white">{name}</b> ({account.username}). Không khôi phục được.
+      <p className="text-sm text-ink-2">
+        Xóa vĩnh viễn tài khoản <b className="text-ink">{name}</b> ({account.username}). Không khôi phục được.
       </p>
-      <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
+      <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
         <li>Người này bị đăng xuất ngay trên mọi thiết bị.</li>
         <li>Đơn đã xác nhận, tin nhắn đã trả lời và nhật ký vẫn giữ tên {name}.</li>
         <li>Tên đăng nhập {account.username} dùng lại được cho người khác.</li>
       </ul>
       {account.status !== 'disabled' && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="rounded-md bg-warn-soft p-3 text-sm text-warn">
           Nếu nhân viên có thể quay lại, hãy <b>tắt</b> tài khoản thay vì xóa: bật lại được bất cứ lúc nào, giữ nguyên tên đăng nhập và vai trò.
         </p>
       )}
@@ -216,11 +216,11 @@ export default function Staff() {
         actions={<Button onClick={() => setDialog({ type: 'create' })}><UserPlus className="size-4" /> Thêm nhân viên</Button>}
       />
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+      <div className="mb-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
         {Object.entries(ADMIN_ROLE).map(([key, r]) => (
-          <div key={key} className="card p-4">
-            <Badge className={r.className}>{r.label}</Badge>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{r.hint}</p>
+          <div key={key} className="border-t border-ink pt-4">
+            <h2 className="text-xl">{r.label}</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{r.hint}</p>
           </div>
         ))}
       </div>
@@ -234,7 +234,7 @@ export default function Staff() {
           <EmptyState icon={UserCog} title="Chưa có tài khoản nào" />
         ) : (
           <Table>
-            <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+            <thead>
               <tr>
                 <th className={th}>Nhân viên</th>
                 <th className={th}>Vai trò</th>
@@ -243,7 +243,7 @@ export default function Staff() {
                 <th className={`${th} text-right`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {data.map((a) => {
                 const self = a._id === me?._id;
                 const locked = a.isOwner || self;
@@ -252,18 +252,18 @@ export default function Staff() {
                 return (
                   <tr key={a._id}>
                     <td className={td}>
-                      <p className={`font-semibold ${a.status === 'disabled' ? 'text-slate-400 dark:text-slate-500' : ''}`}>{a.name || a.username}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className={a.status === 'disabled' ? 'text-muted' : 'text-ink'}>{a.name || a.username}</p>
+                      <p className="text-xs text-muted">
                         {a.username}
-                        {a.isOwner && ' · Tài khoản chủ'}
-                        {self && ' · Bạn'}
+                        {a.isOwner && ', tài khoản chủ'}
+                        {self && ', bạn'}
                       </p>
                     </td>
                     <td className={td}><Badge className={role.className}>{role.label}</Badge></td>
                     <td className={td}>
                       <StatusSwitch account={a} disabled={locked || toggle.isPending} title={locked ? lockedReason : undefined} onToggle={() => onToggle(a)} />
                     </td>
-                    <td className={`${td} text-sm text-slate-600 dark:text-slate-300`}>{a.lastLoginAt ? formatDateTime(a.lastLoginAt) : 'Chưa đăng nhập'}</td>
+                    <td className={`${td} text-sm text-ink-2 tabular-nums`}>{a.lastLoginAt ? formatDateTime(a.lastLoginAt) : 'Chưa đăng nhập'}</td>
                     <td className={`${td} text-right`}>
                       <div className="flex justify-end gap-1" title={locked ? lockedReason : undefined}>
                         <Button variant="ghost" size="icon" disabled={locked} onClick={() => setDialog({ type: 'edit', account: a })} title="Sửa tên, vai trò" aria-label={`Sửa ${a.username}`}>
@@ -275,12 +275,13 @@ export default function Staff() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="hover:bg-error-soft hover:text-error"
                           disabled={locked}
                           onClick={() => setDialog({ type: 'delete', account: a })}
                           title="Xóa tài khoản"
                           aria-label={`Xóa ${a.username}`}
                         >
-                          <Trash2 className="size-4 text-red-600 dark:text-red-400" />
+                          <Trash2 className="size-4" />
                         </Button>
                       </div>
                     </td>
@@ -291,8 +292,8 @@ export default function Staff() {
           </Table>
         )}
       </div>
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        Nhân viên nghỉ việc: gạt công tắc để <b>tắt</b> tài khoản (bật lại được). Xóa thì không khôi phục được, nhưng đơn hàng, tin nhắn và nhật ký vẫn giữ tên người đã làm.
+      <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted">
+        Nhân viên nghỉ việc: gạt công tắc để tắt tài khoản (bật lại được). Xóa thì không khôi phục được, nhưng đơn hàng, tin nhắn và nhật ký vẫn giữ tên người đã làm.
       </p>
 
       <Modal open={dialog?.type === 'create'} onClose={close} title="Thêm nhân viên">

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Calculator } from 'lucide-react';
 import { formatPriceShort, formatVnd } from '../lib/format';
 
 const TERMS = [12, 24, 36, 48, 60, 72, 84, 96];
@@ -29,9 +28,9 @@ export function loanPlan(price, downPercent, months, yearlyRate) {
 
 function Row({ label, value, strong }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 py-1.5 text-sm">
-      <span className="text-slate-500 dark:text-slate-400">{label}</span>
-      <span className={`tabular-nums ${strong ? 'text-base font-bold' : 'font-semibold'}`}>{value}</span>
+    <div className="flex items-baseline justify-between gap-3 py-2.5 text-sm">
+      <span className="text-muted">{label}</span>
+      <span className={`tabular-nums text-ink ${strong ? 'text-base font-medium' : ''}`}>{value}</span>
     </div>
   );
 }
@@ -44,23 +43,18 @@ export function LoanCalculator({ price }) {
   const plan = useMemo(() => loanPlan(price, down, months, validRate ? rate : 0), [price, down, months, rate, validRate]);
 
   return (
-    <section className="card p-5 sm:p-6">
-      <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10">
-          <Calculator className="size-5" />
-        </span>
-        <div>
-          <h2 className="text-lg font-bold">Tính trả góp</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Vay tối đa 80% giá xe, dư nợ giảm dần</p>
-        </div>
+    <section className="border-t border-ink pt-10">
+      <div className="grid gap-x-8 gap-y-3 md:grid-cols-12">
+        <h2 className="text-[length:var(--text-3xl)] md:col-span-5">Tính trả góp</h2>
+        <p className="text-ink-2 md:col-span-6 md:col-start-7 md:self-end">Vay tối đa 80% giá xe, dư nợ giảm dần</p>
       </div>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="space-y-5">
+      <div className="mt-10 grid gap-x-[var(--space-3xl)] gap-y-10 md:grid-cols-2">
+        <div className="space-y-7">
           <div>
             <div className="flex items-baseline justify-between">
               <label htmlFor="down" className="label mb-0">Trả trước</label>
-              <span className="text-sm font-semibold tabular-nums">{down}% · {formatPriceShort(plan.down)}</span>
+              <span className="text-sm text-ink tabular-nums">{down}%, {formatPriceShort(plan.down)}</span>
             </div>
             <input
               id="down"
@@ -70,9 +64,9 @@ export function LoanCalculator({ price }) {
               step="5"
               value={down}
               onChange={(e) => setDown(Number(e.target.value))}
-              className="mt-3 w-full accent-brand-600"
+              className="mt-3 w-full accent-ink"
             />
-            <div className="mt-1 flex justify-between text-xs text-slate-400"><span>20%</span><span>90%</span></div>
+            <div className="mt-1 flex justify-between text-xs text-muted"><span>20%</span><span>90%</span></div>
           </div>
 
           <div>
@@ -83,10 +77,9 @@ export function LoanCalculator({ price }) {
                   key={t}
                   onClick={() => setMonths(t)}
                   aria-pressed={months === t}
-                  className={`rounded-lg border py-2 text-sm font-semibold transition ${
-                    months === t
-                      ? 'border-brand-600 bg-brand-600 text-white'
-                      : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                  type="button"
+                  className={`min-h-11 whitespace-nowrap rounded-md border text-sm transition-colors duration-[var(--dur-short)] ${
+                    months === t ? 'border-ink bg-ink text-paper' : 'border-muted text-ink hover:bg-paper-2'
                   }`}
                 >
                   {t / 12} năm
@@ -105,17 +98,17 @@ export function LoanCalculator({ price }) {
               step="0.1"
               value={Number.isFinite(rate) ? rate : ''}
               onChange={(e) => setRate(e.target.valueAsNumber)}
-              className={`input ${validRate ? '' : 'border-red-400'}`}
+              className={`input ${validRate ? '' : 'border-error'}`}
             />
-            <p className="mt-1.5 text-xs text-slate-500">Lãi tham khảo, tùy ngân hàng và thời điểm vay.</p>
+            <p className="mt-1.5 text-xs text-muted">Lãi tham khảo, tùy ngân hàng và thời điểm vay.</p>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/50">
-          <p className="text-sm text-slate-500 dark:text-slate-400">Trả tháng đầu tiên</p>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight text-brand-600 tabular-nums">{formatVnd(Math.round(plan.first))}</p>
-          <p className="mt-1 text-xs text-slate-500">giảm dần đến {formatVnd(Math.round(plan.last))} ở tháng cuối</p>
-          <div className="mt-4 divide-y divide-slate-200 dark:divide-slate-700">
+        <div className="stock self-start p-8">
+          <p className="text-sm text-muted">Trả tháng đầu tiên</p>
+          <p className="price mt-2 text-[length:var(--text-display-s)] leading-none">{formatVnd(Math.round(plan.first))}</p>
+          <p className="mt-3 text-sm text-muted">giảm dần đến {formatVnd(Math.round(plan.last))} ở tháng cuối</p>
+          <div className="mt-6 border-t border-ink [&>*+*]:border-t [&>*+*]:border-rule">
             <Row label="Số tiền vay" value={formatVnd(plan.loan)} />
             <Row label="Trả trước" value={formatVnd(plan.down)} />
             <Row label="Tổng tiền lãi" value={formatVnd(Math.round(plan.totalInterest))} />
@@ -124,24 +117,24 @@ export function LoanCalculator({ price }) {
         </div>
       </div>
 
-      <details className="group mt-5">
-        <summary className="cursor-pointer text-sm font-semibold text-brand-600 hover:text-brand-700">Xem lịch trả nợ theo năm</summary>
+      <details className="group mt-8">
+        <summary className="link cursor-pointer text-sm">Xem lịch trả nợ theo năm</summary>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[420px] text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="py-2 font-semibold">Năm</th>
-                <th className="py-2 text-right font-semibold">Phải trả</th>
-                <th className="py-2 text-right font-semibold">Trong đó lãi</th>
-                <th className="py-2 text-right font-semibold">Dư nợ còn lại</th>
+              <tr className="text-left text-xs text-muted">
+                <th className="py-2 font-medium">Năm</th>
+                <th className="py-2 text-right font-medium">Phải trả</th>
+                <th className="py-2 text-right font-medium">Trong đó lãi</th>
+                <th className="py-2 text-right font-medium">Dư nợ còn lại</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {plan.years.map((y) => (
                 <tr key={y.year}>
                   <td className="py-2">Năm {y.year}</td>
                   <td className="py-2 text-right tabular-nums">{formatVnd(Math.round(y.paid))}</td>
-                  <td className="py-2 text-right tabular-nums text-slate-500">{formatVnd(Math.round(y.interest))}</td>
+                  <td className="py-2 text-right tabular-nums text-muted">{formatVnd(Math.round(y.interest))}</td>
                   <td className="py-2 text-right tabular-nums">{formatVnd(Math.round(y.remaining))}</td>
                 </tr>
               ))}

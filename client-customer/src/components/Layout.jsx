@@ -32,7 +32,7 @@ export function Layout() {
   useRealtime();
   const theme = useUi((s) => s.theme);
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-svh flex-col">
       <Header />
       <main className="flex-1">
         <Suspense fallback={<Spinner className="py-32" />}>
@@ -67,11 +67,13 @@ export function NotFound() {
 
 function ErrorPage({ notFound }) {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-20 text-center">
-      <p className="text-6xl font-extrabold text-brand-600">{notFound ? '404' : 'Oops'}</p>
-      <h1 className="mt-4 text-2xl font-bold">{notFound ? 'Không tìm thấy trang' : 'Đã có lỗi xảy ra'}</h1>
-      <p className="mt-2 text-slate-500">{notFound ? 'Trang bạn tìm không tồn tại hoặc đã được chuyển đi.' : 'Hãy tải lại trang hoặc quay về trang chủ.'}</p>
-      <ButtonLink to="/" className="mt-8">Về trang chủ</ButtonLink>
+    <div className="container-page grid min-h-[70svh] items-center gap-x-8 gap-y-6 py-20 md:grid-cols-12">
+      <p className="price text-[clamp(6rem,16vw,14rem)] leading-none text-muted md:col-span-5">{notFound ? '404' : 'Lỗi'}</p>
+      <div className="md:col-span-6 md:col-start-7">
+        <h1 className="text-[length:var(--text-display-s)]">{notFound ? 'Không tìm thấy trang' : 'Đã có lỗi xảy ra'}</h1>
+        <p className="mt-4 text-ink-2">{notFound ? 'Trang bạn tìm không tồn tại hoặc đã được chuyển đi.' : 'Hãy tải lại trang hoặc quay về trang chủ.'}</p>
+        <ButtonLink to="/" className="mt-8">Về trang chủ</ButtonLink>
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CreditCard, Lock, LogIn, Minus, Plus, ShoppingCart, Store, Trash2, TriangleAlert } from 'lucide-react';
 import { api } from '../lib/api';
-import { formatPriceShort, formatVnd } from '../lib/format';
+import { formatVnd } from '../lib/format';
 import { Button, ButtonLink, EmptyState, Input, PageHeader } from '../components/ui';
 import { useTitle } from '../hooks/useTitle';
 import { useAuth } from '../stores/auth';
@@ -14,18 +14,18 @@ import { useGuestOrders } from '../stores/guestOrders';
 function PaymentOption({ checked, onChange, icon: Icon, title, text, badge }) {
   return (
     <label
-      className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition ${
-        checked ? 'border-brand-500 bg-brand-50/60 ring-2 ring-brand-500/20 dark:bg-brand-500/5' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
+      className={`grid cursor-pointer grid-cols-[auto_auto_minmax(0,1fr)] items-start gap-x-3 rounded-md border p-4 transition-colors duration-[var(--dur-short)] ${
+        checked ? 'border-ink bg-paper-2' : 'border-rule hover:border-muted'
       }`}
     >
-      <input type="radio" name="payment" className="mt-1 accent-brand-600" checked={checked} onChange={onChange} />
-      <Icon className={`mt-0.5 size-5 shrink-0 ${checked ? 'text-brand-600' : 'text-slate-400'}`} />
+      <input type="radio" name="payment" className="mt-0.5 size-4 accent-ink" checked={checked} onChange={onChange} />
+      <Icon className={`size-5 shrink-0 ${checked ? 'text-ink' : 'text-muted'}`} aria-hidden="true" />
       <span className="min-w-0">
-        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        <span className="flex flex-wrap items-baseline gap-x-2 text-sm text-ink">
           {title}
-          {badge && <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">{badge}</span>}
+          {badge && <span className="text-xs text-muted">{badge}</span>}
         </span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">{text}</span>
+        <span className="mt-1 block text-sm leading-relaxed text-ink-2">{text}</span>
       </span>
     </label>
   );
@@ -69,7 +69,7 @@ export default function Cart() {
         guest.setInfo(info);
       }
       if (order.payUrl) {
-        toast.success('Đã tạo đơn hàng, đang chuyển sang trang thanh toán...');
+        toast.success('Đã tạo đơn hàng, đang chuyển sang trang thanh toán…');
         window.location.assign(order.payUrl);
         return;
       }
@@ -105,37 +105,37 @@ export default function Cart() {
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <div className="space-y-4">
           {items.map(({ car, quantity }) => (
-            <div key={car._id} className="card flex gap-4 p-4">
-              <Link to={`/cars/${car.slug}`} className="w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:w-40 dark:bg-slate-800">
-                {car.image && <img src={car.image} alt={car.name} className="aspect-[16/10] size-full object-cover" />}
+            <div key={car._id} className="card flex gap-5 p-5">
+              <Link to={`/cars/${car.slug}`} className="aspect-[16/10] w-28 shrink-0 self-start overflow-hidden rounded-sm bg-paper-2 sm:w-44">
+                {car.image && <img src={car.image} alt={car.name} className="size-full object-cover" />}
               </Link>
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">{car.brand}</p>
-                    <Link to={`/cars/${car.slug}`} className="block truncate font-semibold hover:text-brand-600">{car.name}</Link>
-                    <p className="mt-0.5 text-sm text-slate-500">{formatVnd(car.price)}</p>
+                    <p className="text-sm text-muted">{car.brand}</p>
+                    <Link to={`/cars/${car.slug}`} className="block truncate font-display text-xl text-ink decoration-accent underline-offset-4 hover:underline">{car.name}</Link>
+                    <p className="mt-1 text-sm text-ink-2 tabular-nums">{formatVnd(car.price)} mỗi xe</p>
                     {car.stock === 0 && (
-                      <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-red-600">
+                      <p className="mt-1 flex items-center gap-1 text-sm font-medium text-error">
                         <TriangleAlert className="size-4" /> Vừa hết hàng, hãy bỏ khỏi giỏ
                       </p>
                     )}
                   </div>
-                  <button onClick={() => remove(car._id)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10" aria-label="Xóa khỏi giỏ">
-                    <Trash2 className="size-5" />
+                  <button type="button" onClick={() => remove(car._id)} className="-mr-2 -mt-2 flex size-10 items-center justify-center rounded-md text-muted transition-colors duration-[var(--dur-short)] hover:bg-error-soft hover:text-error" aria-label="Xóa khỏi giỏ">
+                    <Trash2 className="size-[1.125rem]" />
                   </button>
                 </div>
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-3">
-                  <div className="flex h-10 items-center rounded-xl border border-slate-300 dark:border-slate-700">
+                  <div className="flex h-10 items-center rounded-md border border-muted">
                     <button className="flex size-10 items-center justify-center disabled:opacity-30" onClick={() => setQuantity(car._id, quantity - 1)} disabled={quantity <= 1} aria-label="Giảm">
                       <Minus className="size-4" />
                     </button>
-                    <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
+                    <span className="w-8 text-center text-sm tabular-nums">{quantity}</span>
                     <button className="flex size-10 items-center justify-center disabled:opacity-30" onClick={() => setQuantity(car._id, quantity + 1)} disabled={quantity >= Math.min(car.stock ?? 10, 10)} aria-label="Tăng">
                       <Plus className="size-4" />
                     </button>
                   </div>
-                  <p className="font-bold">{formatVnd(car.price * quantity)}</p>
+                  <p className="price text-xl tabular-nums">{formatVnd(car.price * quantity)}</p>
                 </div>
               </div>
             </div>
@@ -143,23 +143,23 @@ export default function Cart() {
         </div>
 
         <aside className="card h-fit p-6 lg:sticky lg:top-24">
-          <h2 className="text-lg font-semibold">Tóm tắt đơn hàng</h2>
+          <h2 className="text-2xl">Tóm tắt đơn hàng</h2>
           <div className="mt-5 space-y-2 text-sm">
             {items.map(({ car, quantity }) => (
-              <div key={car._id} className="flex justify-between gap-3 text-slate-600 dark:text-slate-400">
+              <div key={car._id} className="flex justify-between gap-3 text-ink-2">
                 <span className="truncate">{car.name} × {quantity}</span>
-                <span className="shrink-0">{formatVnd(car.price * quantity)}</span>
+                <span className="shrink-0 tabular-nums">{formatVnd(car.price * quantity)}</span>
               </div>
             ))}
           </div>
-          <div className="mt-5 flex items-end justify-between border-t border-slate-200 pt-5 dark:border-slate-800">
-            <span className="font-medium">Tổng cộng</span>
-            <span className="text-2xl font-extrabold text-brand-600">{formatVnd(total)}</span>
+          <div className="mt-5 border-t border-ink pt-5">
+            <p className="text-sm text-muted">Tổng cộng</p>
+            <p className="price mt-2 whitespace-nowrap text-[length:var(--text-3xl)] leading-none tabular-nums">{formatVnd(total)}</p>
+            <p className="mt-2 text-sm text-muted">Chưa gồm thuế trước bạ, biển số, bảo hiểm</p>
           </div>
-          <p className="mt-1 text-right text-xs text-slate-500">Chưa gồm thuế trước bạ, biển số, bảo hiểm</p>
 
           <label className="label mt-6" htmlFor="note">Ghi chú cho showroom</label>
-          <textarea id="note" className="input min-h-20" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ví dụ: muốn lái thử trước, cần hỗ trợ trả góp..." />
+          <textarea id="note" className="input min-h-20" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ví dụ: muốn lái thử trước, cần hỗ trợ trả góp" />
 
           <fieldset className="mt-6">
             <legend className="label">Hình thức thanh toán</legend>
@@ -175,19 +175,19 @@ export default function Cart() {
                 checked={payment === 'vnpay'}
                 onChange={() => setPayment('vnpay')}
                 icon={CreditCard}
-                title={<>Đặt cọc online {deposit > 0 && <span className="text-brand-600">{formatVnd(deposit)}</span>}</>}
-                text={`Qua VNPay (thẻ ATM, Visa, QR) để giữ xe đến khi nhận, không giới hạn ${holdHours} giờ. Cọc ${paymentConfig.data ? formatPriceShort(paymentConfig.data.depositPerCar) : '...'} mỗi xe, trừ vào tiền xe.`}
-                badge={paymentConfig.data?.provider === 'demo' ? 'Demo' : undefined}
+                title={<>Đặt cọc online {deposit > 0 && <span className="tabular-nums text-ink-2">{formatVnd(deposit)} mỗi xe</span>}</>}
+                text={`Qua VNPay (thẻ ATM, Visa, QR) để giữ xe đến khi nhận, không giới hạn ${holdHours} giờ. Tiền cọc được trừ vào tiền xe.`}
+                badge={paymentConfig.data?.provider === 'demo' ? '(thanh toán thử)' : undefined}
               />
             </div>
           </fieldset>
 
           {token ? (
-            <p className="mt-4 text-sm text-slate-500">Đặt hàng với tên <b className="text-slate-700 dark:text-slate-200">{customer?.name}</b> · {customer?.phone}</p>
+            <p className="mt-5 text-sm text-muted">Đặt hàng với tên <span className="text-ink">{customer?.name}</span>, {customer?.phone}</p>
           ) : (
             <fieldset className="mt-6 space-y-3">
               <legend className="label">Thông tin liên hệ để đặt xe</legend>
-              <p className="-mt-1 text-xs text-slate-500">Không cần tài khoản. Showroom gọi số này để xác nhận, link theo dõi đơn gửi qua email.</p>
+              <p className="-mt-1 text-xs text-muted">Không cần tài khoản. Showroom gọi số này để xác nhận, link theo dõi đơn gửi qua email.</p>
               <Input placeholder="Họ tên" aria-label="Họ tên" autoComplete="name" maxLength={80} {...bind('name')} />
               <Input placeholder="Số điện thoại" aria-label="Số điện thoại" type="tel" autoComplete="tel" maxLength={15} {...bind('phone')} />
               <Input placeholder="Email" aria-label="Email" type="email" autoComplete="email" {...bind('email')} />
@@ -204,18 +204,18 @@ export default function Cart() {
           </Button>
           {!token && (
             <>
-              <div className="my-4 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-slate-400">
-                <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" /> hoặc <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+              <div className="my-4 flex items-center gap-3 text-sm text-muted">
+                <span className="h-px flex-1 bg-rule" /> hoặc <span className="h-px flex-1 bg-rule" />
               </div>
               <ButtonLink to="/login?from=/cart" variant="outline" size="lg" className="w-full">
                 <LogIn className="size-4" /> Tiếp tục với đăng nhập
               </ButtonLink>
-              <p className="mt-2 text-center text-xs text-slate-500">
-                Chưa có tài khoản? <Link to="/signup" className="font-semibold text-brand-600 hover:underline">Đăng ký</Link> để xem lại mọi đơn và chat với tư vấn viên
+              <p className="mt-2 text-center text-xs text-muted">
+                Chưa có tài khoản? <Link to="/signup" className="link">Đăng ký</Link> để xem lại mọi đơn và chat với tư vấn viên
               </p>
             </>
           )}
-          <p className="mt-3 text-center text-xs text-slate-500">
+          <p className="mt-4 text-sm leading-relaxed text-muted">
             {payment === 'vnpay'
               ? 'Bạn sẽ được chuyển sang cổng thanh toán an toàn. Cọc được hoàn nếu showroom không giao được xe.'
               : `Bạn chưa phải thanh toán ngay. Xe được giữ ${holdHours} giờ, đặt cọc trong thời gian này để giữ xe đến khi nhận.`}

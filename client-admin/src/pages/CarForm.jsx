@@ -31,8 +31,8 @@ function fromCar(car) {
 function Section({ title, description, children }) {
   return (
     <section className="card p-5">
-      <h2 className="font-semibold">{title}</h2>
-      {description && <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
+      <h2 className="font-medium">{title}</h2>
+      {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -95,24 +95,24 @@ function Editor({ car, readOnly = false }) {
     >
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
-          <Link to="/cars" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+          <Link to="/cars" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-ink">
             <ArrowLeft className="size-4" /> Danh sách xe
           </Link>
-          <h1 className="mt-1 truncate text-2xl font-bold tracking-tight">{car ? car.name : 'Thêm xe mới'}</h1>
-          {car?.hidden && <p className="mt-1 text-sm font-medium text-amber-600 dark:text-amber-400">Đã ẩn khỏi web (ngừng bán)</p>}
+          <h1 className="mt-1 truncate text-2xl font-medium">{car ? car.name : 'Thêm xe mới'}</h1>
+          {car?.hidden && <p className="mt-1 text-sm font-medium text-warn">Đã ẩn khỏi web (ngừng bán)</p>}
         </div>
         <div className="flex flex-wrap gap-2">
           {car && canAudit && (
             <Link
               to={`/audit?target=${car._id}&label=${encodeURIComponent(car.name)}`}
-              className="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-ink-2 hover:bg-paper-2"
               title="Ai đã sửa giá, tồn kho, ẩn / hiện xe này"
             >
               <History className="size-4" /> Lịch sử thay đổi
             </Link>
           )}
           {car && (
-            <a href={`${SHOP_URL}/cars/${car.slug}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+            <a href={`${SHOP_URL}/cars/${car.slug}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-md border border-muted px-4 text-sm font-medium hover:bg-paper">
               <ExternalLink className="size-4" /> Xem trên cửa hàng
             </a>
           )}
@@ -125,7 +125,7 @@ function Editor({ car, readOnly = false }) {
       </div>
 
       {readOnly && (
-        <p className="mb-4 flex items-center gap-2 rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:bg-sky-500/10 dark:text-sky-200">
+        <p className="mb-4 flex items-center gap-2 rounded-md bg-info-soft px-4 py-3 text-sm text-accent">
           <Eye className="size-4 shrink-0" /> Bạn đang xem thông số xe. Chỉ quản trị viên sửa được giá, tồn kho và ảnh.
         </p>
       )}
@@ -183,7 +183,7 @@ function Editor({ car, readOnly = false }) {
               />
               <Input label="Số xe trong kho" type="number" min="0" hint="Về 0 thì cửa hàng hiện “Hết hàng”." {...field('stock')} />
               {car && (
-                <p className="rounded-xl bg-slate-50 px-3.5 py-2.5 text-sm text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+                <p className="rounded-md bg-paper px-3.5 py-2.5 text-sm text-ink-2">
                   Đã bán <b>{car.sold}</b> xe
                 </p>
               )}

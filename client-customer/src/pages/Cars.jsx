@@ -22,10 +22,8 @@ function Chips({ options, labels, value, onChange }) {
             type="button"
             onClick={() => onChange(active ? '' : o)}
             aria-pressed={active}
-            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-              active
-                ? 'border-brand-600 bg-brand-600 text-white'
-                : 'border-slate-300 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-500'
+            className={`min-h-11 rounded-md border px-3.5 text-sm transition-colors duration-[var(--dur-short)] active:translate-y-px ${
+              active ? 'border-ink bg-ink text-paper' : 'border-muted text-ink hover:bg-paper-2'
             }`}
           >
             {labels ? labels[o] : o}
@@ -38,8 +36,8 @@ function Chips({ options, labels, value, onChange }) {
 
 function FilterGroup({ title, children }) {
   return (
-    <div className="border-b border-slate-200 py-5 first:pt-0 last:border-0 dark:border-slate-800">
-      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+    <div className="border-b border-rule py-5 first:pt-0 last:border-0">
+      <h3 className="mb-3 text-lg">{title}</h3>
       {children}
     </div>
   );
@@ -62,11 +60,11 @@ function Filters({ params, setParam, options }) {
       <FilterGroup title="Khoảng giá">
         <div className="space-y-1">
           {PRICE_RANGES.map((r, i) => (
-            <label key={r.label} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1 py-1.5 text-sm">
+            <label key={r.label} className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-md px-1 text-sm">
               <input
                 type="radio"
                 name="price"
-                className="size-4 accent-brand-600"
+                className="size-4 accent-ink"
                 checked={priceIndex === i}
                 onChange={() => setParam({ minPrice: r.min || '', maxPrice: r.max || '' })}
               />
@@ -74,7 +72,7 @@ function Filters({ params, setParam, options }) {
             </label>
           ))}
           {(params.get('minPrice') || params.get('maxPrice')) && (
-            <button className="px-1 text-sm font-medium text-brand-600" onClick={() => setParam({ minPrice: '', maxPrice: '' })}>
+            <button type="button" className="link px-1 text-sm" onClick={() => setParam({ minPrice: '', maxPrice: '' })}>
               Bỏ lọc giá
             </button>
           )}
@@ -102,7 +100,7 @@ function Filters({ params, setParam, options }) {
         <label className="flex cursor-pointer items-center gap-2.5 text-sm">
           <input
             type="checkbox"
-            className="size-4 accent-brand-600"
+            className="size-4 accent-ink"
             checked={params.get('inStock') === 'true'}
             onChange={(e) => setParam({ inStock: e.target.checked ? 'true' : '' })}
           />
@@ -154,9 +152,9 @@ export default function Cars() {
     <div className="container-page py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-          <p className="mt-1 text-slate-500 dark:text-slate-400">
-            {result.data ? `${result.data.total} xe phù hợp` : 'Đang tải...'}
+          <h1 className="text-[length:var(--text-3xl)] leading-[1.1] sm:text-5xl">{title}</h1>
+          <p className="mt-1 text-muted">
+            {result.data ? `${result.data.total} xe phù hợp` : 'Đang tải…'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -173,7 +171,7 @@ export default function Cars() {
         <aside className="hidden w-64 shrink-0 lg:block">
           <div className="card sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto p-5">
             {activeCount > 0 && (
-              <button className="mb-4 text-sm font-semibold text-brand-600" onClick={() => setParams(new URLSearchParams())}>
+              <button type="button" className="link mb-4 text-sm" onClick={() => setParams(new URLSearchParams())}>
                 Xóa tất cả bộ lọc ({activeCount})
               </button>
             )}
@@ -183,18 +181,18 @@ export default function Cars() {
 
         {showFilters && (
           <div className="fixed inset-0 z-[60] lg:hidden">
-            <div className="absolute inset-0 bg-slate-950/50" onClick={() => setShowFilters(false)} />
-            <div className="absolute inset-y-0 left-0 flex w-[min(22rem,90vw)] flex-col bg-white dark:bg-slate-900">
-              <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
-                <h2 className="font-semibold">Bộ lọc</h2>
-                <button onClick={() => setShowFilters(false)} className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng">
+            <div className="absolute inset-0 bg-ink/50" onClick={() => setShowFilters(false)} />
+            <div className="absolute inset-y-0 left-0 flex w-[min(22rem,90vw)] flex-col bg-card">
+              <div className="flex items-center justify-between border-b border-rule p-4">
+                <h2 className="font-medium">Bộ lọc</h2>
+                <button type="button" onClick={() => setShowFilters(false)} className="flex size-11 items-center justify-center rounded-md hover:bg-paper-2" aria-label="Đóng">
                   <X className="size-5" />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
                 <Filters params={params} setParam={setParam} options={options.data} />
               </div>
-              <div className="flex gap-2 border-t border-slate-200 p-4 dark:border-slate-800">
+              <div className="flex gap-2 border-t border-rule p-4">
                 <Button variant="outline" className="flex-1" onClick={() => setParams(new URLSearchParams())}>Xóa lọc</Button>
                 <Button className="flex-1" onClick={() => setShowFilters(false)}>Xem {result.data?.total ?? ''} xe</Button>
               </div>

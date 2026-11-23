@@ -29,7 +29,7 @@ export function ConfirmHost() {
         </>
       }
     >
-      <p className="text-slate-600 dark:text-slate-300">{request?.message}</p>
+      <p className="text-ink-2">{request?.message}</p>
     </Modal>
   );
 }

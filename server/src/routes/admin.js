@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
-const config = require('../config');
 const { Admin, AuditLog, Brand, Car, Customer, Order, Conversation, Contact } = require('../models');
 const { requireAdmin, can } = require('../middleware/auth');
 const permissions = require('../permissions');
@@ -38,7 +37,6 @@ function checkId(id) {
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
-  skip: () => config.isTest,
   message: { message: 'Bạn thao tác quá nhiều lần, hãy thử lại sau ít phút' }
 });
 

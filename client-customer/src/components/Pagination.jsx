@@ -11,11 +11,11 @@ function pageList(page, pages) {
 
 export function Pagination({ page, pages, onChange }) {
   if (pages <= 1) return null;
-  const base = 'flex size-10 items-center justify-center rounded-xl text-sm font-semibold transition';
+  const base = 'flex size-10 items-center justify-center rounded-md text-sm font-medium transition-colors';
   return (
     <nav className="flex items-center justify-center gap-1.5" aria-label="Phân trang">
       <button
-        className={`${base} hover:bg-slate-200 disabled:opacity-40 dark:hover:bg-slate-800`}
+        className={`${base} hover:bg-paper-3 disabled:opacity-40 `}
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
         aria-label="Trang trước"
@@ -24,20 +24,20 @@ export function Pagination({ page, pages, onChange }) {
       </button>
       {pageList(page, pages).map((p, i) =>
         p === '…' ? (
-          <span key={`gap-${i}`} className="px-1 text-slate-400">…</span>
+          <span key={`gap-${i}`} className="px-1 text-muted">…</span>
         ) : (
           <button
             key={p}
             onClick={() => onChange(p)}
             aria-current={p === page ? 'page' : undefined}
-            className={`${base} ${p === page ? 'bg-brand-600 text-white' : 'hover:bg-slate-200 dark:hover:bg-slate-800'}`}
+            className={`${base} ${p === page ? 'bg-ink text-paper' : 'hover:bg-paper-3 '}`}
           >
             {p}
           </button>
         )
       )}
       <button
-        className={`${base} hover:bg-slate-200 disabled:opacity-40 dark:hover:bg-slate-800`}
+        className={`${base} hover:bg-paper-3 disabled:opacity-40 `}
         disabled={page >= pages}
         onClick={() => onChange(page + 1)}
         aria-label="Trang sau"

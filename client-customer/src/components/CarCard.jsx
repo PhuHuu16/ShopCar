@@ -1,75 +1,84 @@
 import { Link } from 'react-router';
-import { Fuel, Gauge, Settings2, Users } from 'lucide-react';
 import { formatKm, formatPriceShort } from '../lib/format';
 import { FUEL, TRANSMISSION } from '../lib/labels';
 import { CompareToggle } from './Compare';
 
-export function CarCard({ car }) {
+// -- Thẻ xe: ảnh treo trong khung giấy, nhãn tranh bên dưới --
+export function CarCard({ car, priority = false }) {
   const image = car.images?.[0]?.thumbUrl;
   const soldOut = car.stock === 0;
+  const facts = [FUEL[car.fuel], TRANSMISSION[car.transmission], `${car.seats} chỗ`, car.condition === 'used' ? formatKm(car.mileage) : 'Mới 100%'];
   return (
-    <Link
-      to={`/cars/${car.slug}`}
-      className="group card flex flex-col overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/5"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
-        {image && (
-          <img
-            src={image}
-            alt={car.name}
-            loading="lazy"
-            className="size-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        )}
-        <div className="absolute bottom-3 left-3 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:has-[[aria-pressed=true]]:opacity-100">
+    <Link to={`/cars/${car.slug}`} className="group flex min-w-0 flex-col rounded-sm">
+      <div className="mat relative">
+        <div className="frame relative aspect-[16/10] overflow-hidden bg-paper-2">
+          {image && (
+            <img
+              src={image}
+              alt={car.name}
+              width="640"
+              height="400"
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : undefined}
+              className="size-full object-cover"
+            />
+          )}
+        </div>
+        <div className="absolute bottom-6 left-6 opacity-100 transition-opacity duration-[var(--dur-short)] sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:has-[[aria-pressed=true]]:opacity-100">
           <CompareToggle car={car} />
         </div>
-        <div className="absolute right-3 top-3 flex gap-1.5">
-          {car.condition === 'used' && (
-            <span className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-800 backdrop-blur">Xe cũ</span>
-          )}
-          {soldOut && (
-            <span className="rounded-full bg-slate-900/85 px-2.5 py-1 text-xs font-semibold text-white">Hết hàng</span>
-          )}
-        </div>
+        {(car.condition === 'used' || soldOut) && (
+          <div className="absolute right-6 top-6 flex gap-1.5">
+            {car.condition === 'used' && <span className="rounded-sm bg-card px-2 py-0.5 text-xs text-ink">Xe cũ</span>}
+            {soldOut && <span className="rounded-sm bg-ink px-2 py-0.5 text-xs text-paper">Hết hàng</span>}
+          </div>
+        )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">
-          {car.brand?.name} · {car.year}
-        </p>
-        <h3 className="mt-1 line-clamp-1 font-semibold group-hover:text-brand-600">{car.name}</h3>
-        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm text-slate-500 dark:text-slate-400">
-          <span className="flex items-center gap-1.5"><Fuel className="size-4" />{FUEL[car.fuel]}</span>
-          <span className="flex items-center gap-1.5"><Settings2 className="size-4" />{TRANSMISSION[car.transmission]}</span>
-          <span className="flex items-center gap-1.5"><Users className="size-4" />{car.seats} chỗ</span>
-          <span className="flex items-center gap-1.5"><Gauge className="size-4" />{car.condition === 'used' ? formatKm(car.mileage) : 'Mới 100%'}</span>
-        </div>
-        <p className="mt-auto pt-4 text-xl font-bold text-slate-900 dark:text-white">{formatPriceShort(car.price)}</p>
+      <h3 className="mt-5 truncate text-xl decoration-accent decoration-1 underline-offset-4 group-hover:underline">{car.name}</h3>
+      <div className="mt-2 flex items-baseline justify-between gap-4">
+        <p className="min-w-0 truncate text-sm text-muted">{car.brand?.name}, đời {car.year}</p>
+        <p className="price shrink-0 text-2xl leading-none">{formatPriceShort(car.price)}</p>
       </div>
+      <p className="mt-3 border-t border-rule pt-3 text-sm text-ink-2">{facts.join(', ')}</p>
     </Link>
   );
 }
 
 export function CarCardSkeleton() {
   return (
-    <div className="card overflow-hidden">
-      <div className="aspect-[16/10] animate-pulse bg-slate-200 dark:bg-slate-800" />
-      <div className="space-y-3 p-4">
-        <div className="h-3 w-24 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-        <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-        <div className="h-10 animate-pulse rounded bg-slate-100 dark:bg-slate-800/60" />
-        <div className="h-6 w-28 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-      </div>
+    <div aria-hidden="true">
+      <div className="mat"><div className="aspect-[16/10] animate-pulse bg-paper-2" /></div>
+      <div className="mt-5 h-5 w-2/3 animate-pulse rounded-sm bg-paper-3" />
+      <div className="mt-2 h-4 w-1/3 animate-pulse rounded-sm bg-paper-2" />
+      <div className="mt-4 h-4 animate-pulse rounded-sm bg-paper-2" />
     </div>
   );
 }
 
 export function CarGrid({ cars, loading, count = 8, columns = 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' }) {
   return (
-    <div className={`grid gap-5 ${columns}`}>
+    <div className={`grid gap-x-8 gap-y-14 ${columns}`}>
       {loading
         ? Array.from({ length: count }, (_, i) => <CarCardSkeleton key={i} />)
         : cars.map((car) => <CarCard key={car._id} car={car} />)}
     </div>
+  );
+}
+
+// -- Dải xe cuộn ngang (chạm, cuộn hoặc phím Tab) --
+export function CarRail({ cars, loading, label }) {
+  const items = loading ? Array.from({ length: 5 }, (_, i) => ({ _id: `s${i}` })) : cars;
+  return (
+    <ul
+      className="-mx-[var(--gutter)] flex snap-x snap-mandatory scroll-px-[var(--gutter)] gap-8 overflow-x-auto px-[var(--gutter)] pb-6 [scrollbar-width:thin]"
+      aria-label={label}
+      tabIndex={0}
+    >
+      {items.map((car) => (
+        <li key={car._id} className="w-[78%] shrink-0 snap-start sm:w-[44%] lg:w-[30%] xl:w-[23%]">
+          {loading ? <CarCardSkeleton /> : <CarCard car={car} />}
+        </li>
+      ))}
+    </ul>
   );
 }

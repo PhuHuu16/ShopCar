@@ -50,7 +50,7 @@ export default function Account() {
       <PageHeader title="Tài khoản của tôi">Thành viên từ {formatDate(customer.createdAt)}</PageHeader>
       <div className="space-y-6">
         <form onSubmit={saveProfile} className="card space-y-4 p-6">
-          <h2 className="text-lg font-semibold">Thông tin cá nhân</h2>
+          <h2 className="text-lg font-medium">Thông tin cá nhân</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input label="Tên đăng nhập" value={customer.username} disabled />
             <Input label="Email" value={customer.email} disabled />
@@ -61,7 +61,7 @@ export default function Account() {
         </form>
 
         <form onSubmit={changePassword} className="card space-y-4 p-6">
-          <h2 className="text-lg font-semibold">Đổi mật khẩu</h2>
+          <h2 className="text-lg font-medium">Đổi mật khẩu</h2>
           <Input label="Mật khẩu hiện tại" type="password" autoComplete="current-password" required value={pw.currentPassword}
             error={errors.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} />
           <div className="grid gap-4 sm:grid-cols-2">

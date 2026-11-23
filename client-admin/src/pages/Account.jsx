@@ -50,18 +50,18 @@ export default function Account() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="card p-5">
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <h2 className="font-semibold">Thông tin</h2>
+            <h2 className="font-medium">Thông tin</h2>
             <Badge className={role.className}>{role.label}</Badge>
-            {admin.isOwner && <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">Tài khoản chủ</Badge>}
+            {admin.isOwner && <Badge className="bg-warn-soft text-warn">Tài khoản chủ</Badge>}
           </div>
           <ProfileForm key={admin._id} admin={admin} />
-          {admin.lastLoginAt && <p className="mt-4 text-xs text-slate-500">Đăng nhập gần nhất: {formatDateTime(admin.lastLoginAt)}</p>}
+          {admin.lastLoginAt && <p className="mt-4 text-xs text-muted">Đăng nhập gần nhất: {formatDateTime(admin.lastLoginAt)}</p>}
         </section>
 
         <section className="card p-5">
-          <h2 className="mb-4 font-semibold">Đổi mật khẩu</h2>
+          <h2 className="mb-4 font-medium">Đổi mật khẩu</h2>
           {admin.isOwner ? (
-            <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
+            <p className="rounded-md bg-paper p-4 text-sm text-ink-2">
               Đây là tài khoản chủ, được đồng bộ từ <code>server/.env</code>. Muốn đổi mật khẩu, sửa <code>ADMIN_PASSWORD</code> trong file đó
               rồi khởi động lại server. Cách này luôn giúp bạn vào lại được trang quản trị nếu quên mật khẩu.
             </p>
@@ -71,14 +71,14 @@ export default function Account() {
         </section>
 
         <section className="card p-5 lg:col-span-2">
-          <h2 className="flex items-center gap-2 font-semibold"><ShieldCheck className="size-5 text-brand-600" /> Quyền của bạn</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{role.hint}</p>
+          <h2 className="flex items-center gap-2 font-medium"><ShieldCheck className="size-5 text-accent" /> Quyền của bạn</h2>
+          <p className="mt-1 text-sm text-muted">{role.hint}</p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
             {Object.entries(PERMISSION).map(([key, label]) => {
               const has = admin.permissions?.includes(key);
               return (
-                <li key={key} className={`flex items-start gap-2 text-sm ${has ? '' : 'text-slate-400 line-through dark:text-slate-600'}`}>
-                  <Check className={`mt-0.5 size-4 shrink-0 ${has ? 'text-emerald-600' : 'invisible'}`} />
+                <li key={key} className={`flex items-start gap-2 text-sm ${has ? '' : 'text-muted line-through '}`}>
+                  <Check className={`mt-0.5 size-4 shrink-0 ${has ? 'text-success' : 'invisible'}`} />
                   {label}
                 </li>
               );

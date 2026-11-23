@@ -64,9 +64,9 @@ export default function Audit() {
           />
         )}
         {filters.target && (
-          <span className="inline-flex h-10 items-center gap-2 rounded-xl bg-brand-50 pl-3 pr-1 text-sm font-medium text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">
+          <span className="inline-flex h-10 items-center gap-2 rounded-md bg-paper-2 pl-3 pr-1 text-sm text-ink">
             <History className="size-4" /> Lịch sử của {targetLabel}
-            <button onClick={() => update({ target: '', label: '' })} className="rounded-lg p-1.5 hover:bg-brand-100 dark:hover:bg-brand-500/20" aria-label="Bỏ lọc theo đối tượng">
+            <button onClick={() => update({ target: '', label: '' })} className="rounded-lg p-1.5 hover:bg-paper-2" aria-label="Bỏ lọc theo đối tượng">
               <X className="size-4" />
             </button>
           </span>
@@ -82,7 +82,7 @@ export default function Audit() {
           <EmptyState icon={History} title="Chưa có thao tác nào">Thử bỏ bớt bộ lọc.</EmptyState>
         ) : (
           <Table>
-            <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+            <thead>
               <tr>
                 <th className={th}>Thời gian</th>
                 <th className={th}>Người thực hiện</th>
@@ -91,47 +91,47 @@ export default function Audit() {
                 <th className={th}>Chi tiết</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {data.items.map((e) => {
                 const link = targetLink(e.target);
                 const lines = describeDetails(e);
                 return (
                   <tr key={e._id} className="align-top">
-                    <td className={`${td} text-sm text-slate-600 dark:text-slate-300`}>{formatDateTime(e.createdAt)}</td>
+                    <td className={`${td} text-sm text-ink-2 `}>{formatDateTime(e.createdAt)}</td>
                     <td className={td}>
                       <button
-                        className="text-left font-semibold hover:text-brand-600 disabled:hover:text-inherit"
+                        className="text-left font-medium hover:text-accent disabled:hover:text-inherit"
                         disabled={!e.actor?.account}
                         onClick={() => update({ actor: e.actor.account })}
                         title="Chỉ xem thao tác của người này"
                       >
                         {e.actor?.name || e.actor?.username}
                       </button>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted">
                         {e.actor?.username}
-                        {e.actor?.role && ` · ${ADMIN_ROLE[e.actor.role]?.label || e.actor.role}`}
+                        {e.actor?.role && `, ${ADMIN_ROLE[e.actor.role]?.label || e.actor.role}`}
                       </p>
                     </td>
                     <td className={td}><Badge className={actionClass(e.action)}>{AUDIT_ACTION[e.action] || e.action}</Badge></td>
                     <td className={`${td} max-w-64`}>
                       {e.target?.id ? (
                         <div className="flex items-center gap-1">
-                          <button className="truncate text-left font-medium hover:text-brand-600" onClick={() => showHistory(e.target)} title="Xem mọi thao tác trên đối tượng này">
+                          <button className="truncate text-left font-medium hover:text-accent" onClick={() => showHistory(e.target)} title="Xem mọi thao tác trên đối tượng này">
                             {e.target.label}
                           </button>
                           {link && (
-                            <Link to={link} className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800" title="Mở" aria-label={`Mở ${e.target.label}`}>
+                            <Link to={link} className="shrink-0 rounded-md p-1 text-muted hover:bg-paper-2 hover:text-ink-2" title="Mở" aria-label={`Mở ${e.target.label}`}>
                               <ExternalLink className="size-3.5" />
                             </Link>
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-muted">Không có</span>
                       )}
                     </td>
                     <td className="min-w-56 px-4 py-3 align-middle text-sm">
                       {lines.map((line) => <p key={line}>{line}</p>)}
-                      {e.ip && <p className="text-xs text-slate-400">IP {e.ip}</p>}
+                      {e.ip && <p className="text-xs text-muted">IP {e.ip}</p>}
                     </td>
                   </tr>
                 );

@@ -90,7 +90,7 @@ export function useLiveUpdates(token) {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       toast.success(`Đơn hàng mới ${shortId(order._id)}`, {
-        description: `${order.customerInfo?.name || 'Khách hàng'} · ${formatPriceShort(order.total)}`,
+        description: `${order.customerInfo?.name || 'Khách hàng'}, ${formatPriceShort(order.total)}`,
         action: { label: 'Xem', onClick: () => navigate(`/orders?id=${order._id}`) }
       });
     });
@@ -100,7 +100,7 @@ export function useLiveUpdates(token) {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       toast.success(`Đơn ${shortId(order._id)} đã được đặt cọc`, {
-        description: `${order.customerInfo?.name || 'Khách hàng'} · ${formatPriceShort(order.payment?.deposit || 0)} qua VNPay`,
+        description: `${order.customerInfo?.name || 'Khách hàng'}, ${formatPriceShort(order.payment?.deposit || 0)} qua VNPay`,
         action: { label: 'Xem', onClick: () => navigate(`/orders?id=${order._id}`) }
       });
     });
@@ -120,7 +120,7 @@ export function useLiveUpdates(token) {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       toast(`${contact.name} để lại lời nhắn`, {
-        description: `${contact.phone}${contact.car ? ` · ${contact.car.name}` : ''} — ${contact.message.length > 80 ? `${contact.message.slice(0, 80)}…` : contact.message}`,
+        description: `${contact.phone}${contact.car ? `, ${contact.car.name}` : ''}: ${contact.message.length > 80 ? `${contact.message.slice(0, 80)}…` : contact.message}`,
         action: { label: 'Xem', onClick: () => navigate('/contacts') }
       });
     });

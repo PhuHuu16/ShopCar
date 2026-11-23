@@ -39,9 +39,9 @@ export const AUDIT_GROUP = {
 
 const DANGER = ['auth.login_failed', 'order.cancel', 'customer.block', 'brand.delete', 'car.hide', 'staff.reset_password', 'staff.delete'];
 export function actionClass(action) {
-  if (DANGER.includes(action)) return 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300';
-  if (action.startsWith('auth.') || action.startsWith('account.')) return 'bg-slate-200 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300';
-  return 'bg-brand-100 text-brand-800 dark:bg-brand-500/15 dark:text-brand-300';
+  if (DANGER.includes(action)) return 'bg-error-soft text-error  ';
+  if (action.startsWith('auth.') || action.startsWith('account.')) return 'bg-paper-3 text-ink-2  ';
+  return 'bg-paper-2 text-accent  ';
 }
 
 const FIELD = {

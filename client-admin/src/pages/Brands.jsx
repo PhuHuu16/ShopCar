@@ -90,7 +90,7 @@ export default function Brands() {
           <EmptyState icon={Tags} title="Chưa có hãng xe nào">{canManage && 'Thêm hãng xe đầu tiên ở ô phía trên.'}</EmptyState>
         ) : (
           <Table>
-            <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60">
+            <thead>
               <tr>
                 <th className={th}>Hãng xe</th>
                 <th className={th}>Đường dẫn</th>
@@ -99,21 +99,21 @@ export default function Brands() {
                 {canManage && <th className={`${th} text-right`}>Thao tác</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {data.map((brand) => (
-                <tr key={brand._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                  <td className={`${td} font-semibold`}>{brand.name}</td>
-                  <td className={`${td} font-mono text-xs text-slate-500`}>{brand.slug}</td>
+                <tr key={brand._id} className="hover:bg-paper">
+                  <td className={`${td} font-medium`}>{brand.name}</td>
+                  <td className={`${td} font-mono text-xs text-muted`}>{brand.slug}</td>
                   <td className={`${td} text-right tabular-nums`}>
                     {brand.carCount > 0 ? (
-                      <Link to={`/cars?brand=${brand._id}`} className="font-semibold text-brand-600 hover:underline dark:text-brand-500">
+                      <Link to={`/cars?brand=${brand._id}`} className="text-ink underline decoration-accent underline-offset-4 hover:decoration-2 tabular-nums">
                         {brand.carCount}
                       </Link>
                     ) : (
-                      <span className="text-slate-400">0</span>
+                      <span className="text-muted">0</span>
                     )}
                   </td>
-                  <td className={`${td} text-slate-500`}>{formatDate(brand.createdAt)}</td>
+                  <td className={`${td} text-muted`}>{formatDate(brand.createdAt)}</td>
                   {canManage && <td className={`${td} text-right`}>
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" onClick={() => setEditing(brand)} aria-label={`Sửa ${brand.name}`} title="Đổi tên">

@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
-const config = require('../config');
 const { Customer, Order } = require('../models');
 const { requireCustomer } = require('../middleware/auth');
 const security = require('../utils/security');
@@ -21,7 +20,6 @@ const router = express.Router();
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
-  skip: () => config.isTest,
   message: { message: 'Bạn thao tác quá nhiều lần, hãy thử lại sau ít phút' }
 });
 

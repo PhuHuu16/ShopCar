@@ -5,9 +5,9 @@ export const BODY_TYPE = { sedan: 'Sedan', suv: 'SUV', crossover: 'Crossover', h
 export const CONDITION = { new: 'Xe mới', used: 'Xe đã qua sử dụng' };
 
 export const ORDER_STATUS = {
-  PENDING: { label: 'Chờ xác nhận', className: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
-  APPROVED: { label: 'Đã xác nhận', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
-  CANCELED: { label: 'Đã hủy', className: 'bg-slate-200 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300' }
+  PENDING: { label: 'Chờ xác nhận', className: 'bg-warn-soft text-warn  ' },
+  APPROVED: { label: 'Đã xác nhận', className: 'bg-success-soft text-success  ' },
+  CANCELED: { label: 'Đã hủy', className: 'bg-paper-3 text-ink-2  ' }
 };
 
 export const SORTS = [
@@ -27,8 +27,8 @@ export const PRICE_RANGES = [
 ];
 
 export const PAYMENT_STATUS = {
-  none: { label: 'Thanh toán tại showroom', className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
-  pending: { label: 'Chờ thanh toán cọc', className: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
-  paid: { label: 'Đã đặt cọc', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
-  failed: { label: 'Đặt cọc chưa thành công', className: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' }
+  none: { label: 'Thanh toán tại showroom', className: 'bg-paper-2 text-ink-2  ' },
+  pending: { label: 'Chờ thanh toán cọc', className: 'bg-warn-soft text-warn  ' },
+  paid: { label: 'Đã đặt cọc', className: 'bg-success-soft text-success  ' },
+  failed: { label: 'Đặt cọc chưa thành công', className: 'bg-error-soft text-error  ' }
 };

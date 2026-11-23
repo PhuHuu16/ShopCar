@@ -11,7 +11,7 @@ const DEBOUNCE_MS = 250;
 
 function Highlighted({ text, query }) {
   return highlight(text, query).map((part, i) =>
-    part.match ? <mark key={i} className="bg-transparent font-bold text-brand-600 dark:text-brand-400">{part.text}</mark> : <span key={i}>{part.text}</span>
+    part.match ? <mark key={i} className="bg-transparent text-ink underline decoration-accent underline-offset-2">{part.text}</mark> : <span key={i}>{part.text}</span>
   );
 }
 
@@ -98,7 +98,7 @@ export function SearchBox({ onDone, className = '' }) {
           else searchAll();
         }}
       >
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
         <input
           ref={inputRef}
           value={q}
@@ -109,8 +109,8 @@ export function SearchBox({ onDone, className = '' }) {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          placeholder="Tìm xe, ví dụ: CX-5, Vios..."
-          className="input h-10 rounded-full pl-9 pr-9"
+          placeholder="Tìm xe, ví dụ CX-5"
+          className="input h-10 rounded-md pl-9 pr-9"
           role="combobox"
           aria-label="Tìm xe"
           aria-autocomplete="list"
@@ -121,12 +121,12 @@ export function SearchBox({ onDone, className = '' }) {
           enterKeyHint="search"
         />
         {waiting && open && (
-          <LoaderCircle className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-slate-400" aria-hidden="true" />
+          <LoaderCircle className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted" aria-hidden="true" />
         )}
       </form>
 
       {showList && (
-        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl md:left-auto md:w-96 dark:border-slate-800 dark:bg-slate-900">
+        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-md border border-rule bg-card shadow-md md:left-auto md:w-96">
           <ul id={`${id}-list`} role="listbox" aria-label="Gợi ý xe" aria-busy={stale} className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
             {items.map((car, i) => (
               <li
@@ -137,29 +137,29 @@ export function SearchBox({ onDone, className = '' }) {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => openCar(car)}
                 onMouseEnter={() => setActive(i)}
-                className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${active === i ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
+                className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${active === i ? 'bg-paper-2 ' : ''}`}
               >
                 {car.image ? (
-                  <img src={car.image} alt="" className="h-10 w-14 shrink-0 rounded-lg object-cover" loading="lazy" />
+                  <img src={car.image} alt="" className="h-10 w-14 shrink-0 rounded-sm object-cover" />
                 ) : (
-                  <span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 dark:bg-slate-800">
+                  <span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-paper-2 text-muted">
                     <CarFront className="size-5" />
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium"><Highlighted text={car.name} query={stale ? '' : q} /></span>
-                  <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  <span className="block text-xs text-muted">
                     {formatPriceShort(car.price)}
-                    {car.stock > 0 ? '' : ' · Hết hàng'}
+                    {car.stock > 0 ? '' : ', hết hàng'}
                   </span>
                 </span>
               </li>
             ))}
             {failed && (
-              <li className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Chưa tải được gợi ý. Bấm Enter để tìm trong danh sách xe.</li>
+              <li className="px-4 py-3 text-sm text-muted">Chưa tải được gợi ý. Bấm Enter để tìm trong danh sách xe.</li>
             )}
             {!waiting && !failed && items.length === 0 && (
-              <li className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Không có xe nào khớp “{q.trim()}”. Thử gõ tên hãng hoặc dòng xe.</li>
+              <li className="px-4 py-3 text-sm text-muted">Không có xe nào khớp “{q.trim()}”. Thử gõ tên hãng hoặc dòng xe.</li>
             )}
             <li
               id={`${id}-opt-${items.length}`}
@@ -168,8 +168,8 @@ export function SearchBox({ onDone, className = '' }) {
               onMouseDown={(e) => e.preventDefault()}
               onClick={searchAll}
               onMouseEnter={() => setActive(items.length)}
-              className={`flex cursor-pointer items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-sm font-semibold text-brand-600 dark:border-slate-800 dark:text-brand-400 ${
-                active === items.length ? 'bg-slate-100 dark:bg-slate-800' : ''
+              className={`flex min-h-11 cursor-pointer items-center gap-2 border-t border-rule px-4 py-2.5 text-sm text-ink ${
+                active === items.length ? 'bg-paper-2' : ''
               }`}
             >
               <Search className="size-4" />

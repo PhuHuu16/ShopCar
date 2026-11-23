@@ -16,11 +16,11 @@ function AuthCard({ title, subtitle, children, footer }) {
       <div className="w-full max-w-md">
         <div className="card p-8">
           <div className="mb-6 flex justify-center"><Logo /></div>
-          <h1 className="text-center text-2xl font-bold">{title}</h1>
-          {subtitle && <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
+          <h1 className="text-center text-[length:var(--text-3xl)]">{title}</h1>
+          {subtitle && <p className="mt-2 text-center text-sm text-muted">{subtitle}</p>}
           <div className="mt-8">{children}</div>
         </div>
-        {footer && <p className="mt-6 text-center text-sm text-slate-500">{footer}</p>}
+        {footer && <p className="mt-6 text-center text-sm text-muted">{footer}</p>}
       </div>
     </div>
   );
@@ -30,9 +30,9 @@ function Result({ ok, title, children, action }) {
   const Icon = ok ? CircleCheck : CircleX;
   return (
     <div className="text-center">
-      <Icon className={`mx-auto size-14 ${ok ? 'text-emerald-500' : 'text-red-500'}`} />
-      <h2 className="mt-4 text-lg font-semibold">{title}</h2>
-      {children && <p className="mt-2 text-sm text-slate-500">{children}</p>}
+      <Icon className={`mx-auto size-14 ${ok ? 'text-success' : 'text-error'}`} />
+      <h2 className="mt-4 text-lg font-medium">{title}</h2>
+      {children && <p className="mt-2 text-sm text-muted">{children}</p>}
       {action && <div className="mt-6">{action}</div>}
     </div>
   );
@@ -66,10 +66,10 @@ function ResendActivation({ defaultEmail = '' }) {
   });
   return (
     <form
-      className="mt-4 space-y-3 rounded-xl bg-amber-50 p-4 dark:bg-amber-500/10"
+      className="mt-4 space-y-3 rounded-md bg-warn-soft p-4"
       onSubmit={(e) => { e.preventDefault(); resend.mutate(); }}
     >
-      <p className="text-sm text-amber-900 dark:text-amber-200">Không nhận được email kích hoạt? Nhập email để gửi lại.</p>
+      <p className="text-sm text-warn">Không nhận được email kích hoạt? Nhập email để gửi lại.</p>
       <div className="flex gap-2">
         <input className="input" type="email" required placeholder="email@cua-ban.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Button type="submit" variant="secondary" loading={resend.isPending}>Gửi lại</Button>
@@ -92,7 +92,7 @@ export function Login() {
     mutationFn: () => api('/customer/login', { method: 'POST', body: form.values }),
     onSuccess: ({ token, customer }) => {
       loginStore(token, customer);
-      toast.success(`Chào mừng ${customer.name}!`);
+      toast.success(`Đã đăng nhập: ${customer.name}`);
       navigate(safeRedirect(params.get('from')), { replace: true });
       if (params.get('chat')) openChat();
     },
@@ -107,13 +107,13 @@ export function Login() {
     <AuthCard
       title="Đăng nhập"
       subtitle="Theo dõi đơn hàng và chat với tư vấn viên"
-      footer={<>Chưa có tài khoản? <Link to="/signup" className="font-semibold text-brand-600 hover:underline">Đăng ký ngay</Link></>}
+      footer={<>Chưa có tài khoản? <Link to="/signup" className="link">Đăng ký ngay</Link></>}
     >
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); login.mutate(); }}>
         <Input label="Tên đăng nhập" autoComplete="username" required autoFocus {...form.bind('username')} />
         <Input label="Mật khẩu" type="password" autoComplete="current-password" required {...form.bind('password')} />
         <div className="text-right">
-          <Link to="/forgot-password" className="text-sm font-medium text-brand-600 hover:underline">Quên mật khẩu?</Link>
+          <Link to="/forgot-password" className="link text-sm">Quên mật khẩu?</Link>
         </div>
         <Button type="submit" size="lg" className="w-full" loading={login.isPending}>Đăng nhập</Button>
       </form>
@@ -142,9 +142,9 @@ export function Signup() {
     return (
       <AuthCard title="Kiểm tra email của bạn">
         <div className="text-center">
-          <MailCheck className="mx-auto size-14 text-brand-600" />
-          <p className="mt-4 text-slate-600 dark:text-slate-300">{done}</p>
-          <p className="mt-2 text-sm text-slate-500">Email đã gửi tới <b>{form.values.email}</b>.</p>
+          <MailCheck className="mx-auto size-14 text-accent" />
+          <p className="mt-4 text-ink-2">{done}</p>
+          <p className="mt-2 text-sm text-muted">Email đã gửi tới <b>{form.values.email}</b>.</p>
           <ResendActivation defaultEmail={form.values.email} />
         </div>
       </AuthCard>
@@ -155,7 +155,7 @@ export function Signup() {
     <AuthCard
       title="Tạo tài khoản"
       subtitle="Chỉ mất chưa tới một phút"
-      footer={<>Đã có tài khoản? <Link to="/login" className="font-semibold text-brand-600 hover:underline">Đăng nhập</Link></>}
+      footer={<>Đã có tài khoản? <Link to="/login" className="link">Đăng nhập</Link></>}
     >
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); signup.mutate(); }}>
         <Input label="Họ và tên" autoComplete="name" required {...form.bind('name')} />
@@ -195,7 +195,7 @@ export function Activate() {
   return (
     <AuthCard title="Kích hoạt tài khoản">
       {state.status === 'loading' ? (
-        <div className="flex justify-center py-6"><LoaderCircle className="size-8 animate-spin text-brand-600" /></div>
+        <div className="flex justify-center py-6"><LoaderCircle className="size-8 animate-spin text-accent" /></div>
       ) : state.status === 'ok' ? (
         <Result ok title="Kích hoạt thành công" action={<ButtonLink to="/login" className="w-full">Đăng nhập</ButtonLink>}>{state.message}</Result>
       ) : (
@@ -221,7 +221,7 @@ export function ForgotPassword() {
     <AuthCard
       title="Quên mật khẩu"
       subtitle="Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu"
-      footer={<Link to="/login" className="font-semibold text-brand-600 hover:underline">Quay lại đăng nhập</Link>}
+      footer={<Link to="/login" className="link">Quay lại đăng nhập</Link>}
     >
       {forgot.isSuccess ? (
         <Result ok title="Đã gửi email">{forgot.data.message} Link có hiệu lực trong 30 phút.</Result>
